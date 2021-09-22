@@ -80,8 +80,6 @@ object Main extends App {
       else ""
     }
 
-    pprintln(data)
-    println(template)
   }
 
 }
