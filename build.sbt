@@ -29,7 +29,7 @@ lazy val scemplate = crossProject( /*JSPlatform, */ JVMPlatform, NativePlatform)
     ),
     libraryDependencies ++= Seq(
       "com.github.scopt" %%% "scopt" % "4.0.1",
-      "com.lihaoyi" %% "pprint" % "0.6.6"
+      "com.lihaoyi" %%% "pprint" % "0.6.6"
     ),
     publishMavenStyle := true,
     Test / publishArtifact := false,
@@ -37,7 +37,7 @@ lazy val scemplate = crossProject( /*JSPlatform, */ JVMPlatform, NativePlatform)
   )
   .jvmSettings(
     libraryDependencies += "org.scala-js" %% "scalajs-stubs" % "1.0.0" % "provided",
-    libraryDependencies += "io.github.edadma" %%% "yaml" % "0.1.0"
+    libraryDependencies += "io.github.edadma" %% "yaml" % "0.1.0"
   )
   .nativeSettings(
     nativeLinkStubs := true,
