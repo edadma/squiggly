@@ -1,8 +1,12 @@
 package io.github.edadma.scemplate
 
-import scopt.{OParser, RenderingMode}
-
 import java.io.File
+
+import scopt.OParser
+import pprint._
+
+import io.github.edadma.cross_platform._
+import platform._
 
 object Main extends App {
 
@@ -17,7 +21,7 @@ object Main extends App {
 
     OParser.sequence(
       programName("scemplate"),
-      head("Scala String Template Engine", "v0.1.0"),
+      head("Scala Template Engine", "v0.1.0"),
       opt[Option[String]]('d', "data")
         .valueName("<YAML>")
         .optional()
@@ -61,8 +65,18 @@ object Main extends App {
   }
 
   def app(c: Config): Unit = {
-//    if (c.dataFile.isDefined)
+    val data: Any =
+      if (c.dataFile.isDefined) yaml(readFile(c.dataFile.get))
+      else if (c.dataString.isDefined) yaml(c.dataString.get)
+      else Map()
+    val template: String = {
+      if (c.templateString.isDefined) c.templateString.get
+      else if (c.templateFile.isDefined) readFile(c.templateFile.get)
+      else ""
+    }
 
+    pprintln(data)
+    println(template)
   }
 
 }
