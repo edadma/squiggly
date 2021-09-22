@@ -1,9 +1,9 @@
 ThisBuild / licenses += "ISC" -> url("https://opensource.org/licenses/ISC")
 ThisBuild / versionScheme := Some("semver-spec")
 
-lazy val cross_template = crossProject(JSPlatform, JVMPlatform, NativePlatform).in(file(".")).
+lazy val scemplate = crossProject(JSPlatform, JVMPlatform, NativePlatform).in(file(".")).
   settings(
-    name := "cross-template",
+    name := "scemplate",
     version := "0.1.0",
     scalaVersion := "2.13.6",
     scalacOptions ++=
@@ -15,9 +15,15 @@ lazy val cross_template = crossProject(JSPlatform, JVMPlatform, NativePlatform).
     organization := "io.github.edadma",
     githubOwner := "edadma",
     githubRepository := name.value,
+    resolvers += Resolver.githubPackages("edadma"),
     mainClass := Some(s"${organization.value}.${name.value}.Main"),
     libraryDependencies += "org.scalatest" %%% "scalatest" % "3.2.9" % "test",
-    libraryDependencies += "io.github.edadma" %%% "cross-platform" % "0.1.0",
+    libraryDependencies ++= Seq(
+      "io.github.edadma" %%% "cross-platform" % "0.1.1"
+    ),
+    libraryDependencies ++= Seq(
+      "com.github.scopt" %%% "scopt" % "4.0.1"
+    ),
     publishMavenStyle := true,
     Test / publishArtifact := false,
     licenses += "ISC" -> url("https://opensource.org/licenses/ISC")
@@ -26,7 +32,8 @@ lazy val cross_template = crossProject(JSPlatform, JVMPlatform, NativePlatform).
     libraryDependencies += "org.scala-js" %% "scalajs-stubs" % "1.0.0" % "provided",
   ).
   nativeSettings(
-    nativeLinkStubs := true
+    nativeLinkStubs := true,
+    libraryDependencies += "io.github.edadma" %%% "libyaml" % "0.1.0"
   ).
   jsSettings(
     jsEnv := new org.scalajs.jsenv.nodejs.NodeJSEnv(),
