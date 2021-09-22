@@ -8,9 +8,10 @@ import scala.language.implicitConversions
 
 object Main extends App {
 
-  val tag = " 1 + 2 "
+  val tag = " a + 2 * b "
 
   val parser = new TagParser(tag)
+
   parser.tag.run() match {
     case Success(ast)           => pprintln(ast)
     case Failure(e: ParseError) => println("Expression is not valid: " + parser.formatError(e))
@@ -40,11 +41,15 @@ class TagParser(val input: ParserInput) extends Parser {
           | "/" ~ primary ~> DivExpr)
     }
 
-  def primary: Rule1[ExprAST] = rule(number)
+  def primary: Rule1[ExprAST] = rule(number | variable)
 
-  def number: Rule1[ExprAST] = rule(capture(digits) ~> ValueExpr ~ ws)
+  def number: Rule1[ValueExpr] = rule(capture(digits) ~> ValueExpr ~ ws)
 
   def digits: Rule0 = rule(oneOrMore(CharPredicate.Digit))
+
+  def variable: Rule1[VarExpr] = rule(ident ~> VarExpr)
+
+  def ident: Rule1[String] = rule(capture((CharPredicate.Alpha | '_') ~ zeroOrMore(CharPredicate.AlphaNum | '_')) ~ ws)
 
   def ws: Rule0 = rule(zeroOrMore(' '))
 
@@ -56,10 +61,12 @@ trait ExprAST
 
 case class ValueExpr(value: String) extends ExprAST
 
-case class AddExpr(lhs: ExprAST, rhs: ExprAST) extends ExprAST
+case class VarExpr(ident: String) extends ExprAST
 
-case class SubExpr(lhs: ExprAST, rhs: ExprAST) extends ExprAST
+case class AddExpr(left: ExprAST, right: ExprAST) extends ExprAST
 
-case class MulExpr(lhs: ExprAST, rhs: ExprAST) extends ExprAST
+case class SubExpr(left: ExprAST, right: ExprAST) extends ExprAST
 
-case class DivExpr(lhs: ExprAST, rhs: ExprAST) extends ExprAST
+case class MulExpr(left: ExprAST, right: ExprAST) extends ExprAST
+
+case class DivExpr(left: ExprAST, right: ExprAST) extends ExprAST
