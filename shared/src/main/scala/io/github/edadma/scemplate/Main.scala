@@ -1,12 +1,12 @@
 package io.github.edadma.scemplate
 
 import java.io.File
-
 import scopt.OParser
 import pprint._
-
 import io.github.edadma.cross_platform._
 import platform._
+
+import scala.io.StdIn
 
 object Main extends App {
 
@@ -19,6 +19,9 @@ object Main extends App {
   val parser = {
     import builder._
 
+    // todo: add -t templatename=file,...
+    // todo: add -v varname=value,...
+
     OParser.sequence(
       programName("scemplate"),
       head("Scala Template Engine", "v0.1.0"),
@@ -27,11 +30,10 @@ object Main extends App {
         .optional()
         .action((d, c) => c.copy(dataString = d))
         .text("YAML document"),
-      help('h', "help").text("prints this usage text"),
-      opt[Option[String]]('t', "template")
+      opt[Option[String]]('f', "template")
         .valueName("<file>")
         .optional()
-        .action((t, c) => c.copy(templateFile = t))
+        .action((f, c) => c.copy(templateFile = f))
         .validate { t =>
           val f = new File(t.get)
 
@@ -39,6 +41,7 @@ object Main extends App {
           else failure("file must exist and be a readable file")
         }
         .text("template file"),
+      help('h', "help").text("prints this usage text"),
       version('v', "version").text("prints the version"),
       opt[Option[String]]('y', "yaml")
         .valueName("<file>")
@@ -71,7 +74,9 @@ object Main extends App {
       else Map()
     val template: String = {
       if (c.templateString.isDefined) c.templateString.get
-      else if (c.templateFile.isDefined) readFile(c.templateFile.get)
+      else if (c.templateFile.isDefined)
+        if (c.templateFile.get == "--") scala.io.Source.fromInputStream(System.in).mkString
+        else readFile(c.templateFile.get)
       else ""
     }
 
