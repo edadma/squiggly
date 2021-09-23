@@ -8,7 +8,7 @@ import scala.language.{implicitConversions, postfixOps}
 
 object Main extends App {
 
-  val tag = " (f $a + 3 b) + 4 | g x y "
+  val tag = " (f $a + 3 b) + 4 | g 'asdf' y "
 
   val parser = new TagParser(tag)
 
@@ -73,6 +73,7 @@ class TagParser(val input: ParserInput) extends Parser {
   def primary: Rule1[ExprAST] = rule {
     number |
       variable |
+      string |
       "(" ~ expression ~ ")"
   }
 
@@ -93,12 +94,23 @@ class TagParser(val input: ParserInput) extends Parser {
 
   def variable: Rule1[VarExpr] = rule(capture(optional('$')) ~ ident ~> VarExpr)
 
+  def string: Rule1[StringExpr] =
+    rule((backtickString | singleQuoteString | doubleQuoteString) ~> ((s: String) => StringExpr(unescape(s))))
+
+  def backtickString: Rule1[String] = rule(capture('`' ~ zeroOrMore(noneOf("`"))) ~ '`' ~ ws)
+
+  def singleQuoteString: Rule1[String] = rule(capture('\'' ~ zeroOrMore(noneOf("'\n"))) ~ '\'' ~ ws)
+
+  def doubleQuoteString: Rule1[String] = rule(capture('"' ~ zeroOrMore(noneOf("\"\n"))) ~ '"' ~ ws)
+
   def ident: Rule1[Ident] =
     rule {
       push(cursor) ~ capture((CharPredicate.Alpha | '_') ~ zeroOrMore(CharPredicate.AlphaNum | '_')) ~> Ident ~ ws
     }
 
   def ws: Rule0 = rule(zeroOrMore(' '))
+
+  def unescape(s: String): String = s
 
 }
 
