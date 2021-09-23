@@ -8,7 +8,7 @@ import scala.language.{implicitConversions, postfixOps}
 
 object Main extends App {
 
-  val tag = " f a b + 3 | g x y "
+  val tag = " (f $a + 3 b) + 4 | g x y "
 
   val parser = new TagParser(tag)
 
@@ -91,7 +91,7 @@ class TagParser(val input: ParserInput) extends Parser {
 
   def digits: Rule0 = rule(oneOrMore(CharPredicate.Digit))
 
-  def variable: Rule1[VarExpr] = rule(ident ~> VarExpr)
+  def variable: Rule1[VarExpr] = rule(capture(optional('$')) ~ ident ~> VarExpr)
 
   def ident: Rule1[Ident] =
     rule {
@@ -112,7 +112,7 @@ case class StringExpr(s: String) extends ExprAST
 
 case class NumberExpr(n: BigDecimal) extends ExprAST
 
-case class VarExpr(name: Ident) extends ExprAST
+case class VarExpr(user: String, name: Ident) extends ExprAST
 
 case class AddExpr(left: ExprAST, right: ExprAST) extends ExprAST
 
