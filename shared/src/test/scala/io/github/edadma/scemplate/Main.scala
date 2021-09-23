@@ -23,8 +23,10 @@ object Main extends App {
     case Failure(e)             => println("Unexpected error during parsing run: " + e)
   }
 
-  def problem(pos: Position, parser: Parser, msg: String): Nothing = {
-    Console.err.println(new RuntimeErrorFormatter(msg).customFormat(ParseError(pos, pos, Nil), parser.input))
+  def problem(pos: Int, parser: Parser, msg: String): Nothing = {
+    val p = Position(pos, parser.input)
+
+    Console.err.println(new RuntimeErrorFormatter(msg).customFormat(ParseError(p, p, Nil), parser.input))
     sys.exit(1)
   }
 
@@ -49,8 +51,6 @@ class RuntimeErrorFormatter(msg: String) extends ErrorFormatter {
 class TagParser(val input: ParserInput) extends Parser {
 
   implicit def wspStr(s: String): Rule0 = rule(str(s) ~ zeroOrMore(' '))
-
-  def pos: Position = Position(cursor, input)
 
   def tag: Rule1[ExprAST] = rule(ws ~ expression ~ EOI)
 
@@ -79,14 +79,14 @@ class TagParser(val input: ParserInput) extends Parser {
 
   def ident: Rule1[Ident] =
     rule {
-      push(pos) ~ capture((CharPredicate.Alpha | '_') ~ zeroOrMore(CharPredicate.AlphaNum | '_')) ~> Ident ~ ws
+      push(cursor) ~ capture((CharPredicate.Alpha | '_') ~ zeroOrMore(CharPredicate.AlphaNum | '_')) ~> Ident ~ ws
     }
 
   def ws: Rule0 = rule(zeroOrMore(' '))
 
 }
 
-case class Ident(pos: Position, name: String)
+case class Ident(pos: Int, name: String)
 
 trait AST
 
