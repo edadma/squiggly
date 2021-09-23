@@ -10,9 +10,55 @@ class TagParser(val input: ParserInput) extends Parser {
 
   implicit def wspStr(s: String): Rule0 = rule(str(s) ~ zeroOrMore(' '))
 
-  def tag: Rule1[ExprAST] = rule(ws ~ expression ~ EOI)
+  def tag: Rule1[TagParserAST] =
+    rule {
+      ws ~ (
+        expression
+          | assignmentTag
+          | ifTag
+          | elseTag
+          | endTag
+          | withTag
+          | rangeTag
+      ) ~ EOI
+    }
 
-  def expression: Rule1[ExprAST] = rule(applicative ~ zeroOrMore("|" ~ (apply | variable) ~> PipeExpr))
+  def expression: Rule1[ExprAST] = conditional
+
+  def conditional: Rule1[ExprAST] =
+    rule {
+      ("if" ~ condition ~ "then" ~ expression ~ "else" ~ expression ~> ConditionalAST) | condition
+    }
+
+  def condition: Rule1[ExprAST] = disjunctive
+
+  def disjunctive: Rule1[ExprAST] =
+    rule {
+      conjunctive ~ zeroOrMore(
+        "or" ~ conjunctive ~> OrExpr
+      )
+    }
+
+  def conjunctive: Rule1[ExprAST] =
+    rule {
+      pipeline ~ zeroOrMore(
+        "and" ~ pipeline ~> AndExpr
+      )
+    }
+
+  def not: Rule1[ExprAST] =
+    rule {
+      "not" ~ not |
+        pipeline
+    }
+
+  //  def comparison: Rule1[ComparisonExpr]
+  def pipeline: Rule1[ExprAST] =
+    rule {
+      applicative ~ zeroOrMore(
+        "|" ~ (apply | variable) ~> PipeExpr
+      )
+    }
 
   def applicative: Rule1[ExprAST] = rule(apply | additive)
 
@@ -28,9 +74,15 @@ class TagParser(val input: ParserInput) extends Parser {
 
   def multiplicative: Rule1[ExprAST] =
     rule {
-      primary ~ zeroOrMore(
-        "*" ~ primary ~> MulExpr
-          | "/" ~ primary ~> DivExpr)
+      negative ~ zeroOrMore(
+        "*" ~ negative ~> MulExpr
+          | "/" ~ negative ~> DivExpr)
+    }
+
+  def negative: Rule1[ExprAST] =
+    rule {
+      "-" ~ negative |
+        primary
     }
 
   def primary: Rule1[ExprAST] = rule {
@@ -68,10 +120,24 @@ class TagParser(val input: ParserInput) extends Parser {
 
   def ident: Rule1[Ident] =
     rule {
-      push(cursor) ~ capture((CharPredicate.Alpha | '_') ~ zeroOrMore(CharPredicate.AlphaNum | '_')) ~> Ident ~ ws
+      pos ~ capture((CharPredicate.Alpha | '_') ~ zeroOrMore(CharPredicate.AlphaNum | '_')) ~> Ident ~ ws
     }
 
+  def pos: Rule1[Int] = rule(push(cursor))
+
   def ws: Rule0 = rule(zeroOrMore(' '))
+
+  def assignmentTag: Rule1[AssignmentAST] = rule(capture(optional('$')) ~ ident ~ ":=" ~ expression ~> AssignmentAST)
+
+  def ifTag: Rule1[IfAST] = rule(pos ~ "if" ~ condition ~> IfAST)
+
+  def elseTag: Rule1[ElseAST] = rule(pos ~ "else" ~> ElseAST)
+
+  def endTag: Rule1[EndAST] = rule(pos ~ "end" ~> EndAST)
+
+  def withTag: Rule1[IfAST] = rule(pos ~ "with" ~ expression ~> IfAST)
+
+  def rangeTag: Rule1[IfAST] = rule(pos ~ "range" ~ expression ~> IfAST)
 
   def parseTag: TagParserAST =
     tag.run() match {

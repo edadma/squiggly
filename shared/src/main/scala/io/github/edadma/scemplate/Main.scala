@@ -2,7 +2,6 @@ package io.github.edadma.scemplate
 
 import java.io.File
 import scopt.OParser
-import pprint._
 import io.github.edadma.cross_platform._
 import platform._
 
