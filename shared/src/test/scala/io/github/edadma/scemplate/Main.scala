@@ -8,17 +8,12 @@ import scala.language.{implicitConversions, postfixOps}
 
 object Main extends App {
 
-  val tag = " abc "
+  val tag = " f a b + 3 | g x y "
 
   val parser = new TagParser(tag)
 
   parser.tag.run() match {
-    case Success(ast) =>
-      pprintln(ast)
-
-      val p = ast.asInstanceOf[VarExpr].ident.pos
-
-      problem(p, parser, "asdf")
+    case Success(ast)           => pprintln(ast)
     case Failure(e: ParseError) => println("Expression is not valid: " + parser.formatError(e))
     case Failure(e)             => println("Unexpected error during parsing run: " + e)
   }
@@ -54,7 +49,9 @@ class TagParser(val input: ParserInput) extends Parser {
 
   def tag: Rule1[ExprAST] = rule(ws ~ expression ~ EOI)
 
-  def expression: Rule1[ExprAST] =
+  def expression: Rule1[ExprAST] = rule(additive ~ zeroOrMore("|" ~ (apply | variable) ~> PipeExpr))
+
+  def additive: Rule1[ExprAST] =
     rule {
       multiplicative ~ zeroOrMore(
         "+" ~ multiplicative ~> AddExpr
@@ -64,12 +61,23 @@ class TagParser(val input: ParserInput) extends Parser {
 
   def multiplicative: Rule1[ExprAST] =
     rule {
-      primary ~ zeroOrMore(
-        "*" ~ primary ~> MulExpr
-          | "/" ~ primary ~> DivExpr)
+      applicative ~ zeroOrMore(
+        "*" ~ applicative ~> MulExpr
+          | "/" ~ applicative ~> DivExpr)
     }
 
-  def primary: Rule1[ExprAST] = rule(number | variable)
+  def apply: Rule1[ApplyExpr] = rule(ident ~ oneOrMore(primary) ~> ApplyExpr)
+
+  def applicative: Rule1[ExprAST] = rule {
+    apply |
+      primary
+  }
+
+  def primary: Rule1[ExprAST] = rule {
+    number |
+      variable |
+      "(" ~ expression ~ ")"
+  }
 
   def number: Rule1[ValueExpr] = rule(capture(digits) ~> ValueExpr ~ ws)
 
@@ -94,7 +102,7 @@ trait ExprAST
 
 case class ValueExpr(value: String) extends ExprAST
 
-case class VarExpr(ident: Ident) extends ExprAST
+case class VarExpr(name: Ident) extends ExprAST
 
 case class AddExpr(left: ExprAST, right: ExprAST) extends ExprAST
 
@@ -103,3 +111,7 @@ case class SubExpr(left: ExprAST, right: ExprAST) extends ExprAST
 case class MulExpr(left: ExprAST, right: ExprAST) extends ExprAST
 
 case class DivExpr(left: ExprAST, right: ExprAST) extends ExprAST
+
+case class ApplyExpr(name: Ident, args: Seq[ExprAST]) extends ExprAST
+
+case class PipeExpr(left: ExprAST, right: ExprAST) extends ExprAST
