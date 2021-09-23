@@ -95,13 +95,13 @@ class TagParser(val input: ParserInput) extends Parser {
   def variable: Rule1[VarExpr] = rule(capture(optional('$')) ~ ident ~> VarExpr)
 
   def string: Rule1[StringExpr] =
-    rule((backtickString | singleQuoteString | doubleQuoteString) ~> ((s: String) => StringExpr(unescape(s))))
+    rule((singleQuoteString | doubleQuoteString) ~> ((s: String) => StringExpr(unescape(s))))
 
-  def backtickString: Rule1[String] = rule(capture('`' ~ zeroOrMore(noneOf("`"))) ~ '`' ~ ws)
+  def backtickString: Rule1[String] = rule(capture('`' ~ zeroOrMore("\\`" | noneOf("`"))) ~ '`' ~ ws)
 
-  def singleQuoteString: Rule1[String] = rule(capture('\'' ~ zeroOrMore(noneOf("'\n"))) ~ '\'' ~ ws)
+  def singleQuoteString: Rule1[String] = rule(capture('\'' ~ zeroOrMore("\\'" | noneOf("'\n"))) ~ '\'' ~ ws)
 
-  def doubleQuoteString: Rule1[String] = rule(capture('"' ~ zeroOrMore(noneOf("\"\n"))) ~ '"' ~ ws)
+  def doubleQuoteString: Rule1[String] = rule(capture('"' ~ zeroOrMore("\\\"" | noneOf("\"\n"))) ~ '"' ~ ws)
 
   def ident: Rule1[Ident] =
     rule {
@@ -137,3 +137,5 @@ case class DivExpr(left: ExprAST, right: ExprAST) extends ExprAST
 case class ApplyExpr(name: Ident, args: Seq[ExprAST]) extends ExprAST
 
 case class PipeExpr(left: ExprAST, right: ExprAST) extends ExprAST
+
+case class ConcatExpr(elems: Seq[ExprAST]) extends ExprAST
