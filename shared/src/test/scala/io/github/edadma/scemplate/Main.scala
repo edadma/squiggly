@@ -49,7 +49,11 @@ class TagParser(val input: ParserInput) extends Parser {
 
   def tag: Rule1[ExprAST] = rule(ws ~ expression ~ EOI)
 
-  def expression: Rule1[ExprAST] = rule(additive ~ zeroOrMore("|" ~ (apply | variable) ~> PipeExpr))
+  def expression: Rule1[ExprAST] = rule(applicative ~ zeroOrMore("|" ~ (apply | variable) ~> PipeExpr))
+
+  def applicative: Rule1[ExprAST] = rule(apply | additive)
+
+  def apply: Rule1[ApplyExpr] = rule(ident ~ oneOrMore(additive) ~> ApplyExpr)
 
   def additive: Rule1[ExprAST] =
     rule {
@@ -61,17 +65,10 @@ class TagParser(val input: ParserInput) extends Parser {
 
   def multiplicative: Rule1[ExprAST] =
     rule {
-      applicative ~ zeroOrMore(
-        "*" ~ applicative ~> MulExpr
-          | "/" ~ applicative ~> DivExpr)
+      primary ~ zeroOrMore(
+        "*" ~ primary ~> MulExpr
+          | "/" ~ primary ~> DivExpr)
     }
-
-  def apply: Rule1[ApplyExpr] = rule(ident ~ oneOrMore(primary) ~> ApplyExpr)
-
-  def applicative: Rule1[ExprAST] = rule {
-    apply |
-      primary
-  }
 
   def primary: Rule1[ExprAST] = rule {
     number |
@@ -79,7 +76,18 @@ class TagParser(val input: ParserInput) extends Parser {
       "(" ~ expression ~ ")"
   }
 
-  def number: Rule1[ValueExpr] = rule(capture(digits) ~> ValueExpr ~ ws)
+  def number: Rule1[NumberExpr] = rule(decimal ~> NumberExpr)
+
+  def decimal: Rule1[BigDecimal] =
+    rule {
+      capture(
+        (zeroOrMore(CharPredicate.Digit) ~ '.' ~ digits | digits ~ '.') ~
+          optional((ch('e') | 'E') ~ optional(ch('+') | '-') ~ digits) |
+          digits
+      ) ~ ws ~> ((s: String) => BigDecimal(s))
+    }
+
+  def integer: Rule1[Int] = rule(capture(digits) ~ ws ~> ((s: String) => s.toInt))
 
   def digits: Rule0 = rule(oneOrMore(CharPredicate.Digit))
 
@@ -100,7 +108,9 @@ trait AST
 
 trait ExprAST
 
-case class ValueExpr(value: String) extends ExprAST
+case class StringExpr(s: String) extends ExprAST
+
+case class NumberExpr(n: BigDecimal) extends ExprAST
 
 case class VarExpr(name: Ident) extends ExprAST
 
