@@ -50,10 +50,14 @@ class TemplateParser(input: String, startDelim: String, endDelim: String) {
           matchTag(tagrest) match {
             case Some((rest, tag)) =>
               if (buf.isEmpty) {
-                val tagParser = new TagParser(tag, tagrest.line, tagrest.col)
+                val trimLeft = tag.startsWith("-")
+                val tag1 = if (trimLeft) tag drop 1 else tag
+                val trimRight = tag1.endsWith("-")
+                val tag2 = if (trimRight) tag1 dropRight 1 else tag1
+                val tagParser = new TagParser(tag2, tagrest.line, tagrest.col)
                 val ast = tagParser.parseTag
 
-                Some((rest, TagToken(r, ast)))
+                Some((rest, TagToken(r, ast, trimLeft, trimRight)))
               } else Some(text(r))
             case None => r.error("unclosed tag")
           }
@@ -72,7 +76,7 @@ class TemplateParser(input: String, startDelim: String, endDelim: String) {
     val pos: CharReader
   }
 
-  case class TagToken(pos: CharReader, tag: TagParserAST) extends Token
+  case class TagToken(pos: CharReader, tag: TagParserAST, trimLeft: Boolean, trimRight: Boolean) extends Token
 
   case class TextToken(pos: CharReader, text: String) extends Token
 
