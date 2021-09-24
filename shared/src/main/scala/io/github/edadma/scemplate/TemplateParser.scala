@@ -41,27 +41,31 @@ class TemplateParser(input: String, startDelim: String, endDelim: String) {
       matches(r, s.toList)
     }
 
+    def text(r: CharReader): (CharReader, Token) =
+      (r, if (buf.last.isWhitespace) SpaceToken(start, buf.toString) else TextToken(start, buf.toString))
+
     if (r.more) {
       matches(r, startDelim) match {
         case Some(tagrest) =>
           matchTag(tagrest) match {
             case Some((rest, tag)) =>
-              val tagParser = new TagParser(tag, tagrest.line, tagrest.col)
-              val ast = tagParser.parseTag
+              if (buf.isEmpty) {
+                val tagParser = new TagParser(tag, tagrest.line, tagrest.col)
+                val ast = tagParser.parseTag
 
-              Some((rest, TagToken(r, ast)))
+                Some((rest, TagToken(r, ast)))
+              } else Some(text(r))
             case None => r.error("unclosed tag")
           }
         case None =>
-          if (buf.nonEmpty && (r.ch.isWhitespace ^ buf.last.isWhitespace))
-            Some((r, if (buf.last.isWhitespace) SpaceToken(start, buf.toString) else TextToken(start, buf.toString)))
+          if (buf.nonEmpty && (r.ch.isWhitespace ^ buf.last.isWhitespace)) Some(text(r))
           else {
             buf += r.ch
             token(r.next, start, buf)
           }
       }
     } else if (buf.isEmpty) None
-    else Some((r, if (buf.last.isWhitespace) SpaceToken(start, buf.toString) else TextToken(start, buf.toString)))
+    else Some(text(r))
   }
 
   trait Token {

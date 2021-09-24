@@ -150,7 +150,8 @@ class TagParser(val input: ParserInput, line: Int, col: Int) extends Parser {
 
   def rangeTag: Rule1[IfAST] = rule(pos ~ "range" ~ expression ~> IfAST)
 
-  def commentTag: Rule1[CommentAST] = rule("/*" ~ capture(zeroOrMore(!"*/" ~ ANY)) ~ "*/" ~> CommentAST)
+  def commentTag: Rule1[CommentAST] =
+    rule("/*" ~ capture(zeroOrMore(!(ws ~ str("*/")) ~ ANY)) ~ ws ~ "*/" ~> CommentAST)
 
   def parseTag: TagParserAST =
     tag.run() match {
