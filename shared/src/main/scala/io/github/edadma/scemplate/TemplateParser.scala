@@ -8,20 +8,32 @@ import scala.collection.mutable.ListBuffer
 class TemplateParser(input: String, startDelim: String, endDelim: String) {
 
   def parse: TemplateParserAST = {
-    @tailrec
-    def parse(ts: LazyList[Token], body: Boolean, buf: ListBuffer[Token] = new ListBuffer): TemplateParserAST = {
+    val seq = new ListBuffer[TemplateParserAST]
+
+    def parse(ts: LazyList[Token],
+              parsingbody: Boolean,
+              buf: ListBuffer[Token] = new ListBuffer): (TemplateParserAST, LazyList[Token]) =
       ts match {
-        case (h @ TagToken(_, _, _, true)) #:: (_: SpaceToken) #:: t => parse(h #:: t, body, buf)
-        case (_: SpaceToken) #:: (h @ TagToken(_, _, true, _)) #:: t => parse(h #:: t, body, buf)
-        case TagToken(pos, tag @ WithAST(_, expr), _, _) #:: t       => BlockAST(tag, parse(t, body = true))
+        case (h @ TagToken(_, _, _, true)) #:: (_: SpaceToken) #:: t => parse(h #:: t, parsingbody, buf)
+        case (_: SpaceToken) #:: (h @ TagToken(_, _, true, _)) #:: t => parse(h #:: t, parsingbody, buf)
+        case TagToken(pos, tag: WithAST, _, _) #:: t =>
+          if (buf.isEmpty) {
+            val (body, rest) = parse(t, parsingbody = true)
+
+            (BlockAST(tag, body), rest)
+          } else {
+            (ContentAST(buf.toList), ts)
+          }
+        case TagToken(pos, _: EndAST, _, _) #:: t =>
+          if (parsingbody) (ContentAST(buf.toList), t)
+          else pos.error("unexpected end tag")
         case h #:: t =>
           buf += h
-          parse(t, body, buf)
-        case _ => ContentAST(buf.toList)
+          parse(t, parsingbody, buf)
+        case _ => (ContentAST(buf.toList), LazyList.empty)
       }
-    }
 
-    parse(tokenize, body = false)
+    parse(tokenize, parsingbody = false)._1
   }
 
   def tokenize: LazyList[Token] = tokenize(CharReader.fromString(input))

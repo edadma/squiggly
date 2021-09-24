@@ -6,8 +6,8 @@ object Main extends App {
 
   case class Person(name: String, age: Int)
 
-  val input = "zxcv {{ . }} asdf "
-  val data = Person("jonny", 45)
+  val input = "zxcv {{with .jonny}} name: {{ .name }} age: {{ .age }} {{ end }} asdf "
+  val data = Map("jonny" -> Person("jonny", 45))
   val parser = new TemplateParser(input, "{{", "}}")
   val ast = parser.parse
 

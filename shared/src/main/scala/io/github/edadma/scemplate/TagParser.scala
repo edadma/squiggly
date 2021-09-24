@@ -148,9 +148,9 @@ class TagParser(val input: ParserInput, line: Int, col: Int) extends Parser {
 
   def endTag: Rule1[EndAST] = rule(pos ~ "end" ~> EndAST)
 
-  def withTag: Rule1[IfAST] = rule(pos ~ "with" ~ expression ~> IfAST)
+  def withTag: Rule1[WithAST] = rule(pos ~ "with" ~ expression ~> WithAST)
 
-  def rangeTag: Rule1[IfAST] = rule(pos ~ "range" ~ expression ~> IfAST)
+  def rangeTag: Rule1[RangeAST] = rule(pos ~ "range" ~ expression ~> RangeAST)
 
   def commentTag: Rule1[CommentAST] =
     rule("/*" ~ capture(zeroOrMore(!(ws ~ str("*/")) ~ ANY)) ~ ws ~ "*/" ~> CommentAST)
