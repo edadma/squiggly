@@ -8,7 +8,7 @@ package io.github.edadma.scemplate
 
 class Renderer {
 
-  def render(ast: TemplateParserAST): String = {
+  def render(data: Any, ast: TemplateParserAST): String = {
     val buf = new StringBuilder
 
     def render(ast: TemplateParserAST): Unit =
@@ -16,8 +16,9 @@ class Renderer {
         case BlockAST(block, body) => ???
         case BodyAST(toks) =>
           toks foreach {
-            case TextToken(pos, text) => buf ++= text
-            case SpaceToken(pos, s)   => buf ++= s
+            case TextToken(pos, text)                    => buf ++= text
+            case SpaceToken(pos, s)                      => buf ++= s
+            case TagToken(pos, tag, trimLeft, trimRight) =>
           }
         case IfBlockAST(cond, yes, elseif, no) => ???
       }

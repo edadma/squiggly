@@ -8,8 +8,11 @@ import scala.collection.mutable.ListBuffer
 class TemplateParser(input: String, startDelim: String, endDelim: String) {
 
   def parse: TemplateParserAST = {
+    @tailrec
     def parse(ts: LazyList[Token], buf: ListBuffer[Token] = new ListBuffer): TemplateParserAST = {
       ts match {
+        case (h @ TagToken(_, _, _, true)) #:: (_: SpaceToken) #:: t => parse(h #:: t, buf)
+        case (_: SpaceToken) #:: (h @ TagToken(_, _, true, _)) #:: t => parse(h #:: t, buf)
         case h #:: t =>
           buf += h
           parse(t, buf)

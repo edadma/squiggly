@@ -4,11 +4,14 @@ import pprint.pprintln
 
 object Main extends App {
 
-  val input = " asdf "
+  case class Person(name: String, age: Int)
+
+  val input = "zxcv {{ . }} asdf "
+  val data = Person("jonny", 45)
   val parser = new TemplateParser(input, "{{", "}}")
   val ast = parser.parse
 
   pprintln(ast)
-  println(new Renderer().render(ast))
+//  println(new Renderer().render(data, ast))
 
 }
