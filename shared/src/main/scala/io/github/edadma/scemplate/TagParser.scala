@@ -94,7 +94,8 @@ class TagParser(val input: ParserInput, line: Int, col: Int) extends Parser {
     }
 
   def primary: Rule1[ExprAST] = rule {
-    number |
+    boolean |
+      number |
       variable |
       string |
       element |
@@ -102,6 +103,9 @@ class TagParser(val input: ParserInput, line: Int, col: Int) extends Parser {
   }
 
   def number: Rule1[NumberExpr] = rule(pos ~ decimal ~> NumberExpr)
+
+  def boolean: Rule1[BooleanExpr] =
+    rule(pos ~ capture("true" | "false") ~> ((p: Int, b: String) => BooleanExpr(p, b == "true")))
 
   def decimal: Rule1[BigDecimal] =
     rule {

@@ -14,6 +14,8 @@ case class StringExpr(pos: Int, s: String) extends SimpleExpr
 
 case class NumberExpr(pos: Int, n: BigDecimal) extends SimpleExpr
 
+case class BooleanExpr(pos: Int, b: Boolean) extends SimpleExpr
+
 case class VarExpr(pos: Int, user: String, name: Ident) extends SimpleExpr
 
 case class ElementExpr(pos: Int, ids: Seq[Ident]) extends SimpleExpr

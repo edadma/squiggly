@@ -6,13 +6,13 @@ object Main extends App {
 
   case class Person(name: String, age: Int)
 
-//  val input = "zxcv {{with .jonny}} name: {{ .name }} age: {{ .age }} {{ end }} asdf "
-  val input = "zxcv {{with .jonny}} {{ end }} asdf "
+//  val input = "zxcv {{ with .jonny }} name: {{ .name }} age: {{ .age }} {{ end }} asdf "
+  val input = "asdf 123 {{ 456 + 1 }} {{ 'zxcv' }}"
   val data = Map("jonny" -> Person("jonny", 45))
   val parser = new TemplateParser(input, "{{", "}}")
   val ast = parser.parse
 
   pprintln(ast)
-//  println(new Renderer().render(data, ast))
+  println(new Renderer().render(data, ast))
 
 }
