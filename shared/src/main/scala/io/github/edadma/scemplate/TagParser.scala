@@ -35,28 +35,35 @@ class TagParser(val input: ParserInput) extends Parser {
   def disjunctive: Rule1[ExprAST] =
     rule {
       conjunctive ~ zeroOrMore(
-        "or" ~ conjunctive ~> OrExpr
+        capture("or") ~ conjunctive ~> BinaryExpr
       )
     }
 
   def conjunctive: Rule1[ExprAST] =
     rule {
       pipeline ~ zeroOrMore(
-        "and" ~ pipeline ~> AndExpr
+        capture("and") ~ pipeline ~> BinaryExpr
       )
     }
 
   def not: Rule1[ExprAST] =
     rule {
-      "not" ~ not |
+      capture("not") ~ not ~> UnaryExpr |
+        comparitive
+    }
+
+  def comparitive: Rule1[ExprAST] =
+    rule {
+      pipeline ~ oneOrMore(
+        capture("<=" | ">=" | "!=" | "<" | ">" | "=") ~ pipeline ~> ((o: String, p: ExprAST) => (o, p))
+      ) ~> CompareExpr |
         pipeline
     }
 
-  //  def comparison: Rule1[ComparisonExpr]
   def pipeline: Rule1[ExprAST] =
     rule {
       applicative ~ zeroOrMore(
-        "|" ~ (apply | variable) ~> PipeExpr
+        capture("|") ~ (apply | variable) ~> BinaryExpr
       )
     }
 
@@ -67,21 +74,21 @@ class TagParser(val input: ParserInput) extends Parser {
   def additive: Rule1[ExprAST] =
     rule {
       multiplicative ~ zeroOrMore(
-        "+" ~ multiplicative ~> AddExpr
-          | "-" ~ multiplicative ~> SubExpr
+        capture("+") ~ multiplicative ~> BinaryExpr
+          | capture("-") ~ multiplicative ~> BinaryExpr
       )
     }
 
   def multiplicative: Rule1[ExprAST] =
     rule {
       negative ~ zeroOrMore(
-        "*" ~ negative ~> MulExpr
-          | "/" ~ negative ~> DivExpr)
+        capture("*") ~ negative ~> BinaryExpr
+          | capture("/") ~ negative ~> BinaryExpr)
     }
 
   def negative: Rule1[ExprAST] =
     rule {
-      "-" ~ negative |
+      capture("-") ~ negative ~> UnaryExpr |
         primary
     }
 
@@ -92,7 +99,7 @@ class TagParser(val input: ParserInput) extends Parser {
       "(" ~ expression ~ ")"
   }
 
-  def number: Rule1[NumberExpr] = rule(decimal ~> NumberExpr)
+  def number: Rule1[NumberExpr] = rule(pos ~ decimal ~> NumberExpr)
 
   def decimal: Rule1[BigDecimal] =
     rule {
@@ -107,10 +114,10 @@ class TagParser(val input: ParserInput) extends Parser {
 
   def digits: Rule0 = rule(oneOrMore(CharPredicate.Digit))
 
-  def variable: Rule1[VarExpr] = rule(capture(optional('$')) ~ ident ~> VarExpr)
+  def variable: Rule1[VarExpr] = rule(pos ~ capture(optional('$')) ~ ident ~> VarExpr)
 
   def string: Rule1[StringExpr] =
-    rule((singleQuoteString | doubleQuoteString) ~> ((s: String) => StringExpr(unescape(s))))
+    rule(pos ~ (singleQuoteString | doubleQuoteString) ~> ((p: Int, s: String) => StringExpr(p, unescape(s))))
 
   def backtickString: Rule1[String] = rule(capture('`' ~ zeroOrMore("\\`" | noneOf("`"))) ~ '`' ~ ws)
 

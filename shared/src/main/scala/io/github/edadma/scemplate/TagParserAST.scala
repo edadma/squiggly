@@ -4,41 +4,33 @@ case class Ident(pos: Int, name: String)
 
 trait TagParserAST
 
+trait Positioned { val pos: Int }
+
 trait ExprAST extends TagParserAST
 
-case class StringExpr(s: String) extends ExprAST
+trait SimpleExpr extends ExprAST with Positioned
 
-case class NumberExpr(n: BigDecimal) extends ExprAST
+case class StringExpr(pos: Int, s: String) extends SimpleExpr
 
-case class VarExpr(user: String, name: Ident) extends ExprAST
+case class NumberExpr(pos: Int, n: BigDecimal) extends SimpleExpr
 
-case class NegExpr(expr: ExprAST) extends ExprAST
+case class VarExpr(pos: Int, user: String, name: Ident) extends SimpleExpr
 
-case class NotExpr(expr: ExprAST) extends ExprAST
+case class UnaryExpr(op: String, expr: ExprAST) extends ExprAST
 
-case class AddExpr(left: ExprAST, right: ExprAST) extends ExprAST
-
-case class SubExpr(left: ExprAST, right: ExprAST) extends ExprAST
-
-case class MulExpr(left: ExprAST, right: ExprAST) extends ExprAST
-
-case class DivExpr(left: ExprAST, right: ExprAST) extends ExprAST
-
-case class AndExpr(left: ExprAST, right: ExprAST) extends ExprAST
-
-case class OrExpr(left: ExprAST, right: ExprAST) extends ExprAST
+case class BinaryExpr(left: ExprAST, op: String, right: ExprAST) extends ExprAST
 
 case class ApplyExpr(name: Ident, args: Seq[ExprAST]) extends ExprAST
-
-case class PipeExpr(left: ExprAST, right: ExprAST) extends ExprAST
 
 case class ConcatExpr(elems: Seq[ExprAST]) extends ExprAST
 
 case class ConditionalAST(cond: ExprAST, yes: ExprAST, no: ExprAST) extends ExprAST
 
+case class CompareExpr(left: ExprAST, right: Seq[(String, ExprAST)]) extends ExprAST
+
 case class AssignmentAST(user: String, name: Ident, right: ExprAST) extends TagParserAST
 
-trait ConstructAST extends TagParserAST { val pos: Int }
+trait ConstructAST extends TagParserAST with Positioned
 
 case class IfAST(pos: Int, cond: ExprAST) extends ConstructAST
 
