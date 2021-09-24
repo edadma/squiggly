@@ -30,22 +30,32 @@ class Renderer {
         }
     }
 
+  def beval(data: Any, expr: ExprAST): Boolean = eval(data, expr).asInstanceOf[Boolean]
+
+  def neval(data: Any, expr: ExprAST): BigDecimal = eval(data, expr).asInstanceOf[BigDecimal]
+
   def eval(data: Any, expr: ExprAST): Any =
     expr match {
       case StringExpr(_, s)                   => s
       case NumberExpr(_, n)                   => n
       case VarExpr(_, user, Ident(pos, name)) =>
       case ElementExpr(pos, ids)              =>
-      case BinaryExpr(left, "and", right) =>
-        eval(data, left)
-
+      case BinaryExpr(left, "and", right)     => beval(data, left) && beval(data, right)
+      case BinaryExpr(left, "or", right)      => beval(data, left) || beval(data, right)
+      case UnaryExpr("not", expr)             => !beval(data, expr)
       case BinaryExpr(left, op, right) =>
-        val l = eval(data, left)
-        val r = eval(data, right)
+        val l = neval(data, left)
+        val r = neval(data, right)
 
         op match {
-          case "+" =>
+          case "+"   => l + r
+          case "-"   => l - r
+          case "*"   => l * r
+          case "/"   => l / r
+          case "mod" => l remainder r
+          case "^"   => l.pow(r.toIntExact)
         }
+      case UnaryExpr("-", expr) => -neval(data, expr)
     }
 
   def render(data: Any, ast: TemplateParserAST): String = {

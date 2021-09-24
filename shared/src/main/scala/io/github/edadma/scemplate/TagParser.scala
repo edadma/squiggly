@@ -84,12 +84,19 @@ class TagParser(val input: ParserInput, line: Int, col: Int) extends Parser {
     rule {
       negative ~ zeroOrMore(
         capture("*") ~ negative ~> BinaryExpr
-          | capture("/") ~ negative ~> BinaryExpr)
+          | capture("/") ~ negative ~> BinaryExpr
+          | capture("mod") ~ negative ~> BinaryExpr)
     }
 
   def negative: Rule1[ExprAST] =
     rule {
       capture("-") ~ negative ~> UnaryExpr |
+        power
+    }
+
+  def power: Rule1[ExprAST] =
+    rule {
+      primary ~ capture("^") ~ power ~> BinaryExpr |
         primary
     }
 
