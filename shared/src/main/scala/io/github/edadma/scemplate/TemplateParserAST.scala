@@ -2,9 +2,12 @@ package io.github.edadma.scemplate
 
 trait TemplateParserAST
 
-case class BodyAST(toks: Seq[Token]) extends TemplateParserAST
+case class ContentAST(toks: Seq[Token]) extends TemplateParserAST
 
-case class IfBlockAST(cond: ExprAST, yes: BodyAST, elseif: Seq[(ExprAST, BodyAST)], no: Option[BodyAST])
+case class IfBlockAST(cond: ExprAST,
+                      yes: TemplateParserAST,
+                      elseif: Seq[(ExprAST, TemplateParserAST)],
+                      no: Option[TemplateParserAST])
     extends TemplateParserAST
 
-case class BlockAST(block: ConstructAST, body: BodyAST) extends TemplateParserAST
+case class BlockAST(block: ConstructAST, body: TemplateParserAST) extends TemplateParserAST

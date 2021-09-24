@@ -14,7 +14,7 @@ class Renderer {
     def render(ast: TemplateParserAST): Unit =
       ast match {
         case BlockAST(block, body) => ???
-        case BodyAST(toks) =>
+        case ContentAST(toks) =>
           toks foreach {
             case TextToken(pos, text)                    => buf ++= text
             case SpaceToken(pos, s)                      => buf ++= s
