@@ -6,9 +6,9 @@ import org.parboiled2._
 
 import scala.language.implicitConversions
 
-class TagParser(val input: ParserInput) extends Parser {
+class TagParser(val input: ParserInput, line: Int, col: Int) extends Parser {
 
-  implicit def wspStr(s: String): Rule0 = rule(str(s) ~ zeroOrMore(' '))
+  implicit def wsStr(s: String): Rule0 = rule(str(s) ~ ws)
 
   def tag: Rule1[TagParserAST] =
     rule {
@@ -117,7 +117,7 @@ class TagParser(val input: ParserInput) extends Parser {
 
   def variable: Rule1[VarExpr] = rule(pos ~ capture(optional('$')) ~ ident ~> VarExpr)
 
-  def element: Rule1[ElementExpr] = rule(pos ~ zeroOrMore(ident).separatedBy(".") ~> ElementExpr)
+  def element: Rule1[ElementExpr] = rule(pos ~ "." ~ zeroOrMore(ident).separatedBy(".") ~> ElementExpr)
 
   def string: Rule1[StringExpr] =
     rule(pos ~ (singleQuoteString | doubleQuoteString) ~> ((p: Int, s: String) => StringExpr(p, unescape(s))))
@@ -135,7 +135,7 @@ class TagParser(val input: ParserInput) extends Parser {
 
   def pos: Rule1[Int] = rule(push(cursor))
 
-  def ws: Rule0 = rule(zeroOrMore(' '))
+  def ws: Rule0 = rule(quiet(zeroOrMore(anyOf(" \t\r\n"))))
 
   def assignmentTag: Rule1[AssignmentAST] = rule(capture(optional('$')) ~ ident ~ ":=" ~ expression ~> AssignmentAST)
 
