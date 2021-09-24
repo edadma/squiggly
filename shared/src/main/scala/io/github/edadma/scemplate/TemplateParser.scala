@@ -34,7 +34,11 @@ class TemplateParser(input: String, startDelim: String, endDelim: String) {
 
           val (body, rest) = parse(t, parsingbody = true)
 
-          astbuf += BlockAST(tag, body)
+          if (body == EmptyAST)
+            Console.err.println(pos.longErrorText("waning: empty block"))
+          else
+            astbuf += BlockAST(tag, body)
+
           parse(rest, parsingbody, tokbuf, astbuf)
         case TagToken(pos, _: EndAST, _, _) #:: t =>
           if (parsingbody)
