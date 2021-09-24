@@ -12,26 +12,42 @@ class TemplateParser(input: String, startDelim: String, endDelim: String) {
 
     def parse(ts: LazyList[Token],
               parsingbody: Boolean,
-              buf: ListBuffer[Token] = new ListBuffer): (TemplateParserAST, LazyList[Token]) =
-      ts match {
-        case (h @ TagToken(_, _, _, true)) #:: (_: SpaceToken) #:: t => parse(h #:: t, parsingbody, buf)
-        case (_: SpaceToken) #:: (h @ TagToken(_, _, true, _)) #:: t => parse(h #:: t, parsingbody, buf)
-        case TagToken(pos, tag: WithAST, _, _) #:: t =>
-          if (buf.isEmpty) {
-            val (body, rest) = parse(t, parsingbody = true)
+              tokbuf: ListBuffer[Token] = new ListBuffer,
+              astbuf: ListBuffer[TemplateParserAST] = new ListBuffer): (TemplateParserAST, LazyList[Token]) = {
+      def endOfBlock(tail: LazyList[Token]): (TemplateParserAST, LazyList[Token]) = {
+        if (tokbuf.nonEmpty)
+          astbuf += ContentAST(tokbuf.toList)
 
-            (BlockAST(tag, body), rest)
-          } else {
-            (ContentAST(buf.toList), ts)
+        if (astbuf.isEmpty) (EmptyAST, tail)
+        else if (astbuf.length == 1) (astbuf.head, tail)
+        else (SequenceAST(astbuf.toList), tail)
+      }
+
+      ts match {
+        case (h @ TagToken(_, _, _, true)) #:: (_: SpaceToken) #:: t => parse(h #:: t, parsingbody, tokbuf, astbuf)
+        case (_: SpaceToken) #:: (h @ TagToken(_, _, true, _)) #:: t => parse(h #:: t, parsingbody, tokbuf, astbuf)
+        case TagToken(pos, tag: WithAST, _, _) #:: t =>
+          if (tokbuf.nonEmpty) {
+            astbuf += ContentAST(tokbuf.toList)
+            tokbuf.clear()
           }
+
+          val (body, rest) = parse(t, parsingbody = true)
+
+          astbuf += BlockAST(tag, body)
+          parse(rest, parsingbody, tokbuf, astbuf)
         case TagToken(pos, _: EndAST, _, _) #:: t =>
-          if (parsingbody) (ContentAST(buf.toList), t)
+          if (parsingbody)
+            endOfBlock(t)
           else pos.error("unexpected end tag")
         case h #:: t =>
-          buf += h
-          parse(t, parsingbody, buf)
-        case _ => (ContentAST(buf.toList), LazyList.empty)
+          tokbuf += h
+          parse(t, parsingbody, tokbuf, astbuf)
+        case _ =>
+          if (parsingbody) sys.error("missing end tag")
+          else endOfBlock(LazyList.empty)
       }
+    }
 
     parse(tokenize, parsingbody = false)._1
   }
