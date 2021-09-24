@@ -46,7 +46,7 @@ class TemplateParser(input: String, startDelim: String, endDelim: String) {
         case Some(tagrest) =>
           matchTag(tagrest) match {
             case Some((rest, tag)) =>
-              val tagParser = new TagParser(tag)
+              val tagParser = new TagParser(tag, tagrest.line, tagrest.col)
               val ast = tagParser.parseTag
 
               Some((rest, TagToken(r, ast)))

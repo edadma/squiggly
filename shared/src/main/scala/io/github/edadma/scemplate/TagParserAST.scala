@@ -32,6 +32,8 @@ case class CompareExpr(left: ExprAST, right: Seq[(String, ExprAST)]) extends Exp
 
 case class AssignmentAST(user: String, name: Ident, right: ExprAST) extends TagParserAST
 
+case class CommentAST(comment: String) extends TagParserAST
+
 trait ConstructAST extends TagParserAST with Positioned
 
 case class IfAST(pos: Int, cond: ExprAST) extends ConstructAST

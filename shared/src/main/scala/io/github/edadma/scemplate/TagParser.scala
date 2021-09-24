@@ -19,6 +19,7 @@ class TagParser(val input: ParserInput, line: Int, col: Int) extends Parser {
           | withTag
           | rangeTag
           | assignmentTag
+          | commentTag
           | expression
       ) ~ EOI
     }
@@ -149,11 +150,22 @@ class TagParser(val input: ParserInput, line: Int, col: Int) extends Parser {
 
   def rangeTag: Rule1[IfAST] = rule(pos ~ "range" ~ expression ~> IfAST)
 
+  def commentTag: Rule1[CommentAST] = rule("/*" ~ capture(zeroOrMore(!"*/" ~ ANY)) ~ "*/" ~> CommentAST)
+
   def parseTag: TagParserAST =
     tag.run() match {
       case Success(ast)           => ast
-      case Failure(e: ParseError) => sys.error("Expression is not valid: " + formatError(e))
-      case Failure(e)             => sys.error("Unexpected error during parsing run: " + e)
+      case Failure(e: ParseError) =>
+        //        val p = e.position
+        //        val poffset = p.copy(line = p.line + line - 1, column = p.column + col - 1)
+        //        val pp = e.principalPosition
+        //        val ppoffset = pp.copy(line = pp.line + line - 1, column = pp.column + col - 1)
+        //        val eoffset = e.copy(position = poffset, principalPosition = ppoffset)
+        //
+        //        sys.error(formatError(eoffset))
+        Console.err.println(formatError(e))
+        sys.exit(1)
+      case Failure(e) => sys.error("Unexpected error during parsing run: " + e)
     }
 
   def parseExpression: ExprAST =
