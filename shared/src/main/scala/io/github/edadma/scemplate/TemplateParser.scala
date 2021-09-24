@@ -3,8 +3,22 @@ package io.github.edadma.scemplate
 import io.github.edadma.char_reader.CharReader
 
 import scala.annotation.tailrec
+import scala.collection.mutable.ListBuffer
 
 class TemplateParser(input: String, startDelim: String, endDelim: String) {
+
+  def parse: TemplateParserAST = {
+    def parse(ts: LazyList[Token], buf: ListBuffer[Token] = new ListBuffer): TemplateParserAST = {
+      ts match {
+        case h #:: t =>
+          buf += h
+          parse(t, buf)
+        case _ => BodyAST(buf.toList)
+      }
+    }
+
+    parse(tokenize)
+  }
 
   def tokenize: LazyList[Token] = tokenize(CharReader.fromString(input))
 
@@ -71,14 +85,4 @@ class TemplateParser(input: String, startDelim: String, endDelim: String) {
     } else if (buf.isEmpty) None
     else Some(text(r))
   }
-
-  trait Token {
-    val pos: CharReader
-  }
-
-  case class TagToken(pos: CharReader, tag: TagParserAST, trimLeft: Boolean, trimRight: Boolean) extends Token
-
-  case class TextToken(pos: CharReader, text: String) extends Token
-
-  case class SpaceToken(pos: CharReader, s: String) extends Token
 }

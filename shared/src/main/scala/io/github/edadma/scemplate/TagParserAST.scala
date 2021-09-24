@@ -38,6 +38,8 @@ trait ConstructAST extends TagParserAST with Positioned
 
 case class IfAST(pos: Int, cond: ExprAST) extends ConstructAST
 
+case class ElseIfAST(pos: Int, cond: ExprAST) extends ConstructAST
+
 case class ElseAST(pos: Int) extends ConstructAST
 
 case class EndAST(pos: Int) extends ConstructAST

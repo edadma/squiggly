@@ -142,6 +142,8 @@ class TagParser(val input: ParserInput, line: Int, col: Int) extends Parser {
 
   def ifTag: Rule1[IfAST] = rule(pos ~ "if" ~ condition ~> IfAST)
 
+  def elseIfTag: Rule1[ElseIfAST] = rule(pos ~ "else" ~ "if" ~ condition ~> ElseIfAST)
+
   def elseTag: Rule1[ElseAST] = rule(pos ~ "else" ~> ElseAST)
 
   def endTag: Rule1[EndAST] = rule(pos ~ "end" ~> EndAST)
