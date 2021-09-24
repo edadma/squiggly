@@ -13,13 +13,13 @@ class TagParser(val input: ParserInput) extends Parser {
   def tag: Rule1[TagParserAST] =
     rule {
       ws ~ (
-        expression
-          | assignmentTag
-          | ifTag
+        ifTag
           | elseTag
           | endTag
           | withTag
           | rangeTag
+          | assignmentTag
+          | expression
       ) ~ EOI
     }
 
@@ -41,8 +41,8 @@ class TagParser(val input: ParserInput) extends Parser {
 
   def conjunctive: Rule1[ExprAST] =
     rule {
-      pipeline ~ zeroOrMore(
-        capture("and") ~ pipeline ~> BinaryExpr
+      not ~ zeroOrMore(
+        capture("and") ~ not ~> BinaryExpr
       )
     }
 
