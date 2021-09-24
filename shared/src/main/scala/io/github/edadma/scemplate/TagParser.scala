@@ -96,6 +96,7 @@ class TagParser(val input: ParserInput) extends Parser {
     number |
       variable |
       string |
+      element |
       "(" ~ expression ~ ")"
   }
 
@@ -115,6 +116,8 @@ class TagParser(val input: ParserInput) extends Parser {
   def digits: Rule0 = rule(oneOrMore(CharPredicate.Digit))
 
   def variable: Rule1[VarExpr] = rule(pos ~ capture(optional('$')) ~ ident ~> VarExpr)
+
+  def element: Rule1[ElementExpr] = rule(pos ~ zeroOrMore(ident).separatedBy(".") ~> ElementExpr)
 
   def string: Rule1[StringExpr] =
     rule(pos ~ (singleQuoteString | doubleQuoteString) ~> ((p: Int, s: String) => StringExpr(p, unescape(s))))

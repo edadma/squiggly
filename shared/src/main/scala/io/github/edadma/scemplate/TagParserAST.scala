@@ -16,6 +16,8 @@ case class NumberExpr(pos: Int, n: BigDecimal) extends SimpleExpr
 
 case class VarExpr(pos: Int, user: String, name: Ident) extends SimpleExpr
 
+case class ElementExpr(pos: Int, ids: Seq[Ident]) extends SimpleExpr
+
 case class UnaryExpr(op: String, expr: ExprAST) extends ExprAST
 
 case class BinaryExpr(left: ExprAST, op: String, right: ExprAST) extends ExprAST
