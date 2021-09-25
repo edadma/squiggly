@@ -20,7 +20,7 @@ class Renderer {
 
   @tailrec
   private def lookupSeq(v: Any, ids: Seq[Ident]): Option[Any] =
-    ids match {
+    ids.toList match {
       case Nil      => Some(v)
       case h :: Nil => lookup(v, h)
       case h :: t =>
@@ -39,10 +39,14 @@ class Renderer {
       case StringExpr(_, s)                   => s
       case NumberExpr(_, n)                   => n
       case VarExpr(_, user, Ident(pos, name)) =>
-      case ElementExpr(pos, ids)              =>
-      case BinaryExpr(left, "and", right)     => beval(data, left) && beval(data, right)
-      case BinaryExpr(left, "or", right)      => beval(data, left) || beval(data, right)
-      case UnaryExpr("not", expr)             => !beval(data, expr)
+      case ElementExpr(pos, ids) =>
+        lookupSeq(data, ids) match {
+          case Some(value) => value
+          case None        => sys.error(s"not found: .${ids mkString "."}")
+        }
+      case BinaryExpr(left, "and", right) => beval(data, left) && beval(data, right)
+      case BinaryExpr(left, "or", right)  => beval(data, left) || beval(data, right)
+      case UnaryExpr("not", expr)         => !beval(data, expr)
       case BinaryExpr(left, op, right) =>
         val l = neval(data, left)
         val r = neval(data, right)
@@ -63,16 +67,14 @@ class Renderer {
 
     def render(data: Any, ast: TemplateParserAST): Unit =
       ast match {
+        case SequenceAST(seq) => seq foreach (render(data, _))
         case BlockAST(WithAST(pos, expr), body) =>
+          println(data, eval(data, expr))
+          render(eval(data, expr), body)
         case ContentAST(toks) =>
           toks foreach {
-            case TextToken(pos, text) => buf ++= text
-            case SpaceToken(pos, s)   => buf ++= s
-            case TagToken(pos, ElementExpr(_, ids), _, _) =>
-              lookupSeq(data, ids) match {
-                case Some(value) => buf ++= value.toString
-                case None        => pos.error(s"not found")
-              }
+            case TextToken(pos, text)              => buf ++= text
+            case SpaceToken(pos, s)                => buf ++= s
             case TagToken(pos, tag: ExprAST, _, _) => buf ++= eval(data, tag).toString
           }
         case IfBlockAST(cond, yes, elseif, no) => ???
