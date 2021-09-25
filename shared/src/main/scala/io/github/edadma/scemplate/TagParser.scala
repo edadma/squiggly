@@ -10,6 +10,8 @@ class TagParser(val input: ParserInput, line: Int, col: Int) extends Parser {
 
   implicit def wsStr(s: String): Rule0 = rule(str(s) ~ ws)
 
+  def kw(s: String): Rule1[String] = rule(capture(s) ~> ((s: String) => s.trim))
+
   def tag: Rule1[TagParserAST] =
     rule {
       ws ~ (
@@ -36,27 +38,27 @@ class TagParser(val input: ParserInput, line: Int, col: Int) extends Parser {
   def disjunctive: Rule1[ExprAST] =
     rule {
       conjunctive ~ zeroOrMore(
-        capture("or") ~ conjunctive ~> BinaryExpr
+        kw("or") ~ conjunctive ~> BinaryExpr
       )
     }
 
   def conjunctive: Rule1[ExprAST] =
     rule {
       not ~ zeroOrMore(
-        capture("and") ~ not ~> BinaryExpr
+        kw("and") ~ not ~> BinaryExpr
       )
     }
 
   def not: Rule1[ExprAST] =
     rule {
-      capture("not") ~ not ~> UnaryExpr |
+      kw("not") ~ not ~> UnaryExpr |
         comparitive
     }
 
   def comparitive: Rule1[ExprAST] =
     rule {
       pipeline ~ oneOrMore(
-        capture("<=" | ">=" | "!=" | "<" | ">" | "=") ~ pipeline ~> ((o: String, p: ExprAST) => (o, p))
+        (kw("<=") | kw(">=") | kw("!=") | kw("<") | kw(">") | kw("=")) ~ pipeline ~> ((o: String, p: ExprAST) => (o, p))
       ) ~> CompareExpr |
         pipeline
     }
@@ -64,7 +66,7 @@ class TagParser(val input: ParserInput, line: Int, col: Int) extends Parser {
   def pipeline: Rule1[ExprAST] =
     rule {
       applicative ~ zeroOrMore(
-        capture("|") ~ (apply | variable) ~> BinaryExpr
+        kw("|") ~ (apply | variable) ~> BinaryExpr
       )
     }
 
@@ -75,28 +77,28 @@ class TagParser(val input: ParserInput, line: Int, col: Int) extends Parser {
   def additive: Rule1[ExprAST] =
     rule {
       multiplicative ~ zeroOrMore(
-        capture("+") ~ multiplicative ~> BinaryExpr
-          | capture("-") ~ multiplicative ~> BinaryExpr
+        kw("+") ~ multiplicative ~> BinaryExpr
+          | kw("-") ~ multiplicative ~> BinaryExpr
       )
     }
 
   def multiplicative: Rule1[ExprAST] =
     rule {
       negative ~ zeroOrMore(
-        capture("*") ~ negative ~> BinaryExpr
-          | capture("/") ~ negative ~> BinaryExpr
-          | capture("mod") ~ negative ~> BinaryExpr)
+        kw("*") ~ negative ~> BinaryExpr
+          | kw("/") ~ negative ~> BinaryExpr
+          | kw("mod") ~ negative ~> BinaryExpr)
     }
 
   def negative: Rule1[ExprAST] =
     rule {
-      capture("-") ~ negative ~> UnaryExpr |
+      kw("-") ~ negative ~> UnaryExpr |
         power
     }
 
   def power: Rule1[ExprAST] =
     rule {
-      primary ~ capture("^") ~ power ~> BinaryExpr |
+      primary ~ kw("^") ~ power ~> BinaryExpr |
         primary
     }
 
@@ -112,7 +114,7 @@ class TagParser(val input: ParserInput, line: Int, col: Int) extends Parser {
   def number: Rule1[NumberExpr] = rule(pos ~ decimal ~> NumberExpr)
 
   def boolean: Rule1[BooleanExpr] =
-    rule(pos ~ capture("true" | "false") ~> ((p: Int, b: String) => BooleanExpr(p, b == "true")))
+    rule(pos ~ (kw("true") | kw("false")) ~> ((p: Int, b: String) => BooleanExpr(p, b == "true")))
 
   def decimal: Rule1[BigDecimal] =
     rule {
