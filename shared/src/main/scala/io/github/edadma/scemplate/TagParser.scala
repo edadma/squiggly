@@ -8,13 +8,13 @@ import scala.language.implicitConversions
 
 class TagParser(val input: ParserInput, line: Int, col: Int) extends Parser {
 
-  implicit def wsStr(s: String): Rule0 = rule(str(s) ~ ws)
+  implicit def wsStr(s: String): Rule0 = rule(str(s) ~ sp)
 
   def kw(s: String): Rule1[String] = rule(capture(s) ~> ((s: String) => s.trim))
 
   def tag: Rule1[TagParserAST] =
     rule {
-      ws ~ (
+      sp ~ (
         ifTag
           | elseTag
           | endTag
@@ -122,34 +122,36 @@ class TagParser(val input: ParserInput, line: Int, col: Int) extends Parser {
         (zeroOrMore(CharPredicate.Digit) ~ '.' ~ digits | digits ~ '.') ~
           optional((ch('e') | 'E') ~ optional(ch('+') | '-') ~ digits) |
           digits
-      ) ~ ws ~> ((s: String) => BigDecimal(s))
+      ) ~ sp ~> ((s: String) => BigDecimal(s))
     }
 
-  def integer: Rule1[Int] = rule(capture(digits) ~ ws ~> ((s: String) => s.toInt))
+  def integer: Rule1[Int] = rule(capture(digits) ~ sp ~> ((s: String) => s.toInt))
 
   def digits: Rule0 = rule(oneOrMore(CharPredicate.Digit))
 
   def variable: Rule1[VarExpr] = rule(pos ~ capture(optional('$')) ~ ident ~> VarExpr)
 
-  def element: Rule1[ElementExpr] = rule(pos ~ '.' ~ zeroOrMore(ident).separatedBy('.') ~> ElementExpr)
+  def element: Rule1[ElementExpr] = rule(pos ~ '.' ~ zeroOrMore(identnsp).separatedBy('.') ~ sp ~> ElementExpr)
 
   def string: Rule1[StringExpr] =
     rule(pos ~ (singleQuoteString | doubleQuoteString) ~> ((p: Int, s: String) => StringExpr(p, unescape(s))))
 
-  def backtickString: Rule1[String] = rule(capture('`' ~ zeroOrMore("\\`" | noneOf("`"))) ~ '`' ~ ws)
+  def backtickString: Rule1[String] = rule(capture('`' ~ zeroOrMore("\\`" | noneOf("`"))) ~ '`' ~ sp)
 
-  def singleQuoteString: Rule1[String] = rule('\'' ~ capture(zeroOrMore("\\'" | noneOf("'\n"))) ~ '\'' ~ ws)
+  def singleQuoteString: Rule1[String] = rule('\'' ~ capture(zeroOrMore("\\'" | noneOf("'\n"))) ~ '\'' ~ sp)
 
-  def doubleQuoteString: Rule1[String] = rule('"' ~ capture(zeroOrMore("\\\"" | noneOf("\"\n"))) ~ '"' ~ ws)
+  def doubleQuoteString: Rule1[String] = rule('"' ~ capture(zeroOrMore("\\\"" | noneOf("\"\n"))) ~ '"' ~ sp)
 
-  def ident: Rule1[Ident] =
+  def identnsp: Rule1[Ident] =
     rule {
-      pos ~ capture((CharPredicate.Alpha | '_') ~ zeroOrMore(CharPredicate.AlphaNum | '_')) ~> Ident ~ ws
+      pos ~ capture((CharPredicate.Alpha | '_') ~ zeroOrMore(CharPredicate.AlphaNum | '_')) ~> Ident
     }
+
+  def ident: Rule1[Ident] = rule(identnsp ~ sp)
 
   def pos: Rule1[Int] = rule(push(cursor))
 
-  def ws: Rule0 = rule(quiet(zeroOrMore(anyOf(" \t\r\n"))))
+  def sp: Rule0 = rule(quiet(zeroOrMore(anyOf(" \t\r\n"))))
 
   def assignmentTag: Rule1[AssignmentAST] = rule(capture(optional('$')) ~ ident ~ ":=" ~ expression ~> AssignmentAST)
 
@@ -166,7 +168,7 @@ class TagParser(val input: ParserInput, line: Int, col: Int) extends Parser {
   def rangeTag: Rule1[RangeAST] = rule(pos ~ "range" ~ expression ~> RangeAST)
 
   def commentTag: Rule1[CommentAST] =
-    rule("/*" ~ capture(zeroOrMore(!(ws ~ str("*/")) ~ ANY)) ~ ws ~ "*/" ~> CommentAST)
+    rule("/*" ~ capture(zeroOrMore(!(sp ~ str("*/")) ~ ANY)) ~ sp ~ "*/" ~> CommentAST)
 
   def parseTag: TagParserAST =
     tag.run() match {
