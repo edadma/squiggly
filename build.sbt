@@ -27,6 +27,7 @@ lazy val scemplate = crossProject( /*JSPlatform, */ JVMPlatform, NativePlatform)
     libraryDependencies ++= Seq(
       "io.github.edadma" %%% "cross-platform" % "0.1.1",
       "io.github.edadma" %%% "char-reader" % "0.1.4",
+      "io.github.edadma" %%% "datetime" % "0.1.8",
       "io.github.edadma" %%% "json" % "0.1.10"
     ),
     libraryDependencies ++= Seq(
@@ -45,7 +46,7 @@ lazy val scemplate = crossProject( /*JSPlatform, */ JVMPlatform, NativePlatform)
   )
   .nativeSettings(
     nativeLinkStubs := true,
-    libraryDependencies += "io.github.edadma" %%% "libyaml" % "0.1.1"
+    libraryDependencies += "io.github.edadma" %%% "libyaml" % "0.1.3"
   ) /*.
   jsSettings(
     jsEnv := new org.scalajs.jsenv.nodejs.NodeJSEnv(),

@@ -1,32 +1,35 @@
 package io.github.edadma.scemplate
 
+import io.github.edadma.datetime.Datetime
+
 import scala.annotation.tailrec
-import scala.collection.immutable.{AbstractSeq, LinearSeq}
-import scala.collection.mutable
+import scala.collection.{immutable, mutable}
+import scala.language.postfixOps
 
 object Renderer {
 
   private val ZERO = BigDecimal(0)
 
   val builtinFunctions: Map[String, Any] =
-    Map(
-      )
-  val builtinMethods: Map[String, Any] =
-    Map(
-      )
+    List(
+      BuiltinFunction("now", 0, _ => Datetime.now().timestamp)
+    ) map (f => (f.name, f)) toMap
+  val builtinMethods: Map[String, BuiltinMethod] =
+    List(
+      BuiltinMethod("unix", { case d: Datetime => BigDecimal(d.epochMillis) })
+    ) map (m => (m.name, m)) toMap
   val defaultRenderer = new Renderer(builtinFunctions, builtinMethods)
 
 }
 
-class Renderer(functions: Map[String, Any], methods: Map[String, Any]) {
+class Renderer(functions: Map[String, Any], methods: Map[String, BuiltinMethod]) {
 
   import Renderer._
 
   private def lookup(v: Any, id: Ident): Option[Any] =
     v match {
-      case m: collection.Map[_, _] =>
-        m.asInstanceOf[collection.Map[String, Any]] get id.name
-      case p: Product => p.productElementNames zip p.productIterator find { case (k, _) => k == id.name } map (_._2)
+      case m: collection.Map[_, _] => m.asInstanceOf[collection.Map[String, Any]] get id.name
+      case p: Product              => p.productElementNames zip p.productIterator find { case (k, _) => k == id.name } map (_._2)
     }
 
   @tailrec
@@ -58,27 +61,34 @@ class Renderer(functions: Map[String, Any], methods: Map[String, Any]) {
         case v             => sys.error(s"not a number: $v")
       }
 
+    def callFunction(pos: Int, name: String, args: Seq[Any]): Any =
+      functions get name match {
+        case Some(BuiltinFunction(_, arity, function)) =>
+          if (args.length != arity)
+            sys.error(s"wrong number of arguments for function '$name': expected $arity, found ${args.length}")
+          else function(args)
+        case None =>
+          if (args.isEmpty) getVar(pos, name)
+          else sys.error(s"function found: $name")
+      }
+
+    def getVar(pos: Int, name: String): Any =
+      vars get name match {
+        case Some(value) => value
+        case None        => sys.error(s"unknown variable: $name")
+      }
+
     def eval(context: Any, expr: ExprAST): Any =
       expr match {
         case StringExpr(_, s) => s
         case NumberExpr(_, n) => n
         case VarExpr(_, user, Ident(pos, name)) =>
-          def getVar: Any =
-            vars get name match {
-              case Some(value) => value
-              case None        => sys.error(s"unknown variable: $name")
-            }
-
-          if (user == "$") getVar
-          else
-            functions get name match {
-              case Some(value) => value
-              case None        => getVar
-            }
+          if (user == "$") getVar(pos, name)
+          else callFunction(pos, name, Nil)
         case ElementExpr(pos, global, ids) =>
           lookupSeq(if (global == "$") globalContext else context, ids) match {
             case Some(value) => value
-            case None        => sys.error(s"not found: .${ids mkString "."}")
+            case None        => sys.error(s"not found: .${ids map (_.name) mkString "."}")
           }
         case BinaryExpr(left, "and", right) => beval(context, left) && beval(context, right)
         case BinaryExpr(left, "or", right)  => beval(context, left) || beval(context, right)
@@ -96,6 +106,16 @@ class Renderer(functions: Map[String, Any], methods: Map[String, Any]) {
             case "^"   => l.pow(r.toIntExact)
           }
         case UnaryExpr("-", expr) => -neval(context, expr)
+        case MethodExpr(expr, Ident(pos, name)) =>
+          methods get name match {
+            case Some(BuiltinMethod(_, method)) =>
+              val v = eval(context, expr)
+
+              if (method.isDefinedAt(v)) method(v)
+              else sys.error(s"cannot apply method '$name' to '$v'")
+            case None => sys.error(s"unknown method: $name")
+          }
+        case ApplyExpr(Ident(pos, name), args) => callFunction(pos, name, args map (eval(context, _)))
       }
 
     val buf = new StringBuilder

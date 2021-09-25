@@ -2,9 +2,13 @@ package io.github.edadma
 
 import org.parboiled2.{ParseError, Parser, Position}
 
-import scala.collection.immutable.ArraySeq
+import scala.collection.immutable
 
 package object scemplate {
+
+  case class BuiltinFunction(name: String, arity: Int, function: Seq[Any] => Any)
+
+  case class BuiltinMethod(name: String, function: PartialFunction[Any, Any])
 
   trait Platform {
     def yaml(s: String): Any
@@ -40,7 +44,7 @@ package object scemplate {
       'F' -> 15
     ) foreach { case (k, v) => a(k) = v }
 
-    a to ArraySeq
+    a to immutable.ArraySeq
   }
 
   def hex(c: Char): Int = if (c < 128) HEX(c) else 0
@@ -79,7 +83,7 @@ package object scemplate {
 
   def problem(pos: Int, parser: Parser, msg: String, line: Int, col: Int): Nothing = {
     val p = Position(pos, parser.input)
-//    val offset = p.copy(line = p.line + line - 1, column = p.column + col - 1)
+    //    val offset = p.copy(line = p.line + line - 1, column = p.column + col - 1)
 
     Console.err.println(new RuntimeErrorFormatter(msg).customFormat(ParseError(p, p, Nil), parser.input))
     sys.exit(1)
