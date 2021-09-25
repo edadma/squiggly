@@ -137,7 +137,8 @@ class TagParser(val input: ParserInput, line: Int, col: Int) extends Parser {
 
   def variable: Rule1[VarExpr] = rule(pos ~ capture(optional('$')) ~ ident ~> VarExpr)
 
-  def element: Rule1[ElementExpr] = rule(pos ~ capture(optional('$')) ~ '.' ~ zeroOrMore(identnsp).separatedBy('.') ~ sp ~> ElementExpr)
+  def element: Rule1[ElementExpr] =
+    rule(pos ~ capture(optional('$')) ~ '.' ~ zeroOrMore(identnsp).separatedBy('.') ~ sp ~> ElementExpr)
 
   def string: Rule1[StringExpr] =
     rule(pos ~ (singleQuoteString | doubleQuoteString) ~> ((p: Int, s: String) => StringExpr(p, unescape(s))))
@@ -159,7 +160,7 @@ class TagParser(val input: ParserInput, line: Int, col: Int) extends Parser {
 
   def sp: Rule0 = rule(quiet(zeroOrMore(anyOf(" \t\r\n"))))
 
-  def assignmentTag: Rule1[AssignmentAST] = rule(capture(optional('$')) ~ ident ~ ":=" ~ expression ~> AssignmentAST)
+  def assignmentTag: Rule1[AssignmentAST] = rule(ident ~ ":=" ~ expression ~> AssignmentAST)
 
   def ifTag: Rule1[IfAST] = rule(pos ~ "if" ~ condition ~> IfAST)
 

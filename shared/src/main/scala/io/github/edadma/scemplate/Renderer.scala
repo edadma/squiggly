@@ -2,6 +2,7 @@ package io.github.edadma.scemplate
 
 import scala.annotation.tailrec
 import scala.collection.immutable.{AbstractSeq, LinearSeq}
+import scala.collection.mutable
 
 //object Renderer {
 //
@@ -9,7 +10,7 @@ import scala.collection.immutable.{AbstractSeq, LinearSeq}
 //
 //}
 
-class Renderer {
+class Renderer(functions: Map[String, Function]) {
 
   private def lookup(v: Any, id: Ident): Option[Any] =
     v match {
@@ -37,9 +38,13 @@ class Renderer {
 
     def eval(context: Any, expr: ExprAST): Any =
       expr match {
-        case StringExpr(_, s)                   => s
-        case NumberExpr(_, n)                   => n
+        case StringExpr(_, s) => s
+        case NumberExpr(_, n) => n
         case VarExpr(_, user, Ident(pos, name)) =>
+          vars get name match {
+            case Some(value) => value
+            case None        => ???
+          }
         case ElementExpr(pos, global, ids) =>
           lookupSeq(if (global == "$") globalContext else context, ids) match {
             case Some(value) => value
@@ -64,6 +69,7 @@ class Renderer {
       }
 
     val buf = new StringBuilder
+    val vars = new mutable.HashMap[String, Any]
 
     def render(context: Any, ast: TemplateParserAST): Unit =
       ast match {
@@ -72,9 +78,10 @@ class Renderer {
         case BlockAST(WithAST(pos, expr), body) => render(eval(context, expr), body)
         case ContentAST(toks) =>
           toks foreach {
-            case TextToken(pos, text)              => buf ++= text
-            case SpaceToken(pos, s)                => buf ++= s
-            case TagToken(pos, tag: ExprAST, _, _) => buf ++= eval(context, tag).toString
+            case TextToken(pos, text)                                     => buf ++= text
+            case SpaceToken(pos, s)                                       => buf ++= s
+            case TagToken(pos, tag: ExprAST, _, _)                        => buf ++= eval(context, tag).toString
+            case TagToken(pos, AssignmentAST(Ident(_, name), expr), _, _) => vars(name) = eval(context, expr).toString
           }
         case IfBlockAST(cond, yes, elseif, no) =>
           if (beval(context, cond)) render(context, yes)

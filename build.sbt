@@ -33,7 +33,7 @@ lazy val scemplate = crossProject( /*JSPlatform, */ JVMPlatform, NativePlatform)
       "com.github.scopt" %%% "scopt" % "4.0.1",
       "com.lihaoyi" %%% "pprint" % "0.6.6",
       "org.parboiled" %%% "parboiled" % "2.3.0",
-      "org.ekrich" %% "sconfig" % "1.4.4"
+      "org.ekrich" %%% "sconfig" % "1.4.4"
     ),
     publishMavenStyle := true,
     Test / publishArtifact := false,
