@@ -4,13 +4,23 @@ import scala.annotation.tailrec
 import scala.collection.immutable.{AbstractSeq, LinearSeq}
 import scala.collection.mutable
 
-//object Renderer {
-//
-//  val defaultRenderer = new Renderer
-//
-//}
+object Renderer {
 
-class Renderer(functions: Map[String, Function]) {
+  private val ZERO = BigDecimal(0)
+
+  val builtinFunctions: Map[String, Any] =
+    Map(
+      )
+  val builtinMethods: Map[String, Any] =
+    Map(
+      )
+  val defaultRenderer = new Renderer(builtinFunctions, builtinMethods)
+
+}
+
+class Renderer(functions: Map[String, Any], methods: Map[String, Any]) {
+
+  import Renderer._
 
   private def lookup(v: Any, id: Ident): Option[Any] =
     v match {
@@ -32,19 +42,39 @@ class Renderer(functions: Map[String, Function]) {
     }
 
   def render(globalContext: Any, ast: TemplateParserAST): String = {
-    def beval(context: Any, expr: ExprAST): Boolean = eval(context, expr).asInstanceOf[Boolean]
+    val vars = new mutable.HashMap[String, Any]
 
-    def neval(context: Any, expr: ExprAST): BigDecimal = eval(context, expr).asInstanceOf[BigDecimal]
+    def beval(context: Any, expr: ExprAST): Boolean =
+      eval(context, expr) match {
+        case b: Boolean            => b
+        case () | null | "" | ZERO => false
+        case _                     => true
+      }
+
+    def neval(context: Any, expr: ExprAST): BigDecimal =
+      eval(context, expr) match {
+        case n: BigDecimal => n
+        case s: String     => BigDecimal(s)
+        case v             => sys.error(s"not a number: $v")
+      }
 
     def eval(context: Any, expr: ExprAST): Any =
       expr match {
         case StringExpr(_, s) => s
         case NumberExpr(_, n) => n
         case VarExpr(_, user, Ident(pos, name)) =>
-          vars get name match {
-            case Some(value) => value
-            case None        => ???
-          }
+          def getVar: Any =
+            vars get name match {
+              case Some(value) => value
+              case None        => sys.error(s"unknown variable: $name")
+            }
+
+          if (user == "$") getVar
+          else
+            functions get name match {
+              case Some(value) => value
+              case None        => getVar
+            }
         case ElementExpr(pos, global, ids) =>
           lookupSeq(if (global == "$") globalContext else context, ids) match {
             case Some(value) => value
@@ -69,7 +99,6 @@ class Renderer(functions: Map[String, Function]) {
       }
 
     val buf = new StringBuilder
-    val vars = new mutable.HashMap[String, Any]
 
     def render(context: Any, ast: TemplateParserAST): Unit =
       ast match {
