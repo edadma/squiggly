@@ -30,62 +30,62 @@ class Renderer {
         }
     }
 
-  def beval(data: Any, expr: ExprAST): Boolean = eval(data, expr).asInstanceOf[Boolean]
+  def render(globalContext: Any, ast: TemplateParserAST): String = {
+    def beval(context: Any, expr: ExprAST): Boolean = eval(context, expr).asInstanceOf[Boolean]
 
-  def neval(data: Any, expr: ExprAST): BigDecimal = eval(data, expr).asInstanceOf[BigDecimal]
+    def neval(context: Any, expr: ExprAST): BigDecimal = eval(context, expr).asInstanceOf[BigDecimal]
 
-  def eval(data: Any, expr: ExprAST): Any =
-    expr match {
-      case StringExpr(_, s)                   => s
-      case NumberExpr(_, n)                   => n
-      case VarExpr(_, user, Ident(pos, name)) =>
-      case ElementExpr(pos, ids) =>
-        lookupSeq(data, ids) match {
-          case Some(value) => value
-          case None        => sys.error(s"not found: .${ids mkString "."}")
-        }
-      case BinaryExpr(left, "and", right) => beval(data, left) && beval(data, right)
-      case BinaryExpr(left, "or", right)  => beval(data, left) || beval(data, right)
-      case UnaryExpr("not", expr)         => !beval(data, expr)
-      case BinaryExpr(left, op, right) =>
-        val l = neval(data, left)
-        val r = neval(data, right)
+    def eval(context: Any, expr: ExprAST): Any =
+      expr match {
+        case StringExpr(_, s)                   => s
+        case NumberExpr(_, n)                   => n
+        case VarExpr(_, user, Ident(pos, name)) =>
+        case ElementExpr(pos, global, ids) =>
+          lookupSeq(context, ids) match {
+            case Some(value) => value
+            case None        => sys.error(s"not found: .${ids mkString "."}")
+          }
+        case BinaryExpr(left, "and", right) => beval(context, left) && beval(context, right)
+        case BinaryExpr(left, "or", right)  => beval(context, left) || beval(context, right)
+        case UnaryExpr("not", expr)         => !beval(context, expr)
+        case BinaryExpr(left, op, right) =>
+          val l = neval(context, left)
+          val r = neval(context, right)
 
-        op match {
-          case "+"   => l + r
-          case "-"   => l - r
-          case "*"   => l * r
-          case "/"   => l / r
-          case "mod" => l remainder r
-          case "^"   => l.pow(r.toIntExact)
-        }
-      case UnaryExpr("-", expr) => -neval(data, expr)
-    }
+          op match {
+            case "+"   => l + r
+            case "-"   => l - r
+            case "*"   => l * r
+            case "/"   => l / r
+            case "mod" => l remainder r
+            case "^"   => l.pow(r.toIntExact)
+          }
+        case UnaryExpr("-", expr) => -neval(context, expr)
+      }
 
-  def render(data: Any, ast: TemplateParserAST): String = {
     val buf = new StringBuilder
 
-    def render(data: Any, ast: TemplateParserAST): Unit =
+    def render(context: Any, ast: TemplateParserAST): Unit =
       ast match {
-        case SequenceAST(seq)                   => seq foreach (render(data, _))
-        case BlockAST(WithAST(pos, expr), body) => render(eval(data, expr), body)
+        case SequenceAST(seq)                   => seq foreach (render(context, _))
+        case BlockAST(WithAST(pos, expr), body) => render(eval(context, expr), body)
         case ContentAST(toks) =>
           toks foreach {
             case TextToken(pos, text)              => buf ++= text
             case SpaceToken(pos, s)                => buf ++= s
-            case TagToken(pos, tag: ExprAST, _, _) => buf ++= eval(data, tag).toString
+            case TagToken(pos, tag: ExprAST, _, _) => buf ++= eval(context, tag).toString
           }
         case IfBlockAST(cond, yes, elseif, no) =>
-          if (beval(data, cond)) render(data, yes)
+          if (beval(context, cond)) render(context, yes)
           else {
-            elseif find { case (c, _) => beval(data, c) } match {
-              case Some(e) => render(data, e._2)
-              case None    => no foreach (render(data, _))
+            elseif find { case (c, _) => beval(context, c) } match {
+              case Some(e) => render(context, e._2)
+              case None    => no foreach (render(context, _))
             }
           }
       }
 
-    render(data, ast)
+    render(globalContext, ast)
     buf.toString
   }
 

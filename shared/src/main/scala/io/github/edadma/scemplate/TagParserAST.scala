@@ -18,7 +18,7 @@ case class BooleanExpr(pos: Int, b: Boolean) extends SimpleExpr
 
 case class VarExpr(pos: Int, user: String, name: Ident) extends SimpleExpr
 
-case class ElementExpr(pos: Int, ids: Seq[Ident]) extends SimpleExpr
+case class ElementExpr(pos: Int, global: String, ids: Seq[Ident]) extends SimpleExpr
 
 case class UnaryExpr(op: String, expr: ExprAST) extends ExprAST
 
