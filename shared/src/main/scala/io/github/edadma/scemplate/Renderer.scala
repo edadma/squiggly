@@ -67,6 +67,7 @@ class Renderer {
 
     def render(context: Any, ast: TemplateParserAST): Unit =
       ast match {
+        case EmptyAST                           =>
         case SequenceAST(seq)                   => seq foreach (render(context, _))
         case BlockAST(WithAST(pos, expr), body) => render(eval(context, expr), body)
         case ContentAST(toks) =>
