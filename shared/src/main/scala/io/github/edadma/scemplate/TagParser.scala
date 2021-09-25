@@ -72,7 +72,7 @@ class TagParser(val input: ParserInput, line: Int, col: Int) extends Parser {
 
   def applicative: Rule1[ExprAST] = rule(apply | additive)
 
-  def apply: Rule1[ApplyExpr] = rule(ident ~ oneOrMore(additive) ~> ApplyExpr)
+  def apply: Rule1[ApplyExpr] = rule(identnsp ~ test(cursorChar != '.') ~ sp ~ oneOrMore(additive) ~> ApplyExpr)
 
   def additive: Rule1[ExprAST] =
     rule {
@@ -104,7 +104,8 @@ class TagParser(val input: ParserInput, line: Int, col: Int) extends Parser {
 
   def method: Rule1[ExprAST] =
     rule {
-      primary ~ ('.' ~ ident) ~> MethodExpr
+      primary ~ test(cursor == 0 || !lastChar.isWhitespace) ~ '.' ~ ident ~> MethodExpr |
+        primary
     }
 
   def primary: Rule1[ExprAST] = rule {
