@@ -98,8 +98,13 @@ class TagParser(val input: ParserInput, line: Int, col: Int) extends Parser {
 
   def power: Rule1[ExprAST] =
     rule {
-      primary ~ kw("^") ~ power ~> BinaryExpr |
-        primary
+      method ~ kw("^") ~ power ~> BinaryExpr |
+        method
+    }
+
+  def method: Rule1[ExprAST] =
+    rule {
+      primary ~ ()
     }
 
   def primary: Rule1[ExprAST] = rule {
