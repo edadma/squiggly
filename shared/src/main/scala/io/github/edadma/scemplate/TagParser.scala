@@ -104,7 +104,7 @@ class TagParser(val input: ParserInput, line: Int, col: Int) extends Parser {
 
   def method: Rule1[ExprAST] =
     rule {
-      primary ~ ()
+      primary ~ ('.' ~ ident) ~> MethodExpr
     }
 
   def primary: Rule1[ExprAST] = rule {
