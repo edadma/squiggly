@@ -75,7 +75,14 @@ class Renderer {
             case SpaceToken(pos, s)                => buf ++= s
             case TagToken(pos, tag: ExprAST, _, _) => buf ++= eval(data, tag).toString
           }
-        case IfBlockAST(cond, yes, elseif, no) => ???
+        case IfBlockAST(cond, yes, elseif, no) =>
+          if (beval(data, cond)) render(data, yes)
+          else {
+            elseif find { case (c, _) => beval(data, c) } match {
+              case Some(e) => render(data, e._2)
+              case None    => no foreach (render(data, _))
+            }
+          }
       }
 
     render(data, ast)
