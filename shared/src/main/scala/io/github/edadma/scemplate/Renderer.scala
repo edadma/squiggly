@@ -41,7 +41,7 @@ class Renderer {
         case NumberExpr(_, n)                   => n
         case VarExpr(_, user, Ident(pos, name)) =>
         case ElementExpr(pos, global, ids) =>
-          lookupSeq(context, ids) match {
+          lookupSeq(if (global == "$") globalContext else context, ids) match {
             case Some(value) => value
             case None        => sys.error(s"not found: .${ids mkString "."}")
           }
