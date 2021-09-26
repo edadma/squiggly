@@ -54,4 +54,64 @@ class BasicTests extends AnyFreeSpec with Matchers with Testing {
         """.trim.stripMargin
   }
 
+  "context 2" in {
+    test("345",
+         """
+        |
+        |asdf {{ . }}
+        """.trim.stripMargin) shouldBe
+      """
+        |
+        |asdf 345
+        """.trim.stripMargin
+  }
+
+  "ws 1" in {
+    test("345",
+         """
+        |
+        |asdf {{ . }} zxcv
+        """.trim.stripMargin) shouldBe
+      """
+        |
+        |asdf 345 zxcv
+        """.trim.stripMargin
+  }
+
+  "ws 2" in {
+    test("345",
+         """
+        |
+        |asdf {{- . }} zxcv
+        """.trim.stripMargin) shouldBe
+      """
+        |
+        |asdf345 zxcv
+        """.trim.stripMargin
+  }
+
+  "ws 3" in {
+    test("345",
+         """
+        |
+        |asdf {{ . -}} zxcv
+        """.trim.stripMargin) shouldBe
+      """
+        |
+        |asdf 345zxcv
+        """.trim.stripMargin
+  }
+
+  "ws 4" in {
+    test("345",
+         """
+        |
+        |asdf {{- . -}} zxcv
+        """.trim.stripMargin) shouldBe
+      """
+        |
+        |asdf345zxcv
+        """.trim.stripMargin
+  }
+
 }
