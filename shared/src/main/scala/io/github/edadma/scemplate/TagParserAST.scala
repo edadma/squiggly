@@ -20,6 +20,8 @@ case class VarExpr(pos: Int, user: String, name: Ident) extends SimpleExpr
 
 case class ElementExpr(pos: Int, global: String, ids: Seq[Ident]) extends SimpleExpr
 
+case class MapExpr(pairs: Seq[(Ident, ExprAST)]) extends ExprAST
+
 case class UnaryExpr(op: String, expr: ExprAST) extends ExprAST
 
 case class BinaryExpr(left: ExprAST, op: String, right: ExprAST) extends ExprAST

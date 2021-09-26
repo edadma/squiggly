@@ -79,8 +79,9 @@ class Renderer(builtins: Map[String, BuiltinFunction]) {
 
     def eval(context: Any, expr: ExprAST): Any =
       expr match {
-        case StringExpr(_, s) => s
-        case NumberExpr(_, n) => n
+        case BooleanExpr(_, b) => b
+        case StringExpr(_, s)  => s
+        case NumberExpr(_, n)  => n
         case VarExpr(_, user, Ident(pos, name)) =>
           if (user == "$") getVar(pos, name)
           else callFunction(pos, name, Nil)

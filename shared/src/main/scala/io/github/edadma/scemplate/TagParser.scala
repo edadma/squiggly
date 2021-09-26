@@ -58,8 +58,8 @@ class TagParser(val input: ParserInput, line: Int, col: Int) extends Parser {
   def comparitive: Rule1[ExprAST] =
     rule {
       pipeline ~ oneOrMore(
-        (kw("<=") | kw(">=") | kw("!=") | kw("<") | kw(">") | kw("=")) ~ pipeline ~> ((o: String, p: ExprAST) => (o, p))
-      ) ~> CompareExpr |
+        (kw("<=") | kw(">=") | kw("!=") | kw("<") | kw(">") | kw("=")) ~
+          pipeline ~> Tuple2[String, ExprAST] _) ~> CompareExpr |
         pipeline
     }
 
@@ -115,8 +115,12 @@ class TagParser(val input: ParserInput, line: Int, col: Int) extends Parser {
       variable |
       string |
       element |
+      map |
       "(" ~ expression ~ ")"
   }
+
+  def map: Rule1[MapExpr] =
+    rule("{" ~ zeroOrMore(ident ~ ":" ~ expression ~> Tuple2[Ident, ExprAST] _).separatedBy(",") ~ "}" ~> MapExpr)
 
   def number: Rule1[NumberExpr] = rule(pos ~ decimal ~> NumberExpr)
 

@@ -114,4 +114,28 @@ class BasicTests extends AnyFreeSpec with Matchers with Testing {
         """.trim.stripMargin
   }
 
+  "boolean literals" in {
+    test("{t: true, f: false}",
+         """
+        |
+        |booleans {{ .t }}, {{ .f }}, {{ true }}, {{ false }}
+        """.trim.stripMargin) shouldBe
+      """
+        |
+        |booleans true, false, true, false
+        """.trim.stripMargin
+  }
+
+  "decimal literals" in {
+    test("{N: 6.02214076e23}",
+         """
+        |
+        |Avogadro number {{ .N }} {{ 6.02214076e23 }}
+        """.trim.stripMargin) shouldBe
+      """
+        |
+        |Avogadro number 6.02214076E+23 6.02214076E+23
+        """.trim.stripMargin
+  }
+
 }
