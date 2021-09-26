@@ -9,7 +9,7 @@ object Main extends App {
   case class Person(name: String, age: Int)
 
   //  val input = "zxcv {{ with .jonny -}} name: {{ .name }} age: {{ .age }} {{- end }} asdf "
-  val input = "items: {{range .}}{{ . }} {{end}}"
+  val input = "{{ -123 }}"
 //  val data = Map("jonny" -> Person("jonny", 45))
   val data = List(3, 4, "asdf")
   val parser = new TemplateParser(input, "{{", "}}")

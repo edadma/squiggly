@@ -42,30 +42,6 @@ class BasicTests extends AnyFreeSpec with Matchers with Testing {
         """.trim.stripMargin
   }
 
-  "context 1" in {
-    test("a: 3",
-         """
-        |
-        |asdf {{ .a }}
-        """.trim.stripMargin) shouldBe
-      """
-        |
-        |asdf 3
-        """.trim.stripMargin
-  }
-
-  "context 2" in {
-    test("345",
-         """
-        |
-        |asdf {{ . }}
-        """.trim.stripMargin) shouldBe
-      """
-        |
-        |asdf 345
-        """.trim.stripMargin
-  }
-
   "ws 1" in {
     test("345",
          """
@@ -123,6 +99,18 @@ class BasicTests extends AnyFreeSpec with Matchers with Testing {
       """
         |
         |booleans true, false, true, false
+        """.trim.stripMargin
+  }
+
+  "integer literals" in {
+    test("{a: -345, b: 0, c: 345}",
+         """
+        |
+        |ints {{ .a }} {{ .b }} {{ .c }} {{ -345 }} {{ 0 }} {{ 345 }}
+        """.trim.stripMargin) shouldBe
+      """
+        |
+        |ints -345 0 345 -345 0 345
         """.trim.stripMargin
   }
 
