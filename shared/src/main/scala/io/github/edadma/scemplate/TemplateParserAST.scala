@@ -10,7 +10,7 @@ case class IfBlockAST(cond: ExprAST,
                       no: Option[TemplateParserAST])
     extends TemplateParserAST
 
-case class BlockAST(block: ConstructAST, body: TemplateParserAST) extends TemplateParserAST
+case class BlockAST(block: SimpleBlockAST, body: TemplateParserAST) extends TemplateParserAST
 
 case class SequenceAST(seq: List[TemplateParserAST]) extends TemplateParserAST
 

@@ -117,6 +117,11 @@ class Renderer(builtins: Map[String, BuiltinFunction]) {
         case EmptyAST                           =>
         case SequenceAST(seq)                   => seq foreach (render(context, _))
         case BlockAST(WithAST(pos, expr), body) => render(eval(context, expr), body)
+        case BlockAST(RangeAST(pos, expr), body) =>
+          eval(context, expr) match {
+            case s: Seq[Any] => s foreach (render(_, body))
+            case v           => sys.error(s"range can only be applied to a sequence: $v")
+          }
         case ContentAST(toks) =>
           toks foreach {
             case TextToken(pos, text)                                     => buf ++= text

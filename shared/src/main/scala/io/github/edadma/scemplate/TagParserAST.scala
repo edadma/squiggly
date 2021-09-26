@@ -39,6 +39,7 @@ case class AssignmentAST(name: Ident, expr: ExprAST) extends TagParserAST
 case class CommentAST(comment: String) extends TagParserAST
 
 trait ConstructAST extends TagParserAST with Positioned
+trait SimpleBlockAST extends ConstructAST
 
 case class IfAST(pos: Int, cond: ExprAST) extends ConstructAST
 
@@ -48,6 +49,6 @@ case class ElseAST(pos: Int) extends ConstructAST
 
 case class EndAST(pos: Int) extends ConstructAST
 
-case class WithAST(pos: Int, expr: ExprAST) extends ConstructAST
+case class WithAST(pos: Int, expr: ExprAST) extends SimpleBlockAST
 
-case class RangeAST(pos: Int, expr: ExprAST) extends ConstructAST
+case class RangeAST(pos: Int, expr: ExprAST) extends SimpleBlockAST

@@ -26,7 +26,7 @@ class TemplateParser(input: String, startDelim: String, endDelim: String) {
       ts match {
         case (h @ TagToken(_, _, _, true)) #:: (_: SpaceToken) #:: t => parse(h #:: t, parsingbody, tokbuf, astbuf)
         case (_: SpaceToken) #:: (h @ TagToken(_, _, true, _)) #:: t => parse(h #:: t, parsingbody, tokbuf, astbuf)
-        case TagToken(pos, tag: WithAST, _, _) #:: t =>
+        case TagToken(pos, tag: SimpleBlockAST, _, _) #:: t =>
           if (tokbuf.nonEmpty) {
             astbuf += ContentAST(tokbuf.toList)
             tokbuf.clear()
