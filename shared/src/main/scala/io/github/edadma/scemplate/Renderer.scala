@@ -3,7 +3,7 @@ package io.github.edadma.scemplate
 import io.github.edadma.datetime.Datetime
 
 import scala.annotation.tailrec
-import scala.collection.{immutable, mutable}
+import scala.collection.mutable
 import scala.language.postfixOps
 
 object Renderer {
@@ -27,6 +27,7 @@ class Renderer(builtins: Map[String, BuiltinFunction]) {
     v match {
       case m: collection.Map[_, _] => m.asInstanceOf[collection.Map[String, Any]] get id.name
       case p: Product              => p.productElementNames zip p.productIterator find { case (k, _) => k == id.name } map (_._2)
+      case _                       => sys.error(s"not an object: $v")
     }
 
   @tailrec
