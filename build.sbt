@@ -1,7 +1,7 @@
 ThisBuild / licenses += "ISC" -> url("https://opensource.org/licenses/ISC")
 ThisBuild / versionScheme := Some("semver-spec")
 
-lazy val scemplate = crossProject( /*JSPlatform, */ JVMPlatform, NativePlatform)
+lazy val scemplate = crossProject(JSPlatform, JVMPlatform, NativePlatform)
   .in(file("."))
   .settings(
     name := "scemplate",
@@ -42,17 +42,18 @@ lazy val scemplate = crossProject( /*JSPlatform, */ JVMPlatform, NativePlatform)
   )
   .jvmSettings(
     libraryDependencies += "org.scala-js" %% "scalajs-stubs" % "1.0.0" % "provided",
-    libraryDependencies += "io.github.edadma" %% "yaml" % "0.1.1"
+    libraryDependencies += "io.github.edadma" %% "yaml" % "0.1.4"
   )
   .nativeSettings(
     nativeLinkStubs := true,
     libraryDependencies += "io.github.edadma" %%% "libyaml" % "0.1.3"
-  ) /*.
-  jsSettings(
+  )
+  .jsSettings(
     jsEnv := new org.scalajs.jsenv.nodejs.NodeJSEnv(),
-//    Test / scalaJSUseMainModuleInitializer := true,
-//    Test / scalaJSUseTestModuleInitializer := false,
+    //    Test / scalaJSUseMainModuleInitializer := true,
+    //    Test / scalaJSUseTestModuleInitializer := false,
     Test / scalaJSUseMainModuleInitializer := false,
     Test / scalaJSUseTestModuleInitializer := true,
     scalaJSUseMainModuleInitializer := true,
-  )*/
+    libraryDependencies += "io.github.edadma" %%% "yaml" % "0.1.4"
+  )

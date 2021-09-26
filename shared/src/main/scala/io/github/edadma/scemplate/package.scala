@@ -83,8 +83,7 @@ package object scemplate {
     val p = Position(pos, parser.input)
     //    val offset = p.copy(line = p.line + line - 1, column = p.column + col - 1)
 
-    Console.err.println(new RuntimeErrorFormatter(msg).customFormat(ParseError(p, p, Nil), parser.input))
-    sys.exit(1)
+    sys.error(new RuntimeErrorFormatter(msg).customFormat(ParseError(p, p, Nil), parser.input))
   }
 
 }

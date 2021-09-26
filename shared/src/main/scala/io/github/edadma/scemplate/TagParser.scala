@@ -189,8 +189,7 @@ class TagParser(val input: ParserInput, line: Int, col: Int) extends Parser {
         //        val eoffset = e.copy(position = poffset, principalPosition = ppoffset)
         //
         //        sys.error(formatError(eoffset))
-        Console.err.println(formatError(e))
-        sys.exit(1)
+        sys.error(formatError(e))
       case Failure(e) => sys.error("Unexpected error during parsing run: " + e)
     }
 
