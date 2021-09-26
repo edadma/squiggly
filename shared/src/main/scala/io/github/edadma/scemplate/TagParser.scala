@@ -104,7 +104,8 @@ class TagParser(val input: ParserInput, line: Int, col: Int) extends Parser {
 
   def method: Rule1[ExprAST] =
     rule {
-      primary ~ test(cursor == 0 || !lastChar.isWhitespace) ~ '.' ~ ident ~> MethodExpr |
+      primary ~ test(cursor == 0 || !lastChar.isWhitespace) ~ '.' ~ (identnsp ~ test(cursorChar != '.') ~ sp ~
+        oneOrMore(primary) | ident ~ push(Nil)) ~> MethodExpr |
         primary
     }
 

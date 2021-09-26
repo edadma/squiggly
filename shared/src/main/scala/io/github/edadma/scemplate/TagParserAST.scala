@@ -32,7 +32,7 @@ case class ConditionalAST(cond: ExprAST, yes: ExprAST, no: ExprAST) extends Expr
 
 case class CompareExpr(left: ExprAST, right: Seq[(String, ExprAST)]) extends ExprAST
 
-case class MethodExpr(expr: ExprAST, method: Ident) extends ExprAST
+case class MethodExpr(expr: ExprAST, method: Ident, args: Seq[ExprAST]) extends ExprAST
 
 case class AssignmentAST(name: Ident, expr: ExprAST) extends TagParserAST
 

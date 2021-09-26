@@ -10,19 +10,16 @@ object Renderer {
 
   private val ZERO = BigDecimal(0)
 
-  val builtinFunctions: Map[String, Any] =
+  val builtinFunctions: Map[String, BuiltinFunction] =
     List(
-      BuiltinFunction("now", 0, _ => Datetime.now().timestamp)
+      BuiltinFunction("now", 0, _ => Datetime.now().timestamp),
+      BuiltinFunction("Unix", 1, { case Seq(d: Datetime) => BigDecimal(d.epochMillis) })
     ) map (f => (f.name, f)) toMap
-  val builtinMethods: Map[String, BuiltinMethod] =
-    List(
-      BuiltinMethod("unix", { case d: Datetime => BigDecimal(d.epochMillis) })
-    ) map (m => (m.name, m)) toMap
-  val defaultRenderer = new Renderer(builtinFunctions, builtinMethods)
+  val defaultRenderer = new Renderer(builtinFunctions)
 
 }
 
-class Renderer(functions: Map[String, Any], methods: Map[String, BuiltinMethod]) {
+class Renderer(builtins: Map[String, BuiltinFunction]) {
 
   import Renderer._
 
@@ -62,10 +59,12 @@ class Renderer(functions: Map[String, Any], methods: Map[String, BuiltinMethod])
       }
 
     def callFunction(pos: Int, name: String, args: Seq[Any]): Any =
-      functions get name match {
+      builtins get name match {
         case Some(BuiltinFunction(_, arity, function)) =>
           if (args.length != arity)
             sys.error(s"wrong number of arguments for function '$name': expected $arity, found ${args.length}")
+          else if (!function.isDefinedAt(args))
+            sys.error(s"cannot apply function '$name' to arguments ${args map (a => s"'$a'") mkString ", "}")
           else function(args)
         case None =>
           if (args.isEmpty) getVar(pos, name)
@@ -106,15 +105,8 @@ class Renderer(functions: Map[String, Any], methods: Map[String, BuiltinMethod])
             case "^"   => l.pow(r.toIntExact)
           }
         case UnaryExpr("-", expr) => -neval(context, expr)
-        case MethodExpr(expr, Ident(pos, name)) =>
-          methods get name match {
-            case Some(BuiltinMethod(_, method)) =>
-              val v = eval(context, expr)
-
-              if (method.isDefinedAt(v)) method(v)
-              else sys.error(s"cannot apply method '$name' to '$v'")
-            case None => sys.error(s"unknown method: $name")
-          }
+        case MethodExpr(expr, Ident(pos, name), args) =>
+          callFunction(pos, name, eval(context, expr) +: (args map (eval(context, _))))
         case ApplyExpr(Ident(pos, name), args) => callFunction(pos, name, args map (eval(context, _)))
       }
 

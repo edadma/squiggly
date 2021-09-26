@@ -6,9 +6,7 @@ import scala.collection.immutable
 
 package object scemplate {
 
-  case class BuiltinFunction(name: String, arity: Int, function: Seq[Any] => Any)
-
-  case class BuiltinMethod(name: String, function: PartialFunction[Any, Any])
+  case class BuiltinFunction(name: String, arity: Int, function: PartialFunction[Seq[Any], Any])
 
   trait Platform {
     def yaml(s: String): Any
