@@ -82,6 +82,17 @@ class Renderer(builtins: Map[String, BuiltinFunction]) {
 
     def eval(context: Any, expr: ExprAST): Any =
       expr match {
+        case CompareExpr(left, right) =>
+          var l = neval(context, left)
+
+          right forall {
+            case ("<", expr)  => l < neval(context, expr)
+            case ("<=", expr) => l <= neval(context, expr)
+            case (">", expr)  => l > neval(context, expr)
+            case (">=", expr) => l >= neval(context, expr)
+            case ("=", expr)  => l == neval(context, expr)
+            case ("!=", expr) => l != neval(context, expr)
+          }
         case BooleanExpr(_, b) => b
         case StringExpr(_, s)  => s
         case NumberExpr(_, n)  => n
