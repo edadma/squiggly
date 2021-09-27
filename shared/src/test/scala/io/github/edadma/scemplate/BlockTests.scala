@@ -35,4 +35,34 @@ class BlockTests extends AnyFreeSpec with Matchers with Testing {
         """.trim.stripMargin
   }
 
+  "with 4" in {
+    test(null,
+         """
+        |{{ with false }}{{ . }}{{ else }}else{{ end }}
+        """.trim.stripMargin) shouldBe
+      """
+        |else
+        """.trim.stripMargin
+  }
+
+  "with 5" in {
+    test(null,
+         """
+        |{{ with '' }}{{ . }}{{ else }}else{{ end }}
+        """.trim.stripMargin) shouldBe
+      """
+        |else
+        """.trim.stripMargin
+  }
+
+  "with 6" in {
+    test("{a: []}",
+         """
+        |{{ with .a }}{{ . }}{{ else }}else{{ end }}
+        """.trim.stripMargin) shouldBe
+      """
+        |else
+        """.trim.stripMargin
+  }
+
 }

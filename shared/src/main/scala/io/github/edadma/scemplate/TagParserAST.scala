@@ -4,7 +4,9 @@ case class Ident(pos: Int, name: String)
 
 trait TagParserAST
 
-trait Positioned { val pos: Int }
+trait Positioned {
+  val pos: Int
+}
 
 trait ExprAST extends TagParserAST
 
@@ -43,6 +45,7 @@ case class AssignmentAST(name: Ident, expr: ExprAST) extends TagParserAST
 case class CommentAST(comment: String) extends TagParserAST
 
 trait ConstructAST extends TagParserAST with Positioned
+
 trait SimpleBlockAST extends ConstructAST
 
 case class IfAST(pos: Int, cond: ExprAST) extends ConstructAST
