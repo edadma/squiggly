@@ -42,7 +42,7 @@ lazy val scemplate = crossProject(JSPlatform, JVMPlatform, NativePlatform)
   )
   .jvmSettings(
     libraryDependencies += "org.scala-js" %% "scalajs-stubs" % "1.0.0" % "provided",
-    libraryDependencies += "io.github.edadma" %% "yaml" % "0.1.5"
+    libraryDependencies += "io.github.edadma" %% "yaml" % "0.1.6"
   )
   .nativeSettings(
     nativeLinkStubs := true,
@@ -55,5 +55,5 @@ lazy val scemplate = crossProject(JSPlatform, JVMPlatform, NativePlatform)
     Test / scalaJSUseMainModuleInitializer := false,
     Test / scalaJSUseTestModuleInitializer := true,
     scalaJSUseMainModuleInitializer := true,
-    libraryDependencies += "io.github.edadma" %%% "yaml" % "0.1.5"
+    libraryDependencies += "io.github.edadma" %%% "yaml" % "0.1.6"
   )

@@ -3,7 +3,7 @@ package io.github.edadma.scemplate
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers
 
-class BlockTests extends AnyFreeSpec with Matchers with Testing {
+class WithTests extends AnyFreeSpec with Matchers with Testing {
 
   "with 1" in {
     test(null,
@@ -56,9 +56,29 @@ class BlockTests extends AnyFreeSpec with Matchers with Testing {
   }
 
   "with 6" in {
-    test("{a: []}",
+    test("[]",
          """
-        |{{ with .a }}{{ . }}{{ else }}else{{ end }}
+        |{{ with . }}{{ . }}{{ else }}else{{ end }}
+        """.trim.stripMargin) shouldBe
+      """
+        |else
+        """.trim.stripMargin
+  }
+
+  "with 7" in {
+    test("123",
+         """
+        |{{ with . }}{{ . }}{{ end }}
+        """.trim.stripMargin) shouldBe
+      """
+        |123
+        """.trim.stripMargin
+  }
+
+  "with 8" in {
+    test("{}",
+         """
+        |{{ with . }}{{ . }}{{ else }}else{{ end }}
         """.trim.stripMargin) shouldBe
       """
         |else
