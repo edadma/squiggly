@@ -20,7 +20,7 @@ class TemplateParser(input: String, startDelim: String, endDelim: String, builti
           astbuf += ContentAST(tokbuf.toList)
 
         if (astbuf.isEmpty) (if (els) BlockWithElseAST(EmptyBlockAST) else EmptyBlockAST, tail)
-        else if (astbuf.length == 1) (astbuf.head, tail)
+        else if (astbuf.length == 1) (if (els) BlockWithElseAST(astbuf.head) else astbuf.head, tail)
         else (if (els) BlockWithElseAST(SequenceAST(astbuf.toList)) else SequenceAST(astbuf.toList), tail)
       }
 
@@ -39,7 +39,7 @@ class TemplateParser(input: String, startDelim: String, endDelim: String, builti
           val (body, els, rest) =
             body0 match {
               case BlockWithElseAST(b) =>
-                val (els, rest) = parse(t, parsingbody = true, allowelse = false)
+                val (els, rest) = parse(rest0, parsingbody = true, allowelse = false)
 
                 (b, Some(els), rest)
               case _ => (body0, None, rest0)

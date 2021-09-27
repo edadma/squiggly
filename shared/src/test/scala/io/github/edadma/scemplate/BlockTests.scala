@@ -1,0 +1,38 @@
+package io.github.edadma.scemplate
+
+import org.scalatest.freespec.AnyFreeSpec
+import org.scalatest.matchers.should.Matchers
+
+class BlockTests extends AnyFreeSpec with Matchers with Testing {
+
+  "with 1" in {
+    test(null,
+         """
+        |{{ with 123 }}{{ . }}{{ end }}
+        """.trim.stripMargin) shouldBe
+      """
+        |123
+        """.trim.stripMargin
+  }
+
+  "with 2" in {
+    test("{a: {b: 3, c: {d: 4}}}",
+         """
+        |{{ with .a.b }}{{ . }}{{ end }}
+        """.trim.stripMargin) shouldBe
+      """
+        |3
+        """.trim.stripMargin
+  }
+
+  "with 3" in {
+    test(null,
+         """
+        |{{ with 0 }}{{ . }}{{ else }}else{{ end }}
+        """.trim.stripMargin) shouldBe
+      """
+        |else
+        """.trim.stripMargin
+  }
+
+}
