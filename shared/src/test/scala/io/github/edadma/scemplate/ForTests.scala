@@ -3,7 +3,7 @@ package io.github.edadma.scemplate
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers
 
-class RangeTests extends AnyFreeSpec with Matchers with Testing {
+class ForTests extends AnyFreeSpec with Matchers with Testing {
 
   "with 1" in {
     test(null,

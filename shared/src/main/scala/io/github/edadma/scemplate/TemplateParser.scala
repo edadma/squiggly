@@ -29,7 +29,7 @@ class TemplateParser(input: String, startDelim: String, endDelim: String, builti
           parse(h #:: t, parsingbody, allowelse, tokbuf, astbuf)
         case (_: SpaceToken) #:: (h @ TagToken(_, _, true, _)) #:: t =>
           parse(h #:: t, parsingbody, allowelse, tokbuf, astbuf)
-        case TagToken(pos, tag: SimpleBlockAST, _, _) #:: t =>
+        case TagToken(pos, tag: ConstructAST, _, _) #:: t =>
           if (tokbuf.nonEmpty) {
             astbuf += ContentAST(tokbuf.toList)
             tokbuf.clear()

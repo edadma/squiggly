@@ -146,11 +146,23 @@ class Renderer(builtins: Map[String, BuiltinFunction]) {
             case v if falsy(v) => els foreach (render(context, _))
             case v             => render(v, body)
           }
-        case BlockAST(RangeAST(pos, expr), body, els) =>
+        case BlockAST(ForAST(pos, index, expr), body, els) =>
           eval(context, expr) match {
-            case v if falsy(v)    => els foreach (render(context, _))
-            case s: Iterable[Any] => s foreach (render(_, body))
-            case v                => sys.error(s"range can only be applied to an iterable object: $v")
+            case v if falsy(v) => els foreach (render(context, _))
+            case s: Iterable[Any] =>
+              s.zipWithIndex foreach {
+                case (i, e) =>
+                  index match {
+                    case Some((Some(Ident(_, idx)), Ident(_, elem))) =>
+                      vars(idx) = i
+                      vars(elem) = e
+                    case Some((None, Ident(_, elem))) => vars(elem) = e
+                    case None                         =>
+                  }
+
+                  render(e, body)
+              }
+            case v => sys.error(s"range can only be applied to an iterable object: $v")
           }
         case ContentAST(toks) =>
           toks foreach {
