@@ -32,7 +32,7 @@ case class ApplyExpr(name: Ident, args: Seq[ExprAST]) extends ExprAST
 
 case class ConcatExpr(elems: Seq[ExprAST]) extends ExprAST
 
-case class ConditionalAST(cond: ExprAST, yes: ExprAST, no: ExprAST) extends ExprAST
+case class ConditionalAST(cond: ExprAST, yes: ExprAST, no: Option[ExprAST]) extends ExprAST
 
 case class CompareExpr(left: ExprAST, right: Seq[(String, ExprAST)]) extends ExprAST
 

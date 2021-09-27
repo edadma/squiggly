@@ -82,6 +82,10 @@ class Renderer(builtins: Map[String, BuiltinFunction]) {
 
     def eval(context: Any, expr: ExprAST): Any =
       expr match {
+        case ConditionalAST(cond, yes, no) =>
+          if (beval(context, cond)) eval(context, yes)
+          else if (no.isDefined) eval(context, no.get)
+          else ""
         case CompareExpr(left, right) =>
           var l = neval(context, left)
 
