@@ -209,7 +209,7 @@ class TagParser(val input: ParserInput, line: Int, col: Int, builtins: Map[Strin
   def withTag: Rule1[WithAST] = rule(pos ~ "with" ~ expression ~> WithAST)
 
   def index: Rule1[(Option[Ident], Ident)] =
-    rule(optional(ident ~ ",") ~ ident ~ ":=" ~> Tuple2[Option[Ident], Ident] _)
+    rule(optional(ident ~ ",") ~ ident ~ "<-" ~> Tuple2[Option[Ident], Ident] _)
 
   def forTag: Rule1[ForAST] =
     rule(pos ~ "for" ~ optional(index) ~ expression ~> ForAST)

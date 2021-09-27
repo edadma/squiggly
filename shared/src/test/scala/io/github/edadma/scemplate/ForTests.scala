@@ -15,6 +15,26 @@ class ForTests extends AnyFreeSpec with Matchers with Testing {
         """.trim.stripMargin
   }
 
+  "for 1a" in {
+    test("l: [3, 4]",
+         """
+          |{{ for i <- .l }}[{{ i }}, {{ . }}]{{ end }}
+          """.trim.stripMargin) shouldBe
+      """
+        |[3, 3][4, 4]
+        """.trim.stripMargin
+  }
+
+  "for 1b" in {
+    test("l: [3, 4]",
+         """
+          |{{ for i, e <- .l }}[{{ i }}, {{ e }}, {{ . }}]{{ end }}
+          """.trim.stripMargin) shouldBe
+      """
+        |[0, 3, 3][1, 4, 4]
+        """.trim.stripMargin
+  }
+
   "for 2" in {
     the[RuntimeException] thrownBy
       test("{a: {b: 3, c: {d: 4}}}",
