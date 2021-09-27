@@ -12,48 +12,60 @@ class TemplateParser(input: String, startDelim: String, endDelim: String, builti
 
     def parse(ts: LazyList[Token],
               parsingbody: Boolean,
+              allowelse: Boolean,
               tokbuf: ListBuffer[Token] = new ListBuffer,
               astbuf: ListBuffer[TemplateParserAST] = new ListBuffer): (TemplateParserAST, LazyList[Token]) = {
-      def endOfBlock(tail: LazyList[Token]): (TemplateParserAST, LazyList[Token]) = {
+      def endOfBlock(tail: LazyList[Token], els: Boolean): (TemplateParserAST, LazyList[Token]) = {
         if (tokbuf.nonEmpty)
           astbuf += ContentAST(tokbuf.toList)
 
-        if (astbuf.isEmpty) (EmptyAST, tail)
+        if (astbuf.isEmpty) (if (els) BlockWithElseAST(EmptyBlockAST) else EmptyBlockAST, tail)
         else if (astbuf.length == 1) (astbuf.head, tail)
-        else (SequenceAST(astbuf.toList), tail)
+        else (if (els) BlockWithElseAST(SequenceAST(astbuf.toList)) else SequenceAST(astbuf.toList), tail)
       }
 
       ts match {
-        case (h @ TagToken(_, _, _, true)) #:: (_: SpaceToken) #:: t => parse(h #:: t, parsingbody, tokbuf, astbuf)
-        case (_: SpaceToken) #:: (h @ TagToken(_, _, true, _)) #:: t => parse(h #:: t, parsingbody, tokbuf, astbuf)
+        case (h @ TagToken(_, _, _, true)) #:: (_: SpaceToken) #:: t =>
+          parse(h #:: t, parsingbody, allowelse, tokbuf, astbuf)
+        case (_: SpaceToken) #:: (h @ TagToken(_, _, true, _)) #:: t =>
+          parse(h #:: t, parsingbody, allowelse, tokbuf, astbuf)
         case TagToken(pos, tag: SimpleBlockAST, _, _) #:: t =>
           if (tokbuf.nonEmpty) {
             astbuf += ContentAST(tokbuf.toList)
             tokbuf.clear()
           }
 
-          val (body, rest) = parse(t, parsingbody = true)
+          val (body0, rest0) = parse(t, parsingbody = true, allowelse = true)
+          val (body, els, rest) =
+            body0 match {
+              case BlockWithElseAST(b) =>
+                val (els, rest) = parse(t, parsingbody = true, allowelse = false)
 
-          if (body == EmptyAST)
-            Console.err.println(pos.longErrorText("waning: empty block"))
-          else
-            astbuf += BlockAST(tag, body)
+                (b, Some(els), rest)
+              case _ => (body0, None, rest0)
+            }
 
-          parse(rest, parsingbody, tokbuf, astbuf)
+          if (body == EmptyBlockAST)
+            Console.err.println(pos.longErrorText("warning: empty block"))
+
+          astbuf += BlockAST(tag, body, els)
+          parse(rest, parsingbody, allowelse, tokbuf, astbuf)
+        case TagToken(pos, _: ElseAST, _, _) #:: t =>
+          if (parsingbody && allowelse) endOfBlock(t, els = true)
+          else pos.error("unexpected 'else' tag")
         case TagToken(pos, _: EndAST, _, _) #:: t =>
-          if (parsingbody)
-            endOfBlock(t)
-          else pos.error("unexpected end tag")
-        case h #:: t =>
+          if (parsingbody) endOfBlock(t, els = false)
+          else pos.error("unexpected 'end' tag")
+        case h #:: t if !h.eoi =>
           tokbuf += h
-          parse(t, parsingbody, tokbuf, astbuf)
-        case _ =>
-          if (parsingbody) sys.error("missing end tag")
-          else endOfBlock(LazyList.empty)
+          parse(t, parsingbody, allowelse, tokbuf, astbuf)
+        case EOIToken(pos) #:: _ =>
+          if (parsingbody) pos.error("missing end tag")
+          else endOfBlock(LazyList.empty, els = false)
       }
     }
 
-    parse(tokenize, parsingbody = false)._1
+    parse(tokenize, parsingbody = false, allowelse = false)._1
   }
 
   def tokenize: LazyList[Token] = tokenize(CharReader.fromString(input))
@@ -61,7 +73,7 @@ class TemplateParser(input: String, startDelim: String, endDelim: String, builti
   def tokenize(r: CharReader): LazyList[Token] =
     token(r, r) match {
       case Some((rest, tok)) => tok #:: tokenize(rest)
-      case None              => LazyList.empty
+      case None              => EOIToken(r) #:: LazyList.empty
     }
 
   def token(r: CharReader, start: CharReader, buf: StringBuilder = new StringBuilder): Option[(CharReader, Token)] = {

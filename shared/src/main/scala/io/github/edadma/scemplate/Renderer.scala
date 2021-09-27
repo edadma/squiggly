@@ -40,7 +40,7 @@ class Renderer(builtins: Map[String, BuiltinFunction]) {
 
     def falsy(a: Any): Boolean =
       a match {
-        case false | null | "" | ZERO               => true
+        case () | false | null | "" | ZERO          => true
         case s: collection.Iterable[_] if s.isEmpty => true
         case _                                      => false
       }
@@ -91,7 +91,7 @@ class Renderer(builtins: Map[String, BuiltinFunction]) {
         case ElementExpr(pos, global, ids) =>
           lookupSeq(if (global == "$") globalContext else context, ids) match {
             case Some(value) => value
-            case None        => sys.error(s"not found: .${ids map (_.name) mkString "."}")
+            case None        => () //sys.error(s"not found: .${ids map (_.name) mkString "."}")
           }
         case BinaryExpr(left, "and", right) => beval(context, left) && beval(context, right)
         case BinaryExpr(left, "or", right)  => beval(context, left) || beval(context, right)
@@ -120,13 +120,18 @@ class Renderer(builtins: Map[String, BuiltinFunction]) {
 
     def render(context: Any, ast: TemplateParserAST): Unit =
       ast match {
-        case EmptyAST                           =>
-        case SequenceAST(seq)                   => seq foreach (render(context, _))
-        case BlockAST(WithAST(pos, expr), body) => render(eval(context, expr), body)
-        case BlockAST(RangeAST(pos, expr), body) =>
+        case EmptyBlockAST    =>
+        case SequenceAST(seq) => seq foreach (render(context, _))
+        case BlockAST(WithAST(pos, expr), body, els) =>
           eval(context, expr) match {
-            case s: Seq[Any] => s foreach (render(_, body))
-            case v           => sys.error(s"range can only be applied to a sequence: $v")
+            case v if falsy(v) => els foreach (render(context, _))
+            case v             => render(v, body)
+          }
+        case BlockAST(RangeAST(pos, expr), body, els) =>
+          eval(context, expr) match {
+            case v if falsy(v)    => els foreach (render(context, _))
+            case s: Iterable[Any] => s foreach (render(_, body))
+            case v                => sys.error(s"range can only be applied to an iterable object: $v")
           }
         case ContentAST(toks) =>
           toks foreach {

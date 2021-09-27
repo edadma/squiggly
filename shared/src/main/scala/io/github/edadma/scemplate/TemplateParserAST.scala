@@ -5,13 +5,16 @@ trait TemplateParserAST
 case class ContentAST(toks: Seq[Token]) extends TemplateParserAST
 
 case class IfBlockAST(cond: ExprAST,
-                      yes: TemplateParserAST,
+                      body: TemplateParserAST,
                       elseif: Seq[(ExprAST, TemplateParserAST)],
-                      no: Option[TemplateParserAST])
+                      els: Option[TemplateParserAST])
     extends TemplateParserAST
 
-case class BlockAST(block: SimpleBlockAST, body: TemplateParserAST) extends TemplateParserAST
+case class BlockAST(block: SimpleBlockAST, body: TemplateParserAST, els: Option[TemplateParserAST])
+    extends TemplateParserAST
+
+case class BlockWithElseAST(body: TemplateParserAST) extends TemplateParserAST
 
 case class SequenceAST(seq: List[TemplateParserAST]) extends TemplateParserAST
 
-case object EmptyAST extends TemplateParserAST
+case object EmptyBlockAST extends TemplateParserAST
