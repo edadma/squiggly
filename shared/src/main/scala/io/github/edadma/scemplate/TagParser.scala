@@ -1,12 +1,13 @@
 package io.github.edadma.scemplate
 
 import scala.util.{Failure, Success}
-
 import org.parboiled2._
 
+import scala.annotation.tailrec
 import scala.language.implicitConversions
 
-class TagParser(val input: ParserInput, line: Int, col: Int) extends Parser {
+class TagParser(val input: ParserInput, line: Int, col: Int, builtins: Map[String, BuiltinFunction]) extends Parser {
+  val buf = new StringBuilder
 
   implicit def wsStr(s: String): Rule0 = rule(str(s) ~ sp)
 
@@ -142,8 +143,38 @@ class TagParser(val input: ParserInput, line: Int, col: Int) extends Parser {
 
   def variable: Rule1[VarExpr] = rule(pos ~ capture(optional('$')) ~ ident ~> VarExpr)
 
+  def nextIsMethod: Boolean = {
+    buf.clear()
+
+    if (cursorChar.isLetter || cursorChar == '_') {
+      buf += cursorChar
+
+      var i = 1
+
+      @tailrec
+      def next(): Unit = {
+        val c = charAtRC(i)
+
+        if (c.isLetterOrDigit || c == '_') {
+          buf += c
+          i += 1
+          next()
+        }
+      }
+
+      next()
+
+      builtins get buf.toString match {
+        case Some(BuiltinFunction(_, arities, _)) if arities exists (_ >= 1) => true
+        case _                                                               => false
+      }
+    } else false
+  }
+
   def element: Rule1[ElementExpr] =
-    rule(pos ~ capture(optional('$')) ~ '.' ~ zeroOrMore(identnsp).separatedBy('.') ~ sp ~> ElementExpr)
+    rule(
+      pos ~ capture(optional('$')) ~ '.' ~ zeroOrMore(test(!nextIsMethod) ~ identnsp)
+        .separatedBy('.') ~ sp ~> ElementExpr)
 
   def string: Rule1[StringExpr] =
     rule(pos ~ (singleQuoteString | doubleQuoteString) ~> ((p: Int, s: String) => StringExpr(p, unescape(s))))

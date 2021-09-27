@@ -9,7 +9,7 @@ class VariableTests extends AnyFreeSpec with Matchers with Testing {
     test("{a: {b: 3, c: {d: 4}}}",
          """
         |
-        |{{ .a.b }} {{ .a.c.d }}
+        |{{ .a.b }} {{ .a.c.d }} {{ with .a }}
         """.trim.stripMargin) shouldBe
       """
         |

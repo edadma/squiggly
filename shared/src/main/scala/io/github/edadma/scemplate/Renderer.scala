@@ -38,12 +38,14 @@ class Renderer(builtins: Map[String, BuiltinFunction]) {
   def render(globalContext: Any, ast: TemplateParserAST): String = {
     val vars = new mutable.HashMap[String, Any]
 
-    def beval(context: Any, expr: ExprAST): Boolean =
-      eval(context, expr) match {
-        case b: Boolean            => b
-        case () | null | "" | ZERO => false
-        case _                     => true
+    def falsy(a: Any): Boolean =
+      a match {
+        case false | null | "" | ZERO               => true
+        case s: collection.Iterable[_] if s.isEmpty => true
+        case _                                      => false
       }
+
+    def beval(context: Any, expr: ExprAST): Boolean = !falsy(eval(context, expr))
 
     def neval(context: Any, expr: ExprAST): BigDecimal =
       eval(context, expr) match {

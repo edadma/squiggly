@@ -12,7 +12,7 @@ object Main extends App {
   val data = List(3, 4, "asdf")
   //  val input = "zxcv {{ with .jonny -}} name: {{ .name }} age: {{ .age }} {{- end }} asdf "
   val input = "{{ take 2 . }}"
-  val parser = new TemplateParser(input, "{{", "}}")
+  val parser = new TemplateParser(input, "{{", "}}", Builtin.functions)
   val ast = parser.parse
 
   pprintln(ast)
