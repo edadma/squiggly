@@ -87,19 +87,21 @@ class Renderer(builtins: Map[String, BuiltinFunction]) {
           else if (no.isDefined) eval(context, no.get)
           else ""
         case CompareExpr(left, right) =>
-          var l = neval(context, left)
+          var l = eval(context, left)
 
           right forall {
+            case ("=", expr)  => l == eval(context, expr)
+            case ("!=", expr) => l != eval(context, expr)
             case (op, expr) =>
               val r = neval(context, expr)
+              val ln = l.asInstanceOf[BigDecimal]
+
               val res =
                 op match {
-                  case "<"  => l < r
-                  case "<=" => l <= r
-                  case ">"  => l > r
-                  case ">=" => l >= r
-                  case "="  => l == r
-                  case "!=" => l != r
+                  case "<"  => ln < r
+                  case "<=" => ln <= r
+                  case ">"  => ln > r
+                  case ">=" => ln >= r
                 }
 
               l = r

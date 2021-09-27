@@ -9,9 +9,9 @@ object Main extends App {
   case class Person(name: String, age: Int)
 
 //  val data = Map("jonny" -> Person("jonny", 45))
-  val data = List(3, 4, "asdf")
+  val data = List(BigDecimal(3), BigDecimal(4), "asdf")
   //  val input = "zxcv {{ with .jonny -}} name: {{ .name }} age: {{ .age }} {{- end }} asdf "
-  val input = "{{with .}}{{ . }}{{end}}"
+  val input = "{{for .}}{{ if . = 3 }}yes{{ else }}no{{ end }}{{ end }}"
   val parser = new TemplateParser(input, "{{", "}}", Builtin.functions)
   val ast = parser.parse
 
