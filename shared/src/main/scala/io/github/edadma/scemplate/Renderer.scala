@@ -86,12 +86,20 @@ class Renderer(builtins: Map[String, BuiltinFunction]) {
           var l = neval(context, left)
 
           right forall {
-            case ("<", expr)  => l < neval(context, expr)
-            case ("<=", expr) => l <= neval(context, expr)
-            case (">", expr)  => l > neval(context, expr)
-            case (">=", expr) => l >= neval(context, expr)
-            case ("=", expr)  => l == neval(context, expr)
-            case ("!=", expr) => l != neval(context, expr)
+            case (op, expr) =>
+              val r = neval(context, expr)
+              val res =
+                op match {
+                  case "<"  => l < r
+                  case "<=" => l <= r
+                  case ">"  => l > r
+                  case ">=" => l >= r
+                  case "="  => l == r
+                  case "!=" => l != r
+                }
+
+              l = r
+              res
           }
         case BooleanExpr(_, b) => b
         case StringExpr(_, s)  => s
