@@ -11,7 +11,7 @@ object Main extends App {
 //  val data = Map("jonny" -> Person("jonny", 45))
   val data = List(BigDecimal(3), BigDecimal(4), "asdf")
   //  val input = "zxcv {{ with .jonny -}} name: {{ .name }} age: {{ .age }} {{- end }} asdf "
-  val input = "{{ if false }}yes{{ else }}no{{ end }}"
+  val input = "{{ s := {a: 3, b: 4, c: 5} }}{{ for s }}{{ . }}{{ end }}"
   val parser = new TemplateParser(input, "{{", "}}", Builtin.functions)
   val ast = parser.parse
 

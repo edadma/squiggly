@@ -82,6 +82,8 @@ class Renderer(builtins: Map[String, BuiltinFunction]) {
 
     def eval(context: Any, expr: ExprAST): Any =
       expr match {
+        case SeqExpr(elems) => elems map (eval(context, _))
+        case MapExpr(pairs) => pairs map { case (Ident(_, k), v) => (k, eval(context, v)) } toMap
         case ConditionalAST(cond, yes, no) =>
           if (beval(context, cond)) eval(context, yes)
           else if (no.isDefined) eval(context, no.get)
@@ -175,7 +177,7 @@ class Renderer(builtins: Map[String, BuiltinFunction]) {
             case TextToken(pos, text)                                     => buf ++= text
             case SpaceToken(pos, s)                                       => buf ++= s
             case TagToken(pos, tag: ExprAST, _, _)                        => buf ++= eval(context, tag).toString
-            case TagToken(pos, AssignmentAST(Ident(_, name), expr), _, _) => vars(name) = eval(context, expr).toString
+            case TagToken(pos, AssignmentAST(Ident(_, name), expr), _, _) => vars(name) = eval(context, expr)
           }
         case IfBlockAST(cond, yes, elseif, no) =>
           if (beval(context, cond)) render(context, yes)

@@ -118,11 +118,14 @@ class TagParser(val input: ParserInput, line: Int, col: Int, builtins: Map[Strin
       string |
       element |
       map |
+      seq |
       "(" ~ expression ~ ")"
   }
 
   def map: Rule1[MapExpr] =
     rule("{" ~ zeroOrMore(ident ~ ":" ~ expression ~> Tuple2[Ident, ExprAST] _).separatedBy(",") ~ "}" ~> MapExpr)
+
+  def seq: Rule1[SeqExpr] = rule("[" ~ zeroOrMore(expression).separatedBy(",") ~ "]" ~> SeqExpr)
 
   def number: Rule1[NumberExpr] = rule(pos ~ decimal ~> NumberExpr)
 

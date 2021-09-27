@@ -24,6 +24,8 @@ case class ElementExpr(pos: Int, global: String, ids: Seq[Ident]) extends Simple
 
 case class MapExpr(pairs: Seq[(Ident, ExprAST)]) extends ExprAST
 
+case class SeqExpr(elems: Seq[ExprAST]) extends ExprAST
+
 case class UnaryExpr(op: String, expr: ExprAST) extends ExprAST
 
 case class BinaryExpr(left: ExprAST, op: String, right: ExprAST) extends ExprAST
