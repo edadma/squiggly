@@ -5,80 +5,78 @@ import org.scalatest.matchers.should.Matchers
 
 class ForTests extends AnyFreeSpec with Matchers with Testing {
 
-  "with 1" in {
+  "for 1" in {
+    test("l: [3, 4]",
+         """
+        |{{ for .l }}{{ . }}{{ end }}
+        """.trim.stripMargin) shouldBe
+      """
+        |34
+        """.trim.stripMargin
+  }
+
+  "for 2" in {
+    the[RuntimeException] thrownBy
+      test("{a: {b: 3, c: {d: 4}}}",
+           """
+            |{{ for .a.b }}{{ . }}{{ end }}
+            """.trim.stripMargin) should have message "'for' can only be applied to an iterable object: 3"
+  }
+
+  "for 3" in {
+    test("{a: 3, b: 4, c: 5}",
+         """
+        |{{ for . }}{{ . }}{{ end }}
+        """.trim.stripMargin) shouldBe
+      """
+        |(a,3)(b,4)(c,5)
+        """.trim.stripMargin
+  }
+
+  "for 4" in {
     test(null,
          """
-        |{{ with 123 }}{{ . }}{{ end }}
-        """.trim.stripMargin) shouldBe
-      """
-        |123
-        """.trim.stripMargin
-  }
-
-  "with 2" in {
-    test("{a: {b: 3, c: {d: 4}}}",
-         """
-        |{{ with .a.b }}{{ . }}{{ end }}
-        """.trim.stripMargin) shouldBe
-      """
-        |3
-        """.trim.stripMargin
-  }
-
-  "with 3" in {
-    test("123",
-         """
-        |{{ with . }}{{ . }}{{ end }}
-        """.trim.stripMargin) shouldBe
-      """
-        |123
-        """.trim.stripMargin
-  }
-
-  "with 4" in {
-    test(null,
-         """
-        |{{ with 0 }}{{ . }}{{ else }}else{{ end }}
+        |{{ for 0 }}{{ . }}{{ else }}else{{ end }}
         """.trim.stripMargin) shouldBe
       """
         |else
         """.trim.stripMargin
   }
 
-  "with 5" in {
+  "for 5" in {
     test(null,
          """
-        |{{ with false }}{{ . }}{{ else }}else{{ end }}
+        |{{ for false }}{{ . }}{{ else }}else{{ end }}
         """.trim.stripMargin) shouldBe
       """
         |else
         """.trim.stripMargin
   }
 
-  "with 6" in {
+  "for 6" in {
     test(null,
          """
-        |{{ with '' }}{{ . }}{{ else }}else{{ end }}
+        |{{ for '' }}{{ . }}{{ else }}else{{ end }}
         """.trim.stripMargin) shouldBe
       """
         |else
         """.trim.stripMargin
   }
 
-  "with 7" in {
+  "for 7" in {
     test("[]",
          """
-        |{{ with . }}{{ . }}{{ else }}else{{ end }}
+        |{{ for . }}{{ . }}{{ else }}else{{ end }}
         """.trim.stripMargin) shouldBe
       """
         |else
         """.trim.stripMargin
   }
 
-  "with 8" in {
+  "for 8" in {
     test("{}",
          """
-        |{{ with . }}{{ . }}{{ else }}else{{ end }}
+        |{{ for . }}{{ . }}{{ else }}else{{ end }}
         """.trim.stripMargin) shouldBe
       """
         |else

@@ -151,7 +151,7 @@ class Renderer(builtins: Map[String, BuiltinFunction]) {
             case v if falsy(v) => els foreach (render(context, _))
             case s: Iterable[Any] =>
               s.zipWithIndex foreach {
-                case (i, e) =>
+                case (e, i) =>
                   index match {
                     case Some((Some(Ident(_, idx)), Ident(_, elem))) =>
                       vars(idx) = i
@@ -162,7 +162,7 @@ class Renderer(builtins: Map[String, BuiltinFunction]) {
 
                   render(e, body)
               }
-            case v => sys.error(s"range can only be applied to an iterable object: $v")
+            case v => sys.error(s"'for' can only be applied to an iterable object: $v")
           }
         case ContentAST(toks) =>
           toks foreach {
