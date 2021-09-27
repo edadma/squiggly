@@ -1,7 +1,5 @@
 package io.github.edadma.scemplate
 
-import io.github.edadma.datetime.Datetime
-
 import scala.annotation.tailrec
 import scala.collection.mutable
 import scala.language.postfixOps
@@ -10,12 +8,7 @@ object Renderer {
 
   private val ZERO = BigDecimal(0)
 
-  val builtinFunctions: Map[String, BuiltinFunction] =
-    List(
-      BuiltinFunction("now", 0, _ => Datetime.now().timestamp),
-      BuiltinFunction("Unix", 1, { case Seq(d: Datetime) => BigDecimal(d.epochMillis) })
-    ) map (f => (f.name, f)) toMap
-  val defaultRenderer = new Renderer(builtinFunctions)
+  val defaultRenderer = new Renderer(Builtin.functions)
 
 }
 
@@ -61,10 +54,17 @@ class Renderer(builtins: Map[String, BuiltinFunction]) {
 
     def callFunction(pos: Int, name: String, args: Seq[Any]): Any =
       builtins get name match {
-        case Some(BuiltinFunction(_, arity, function)) =>
-          if (args.length != arity)
+        case Some(BuiltinFunction(_, arities, function)) =>
+          if (!arities(args.length)) {
+            val arity =
+              if (arities.size == 1) arities.head.toString
+              else {
+                val sorted = arities.toList.sorted
+
+                s"${sorted dropRight 1 mkString ", "} or ${sorted.last}"
+              }
             sys.error(s"wrong number of arguments for function '$name': expected $arity, found ${args.length}")
-          else if (!function.isDefinedAt(args))
+          } else if (!function.isDefinedAt(args))
             sys.error(s"cannot apply function '$name' to arguments ${args map (a => s"'$a'") mkString ", "}")
           else function(args)
         case None =>
@@ -108,8 +108,10 @@ class Renderer(builtins: Map[String, BuiltinFunction]) {
           }
         case UnaryExpr("-", expr) => -neval(context, expr)
         case MethodExpr(expr, Ident(pos, name), args) =>
-          callFunction(pos, name, eval(context, expr) +: (args map (eval(context, _))))
+          callFunction(pos, name, (args map (eval(context, _))) :+ eval(context, expr))
         case ApplyExpr(Ident(pos, name), args) => callFunction(pos, name, args map (eval(context, _)))
+        case PipeExpr(left, ApplyExpr(Ident(pos, name), args)) =>
+          callFunction(pos, name, (args map (eval(context, _))) :+ eval(context, left))
       }
 
     val buf = new StringBuilder

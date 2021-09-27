@@ -10,7 +10,7 @@ class TagParser(val input: ParserInput, line: Int, col: Int) extends Parser {
 
   implicit def wsStr(s: String): Rule0 = rule(str(s) ~ sp)
 
-  def kw(s: String): Rule1[String] = rule(capture(s) ~> ((s: String) => s.trim))
+  def kw(s: String): Rule1[String] = rule(quiet(capture(s) ~> ((s: String) => s.trim)))
 
   def tag: Rule1[TagParserAST] =
     rule {
@@ -57,16 +57,16 @@ class TagParser(val input: ParserInput, line: Int, col: Int) extends Parser {
 
   def comparitive: Rule1[ExprAST] =
     rule {
-      pipeline ~ oneOrMore(
+      pipe ~ oneOrMore(
         (kw("<=") | kw(">=") | kw("!=") | kw("<") | kw(">") | kw("=")) ~
-          pipeline ~> Tuple2[String, ExprAST] _) ~> CompareExpr |
-        pipeline
+          pipe ~> Tuple2[String, ExprAST] _) ~> CompareExpr |
+        pipe
     }
 
-  def pipeline: Rule1[ExprAST] =
+  def pipe: Rule1[ExprAST] =
     rule {
       applicative ~ zeroOrMore(
-        kw("|") ~ (apply | variable) ~> BinaryExpr
+        "|" ~ (apply | ident ~ push(Nil) ~> ApplyExpr) ~> PipeExpr
       )
     }
 
