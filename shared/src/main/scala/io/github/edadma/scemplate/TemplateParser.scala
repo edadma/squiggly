@@ -56,6 +56,27 @@ class TemplateParser(input: String, startDelim: String, endDelim: String, builti
         case TagToken(pos, _: EndAST, _, _) #:: t =>
           if (parsingbody) endOfBlock(t, els = false)
           else pos.error("unexpected 'end' tag")
+        case TagToken(pos, tag: IfAST, _, _) #:: t =>
+          if (tokbuf.nonEmpty) {
+            astbuf += ContentAST(tokbuf.toList)
+            tokbuf.clear()
+          }
+
+          val (body0, rest0) = parse(t, parsingbody = true, allowelse = true)
+          val (body, els, rest) =
+            body0 match {
+              case BlockWithElseAST(b) =>
+                val (els, rest) = parse(rest0, parsingbody = true, allowelse = false)
+
+                (b, Some(els), rest)
+              case _ => (body0, None, rest0)
+            }
+
+          if (body == EmptyBlockAST)
+            Console.err.println(pos.longErrorText("warning: empty block"))
+
+          astbuf += BlockAST(tag, body, els)
+          parse(rest, parsingbody, allowelse, tokbuf, astbuf)
         case h #:: t if !h.eoi =>
           tokbuf += h
           parse(t, parsingbody, allowelse, tokbuf, astbuf)
