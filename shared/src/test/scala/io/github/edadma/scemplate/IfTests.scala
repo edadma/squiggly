@@ -45,13 +45,43 @@ class IfTests extends AnyFreeSpec with Matchers with Testing {
         """.trim.stripMargin
   }
 
-  "if 4" in {
+  "if 5" in {
     test("3",
          """
           |[{{ if . = 3 }}three{{ else if . = 4 }}four{{ else }}none{{ end }}]
           """.trim.stripMargin) shouldBe
       """
         |[three]
+        """.trim.stripMargin
+  }
+
+  "if 6" in {
+    test("3",
+         """
+          |[{{ if . = 3 }}three{{ else if . = 4 }}four{{ end }}]
+          """.trim.stripMargin) shouldBe
+      """
+        |[three]
+        """.trim.stripMargin
+  }
+
+  "if 7" in {
+    test("4",
+         """
+          |[{{ if . = 3 }}three{{ else if . = 4 }}four{{ end }}]
+          """.trim.stripMargin) shouldBe
+      """
+        |[four]
+        """.trim.stripMargin
+  }
+
+  "if 8" in {
+    test("5",
+         """
+          |[{{ if . = 3 }}three{{ else if . = 4 }}four{{ end }}]
+          """.trim.stripMargin) shouldBe
+      """
+        |[]
         """.trim.stripMargin
   }
 

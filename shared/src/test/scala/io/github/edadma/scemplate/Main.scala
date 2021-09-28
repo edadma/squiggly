@@ -10,7 +10,7 @@ object Main extends App {
 
   //  val data = Map("jonny" -> Person("jonny", 45))
 //  val data = List(BigDecimal(3), BigDecimal(4), "asdf")
-  val data = BigDecimal(3)
+  val data = BigDecimal(5)
   //  val input = "zxcv {{ with .jonny -}} name: {{ .name }} age: {{ .age }} {{- end }} asdf "
   val input = "[{{ if . = 3 }}three{{ else if . = 4 }}four{{ else }}none{{ end }}]"
   val parser = new TemplateParser(input, "{{", "}}", Builtin.functions)

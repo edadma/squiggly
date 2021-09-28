@@ -3,7 +3,7 @@ package io.github.edadma.scemplate
 import io.github.edadma.char_reader.CharReader
 
 import scala.annotation.tailrec
-import scala.collection.mutable.ListBuffer
+import scala.collection.mutable.{ArrayBuffer, ListBuffer}
 
 class TemplateParser(input: String, startDelim: String, endDelim: String, builtins: Map[String, BuiltinFunction]) {
 
@@ -53,6 +53,9 @@ class TemplateParser(input: String, startDelim: String, endDelim: String, builti
         case TagToken(pos, _: ElseAST, _, _) #:: t =>
           if (parsingbody && allowelse) (BlockWithElseAST(endOfBlock), t)
           else pos.error("unexpected 'else' tag")
+        case TagToken(pos, ElseIfAST(_, cond), _, _) #:: t =>
+          if (parsingbody && allowelse) (BlockWithElseIfAST(endOfBlock, cond), t)
+          else pos.error("unexpected 'else if' tag")
         case TagToken(pos, _: EndAST, _, _) #:: t =>
           if (parsingbody) (endOfBlock, t)
           else pos.error("unexpected 'end' tag")
@@ -62,8 +65,9 @@ class TemplateParser(input: String, startDelim: String, endDelim: String, builti
             tokbuf.clear()
           }
 
-          val elseifbuf = new ListBuffer[(ExprAST, TemplateParserAST)]
+          val elseifbuf = new ArrayBuffer[(ExprAST, TemplateParserAST)]
 
+          @tailrec
           def elseif(t: LazyList[Token]): (TemplateParserAST, Option[TemplateParserAST], LazyList[Token]) = {
             val (body0, rest0) = parse(t, parsingbody = true, allowelse = true)
 
@@ -73,7 +77,9 @@ class TemplateParser(input: String, startDelim: String, endDelim: String, builti
 
                 (b, Some(els), rest)
               case BlockWithElseIfAST(b, cond) =>
-              case _                           => (body0, None, rest0)
+                elseifbuf += ((cond, b))
+                elseif(rest0)
+              case _ => (body0, None, rest0)
             }
           }
 
@@ -82,7 +88,16 @@ class TemplateParser(input: String, startDelim: String, endDelim: String, builti
           if (body == EmptyBlockAST)
             Console.err.println(pos.longErrorText("warning: empty block"))
 
-          astbuf += IfBlockAST(cond, body, Nil, els)
+          var next: TemplateParserAST = body
+
+          for (i <- elseifbuf.indices.reverse) {
+            val cur = elseifbuf(i)._2
+
+            elseifbuf(i) = (elseifbuf(i)._1, next)
+            next = cur
+          }
+
+          astbuf += IfBlockAST(cond, next, elseifbuf.toSeq, els)
           parse(rest, parsingbody, allowelse, tokbuf, astbuf)
         case h #:: t if !h.eoi =>
           tokbuf += h
