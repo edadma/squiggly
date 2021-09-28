@@ -45,4 +45,44 @@ class ArithmeticTests extends AnyFreeSpec with Matchers with Testing {
     test(null, "{{ 2 ^ 3 ^ 3 }}") shouldBe "134217728"
   }
 
+  "arithmetic 11" in {
+    test(null, "{{ 3 - 4 }}") shouldBe "-1"
+  }
+
+  "arithmetic 12" in {
+    test(null, "{{ 3 + 4 * 5 }}") shouldBe "23"
+  }
+
+  "arithmetic 13" in {
+    test(null, "{{ -3 + 4 * 5 }}") shouldBe "17"
+  }
+
+  "arithmetic 14" in {
+    test(null, "{{ 3 + -4 * 5 }}") shouldBe "-17"
+  }
+
+  "arithmetic 15" in {
+    test(null, "{{ 3 + 4 * -5 }}") shouldBe "-17"
+  }
+
+  "arithmetic 16" in {
+    test(null, "{{ (3 + 4) * 5 }}") shouldBe "35"
+  }
+
+  "arithmetic 17" in {
+    test(null, "{{ (-3 + 4) * 5 }}") shouldBe "5"
+  }
+
+  "arithmetic 18" in {
+    test(null, "{{ (3 + -4) * 5 }}") shouldBe "-5"
+  }
+
+  "arithmetic 19" in {
+    test(null, "{{ (3 + 4) * -5 }}") shouldBe "-35"
+  }
+
+  "arithmetic 20" in {
+    test(null, "{{ -(3 + 4) * 5 }}") shouldBe "-35"
+  }
+
 }
