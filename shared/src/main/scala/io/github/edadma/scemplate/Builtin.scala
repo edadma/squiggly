@@ -31,12 +31,26 @@ object Builtin {
         case (con, Seq(NonStrictExpr(expr), s: Iterable[_])) => s filter (e => con.copy(data = e).beval(expr))
         case (con, Seq(s: String))                           => s // todo
       }),
+      // todo: "join" https://gohugo.io/functions/delimit/
+      BuiltinFunction("length", 1, {
+        case (con, Seq(s: String))      => s.length
+        case (con, Seq(s: Iterable[_])) => s.size
+      }),
       BuiltinFunction("map", 2, {
         case (con, Seq(NonStrictExpr(expr), s: Iterable[_])) => s map (e => con.copy(data = e).eval(expr))
         case (con, Seq(s: String))                           => s // todo
       }),
       BuiltinFunction("now", 0, _ => Datetime.now().timestamp),
-      BuiltinFunction("number", 1, { case (con, Seq(s: String))            => BigDecimal(s) }),
+      BuiltinFunction("number", 1, { case (con, Seq(s: String)) => BigDecimal(s) }),
+      BuiltinFunction(
+        "slice",
+        2, {
+          case (con, Seq(from: Num, s: Iterable[_]))             => s slice (from.toIntExact, s.size)
+          case (con, Seq(from: Num, until: Num, s: Iterable[_])) => s slice (from.toIntExact, until.toIntExact)
+          case (con, Seq(from: Num, s: String))                  => s slice (from.toIntExact, s.length)
+          case (con, Seq(from: Num, until: Num, s: String))      => s slice (from.toIntExact, until.toIntExact)
+        }
+      ),
       BuiltinFunction("take", 2, { case (con, Seq(n: Num, s: Iterable[_])) => s take n.toIntExact }),
       BuiltinFunction("trim", 1, { case (con, Seq(s: String))              => s.trim }),
       BuiltinFunction("unix", 1, { case (con, Seq(d: Datetime))            => BigDecimal(d.epochMillis) }),
