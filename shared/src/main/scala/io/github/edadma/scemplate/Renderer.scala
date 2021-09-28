@@ -56,17 +56,10 @@ class Renderer(builtins: Map[String, BuiltinFunction]) {
 
     def callFunction(pos: Int, name: String, args: Seq[Any]): Any =
       builtins get name match {
-        case Some(BuiltinFunction(_, arities, function)) =>
-          if (!arities(args.length)) {
-            val arity =
-              if (arities.size == 1) arities.head.toString
-              else {
-                val sorted = arities.toList.sorted
-
-                s"${sorted dropRight 1 mkString ", "} or ${sorted.last}"
-              }
-            sys.error(s"wrong number of arguments for function '$name': expected $arity, found ${args.length}")
-          } else if (!function.isDefinedAt(args))
+        case Some(BuiltinFunction(_, arity, function)) =>
+          if (args.length < arity)
+            sys.error(s"too few arguments for function '$name': expected $arity, found ${args.length}")
+          else if (!function.isDefinedAt(args))
             sys.error(s"cannot apply function '$name' to arguments ${args map (a => s"'$a'") mkString ", "}")
           else function(args)
         case None =>

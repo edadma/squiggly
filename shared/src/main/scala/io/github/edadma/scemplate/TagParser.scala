@@ -169,8 +169,8 @@ class TagParser(val input: ParserInput, line: Int, col: Int, builtins: Map[Strin
       next()
 
       builtins get buf.toString match {
-        case Some(BuiltinFunction(_, arities, _)) if arities exists (_ >= 1) => true
-        case _                                                               => false
+        case Some(BuiltinFunction(_, arity, _)) if arity >= 1 => true
+        case _                                                => false
       }
     } else false
   }
