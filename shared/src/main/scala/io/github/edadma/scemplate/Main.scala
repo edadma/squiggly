@@ -4,15 +4,15 @@ import java.io.File
 import scopt.OParser
 import io.github.edadma.cross_platform._
 import platform._
-
-import scala.io.StdIn
+import pprint.pprintln
 
 object Main extends App {
 
   case class Config(dataFile: Option[String] = None,
                     dataString: Option[String] = None,
                     templateFile: Option[String] = None,
-                    templateString: Option[String] = None)
+                    templateString: Option[String] = None,
+                    ast: Boolean = false)
 
   val builder = OParser.builder[Config]
   val parser = {
@@ -24,6 +24,10 @@ object Main extends App {
     OParser.sequence(
       programName("scemplate"),
       head("Scala Template Engine", "v0.1.0"),
+      opt[Boolean]('a', "ast")
+        .optional()
+        .action((d, c) => c.copy(ast = d))
+        .text("pretty print AST"),
       opt[Option[String]]('d', "data")
         .valueName("<YAML>")
         .optional()
@@ -61,9 +65,9 @@ object Main extends App {
   }
 
   OParser.parse(parser, args, Config()) match {
-    case Some(Config(_, _, None, None)) => println(OParser.usage(parser))
-    case Some(conf)                     => app(conf)
-    case _                              =>
+    case Some(Config(_, _, None, None, _)) => println(OParser.usage(parser))
+    case Some(conf)                        => app(conf)
+    case _                                 =>
   }
 
   def app(c: Config): Unit = {
@@ -79,6 +83,13 @@ object Main extends App {
       else ""
     }
 
+    val parser = new TemplateParser(template, "{{", "}}", Builtin.functions)
+    val ast = parser.parse
+
+    if (c.ast)
+      pprintln(ast)
+    else
+      println(Renderer.defaultRenderer.render(data, ast))
   }
 
 }
