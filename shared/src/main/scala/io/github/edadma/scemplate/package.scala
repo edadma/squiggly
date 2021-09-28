@@ -8,6 +8,8 @@ package object scemplate {
 
   case class BuiltinFunction(name: String, arities: Set[Int], function: PartialFunction[Seq[Any], Any])
 
+  type Num = BigDecimal
+
   trait Platform {
     def yaml(s: String): Any
   }
