@@ -180,6 +180,7 @@ class Renderer(functions: Map[String, BuiltinFunction]) {
             case SpaceToken(pos, s)                                       => buf ++= s
             case TagToken(pos, tag: ExprAST, _, _)                        => buf ++= context.eval(tag).toString
             case TagToken(pos, AssignmentAST(Ident(_, name), expr), _, _) => context.vars(name) = context.eval(expr)
+            case TagToken(pos, tag: CommentAST, _, _)                     =>
           }
         case IfBlockAST(cond, yes, elseif, no) =>
           if (context.beval(cond)) render(context, yes)
