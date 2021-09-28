@@ -16,10 +16,11 @@ class TagParser(val input: ParserInput, line: Int, col: Int, builtins: Map[Strin
   def tag: Rule1[TagParserAST] =
     rule {
       sp ~ (
-        elseTag
+        elseIfTag
           | endTag
           | withTag
           | forTag
+          | elseTag
           | assignmentTag
           | commentTag
           | expression

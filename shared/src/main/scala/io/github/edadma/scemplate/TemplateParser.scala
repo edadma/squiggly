@@ -15,13 +15,13 @@ class TemplateParser(input: String, startDelim: String, endDelim: String, builti
               allowelse: Boolean,
               tokbuf: ListBuffer[Token] = new ListBuffer,
               astbuf: ListBuffer[TemplateParserAST] = new ListBuffer): (TemplateParserAST, LazyList[Token]) = {
-      def endOfBlock(tail: LazyList[Token], els: Boolean): (TemplateParserAST, LazyList[Token]) = {
+      def endOfBlock: TemplateParserAST = {
         if (tokbuf.nonEmpty)
           astbuf += ContentAST(tokbuf.toList)
 
-        if (astbuf.isEmpty) (if (els) BlockWithElseAST(EmptyBlockAST) else EmptyBlockAST, tail)
-        else if (astbuf.length == 1) (if (els) BlockWithElseAST(astbuf.head) else astbuf.head, tail)
-        else (if (els) BlockWithElseAST(SequenceAST(astbuf.toList)) else SequenceAST(astbuf.toList), tail)
+        if (astbuf.isEmpty) EmptyBlockAST
+        else if (astbuf.length == 1) astbuf.head
+        else SequenceAST(astbuf.toList)
       }
 
       ts match {
@@ -51,10 +51,10 @@ class TemplateParser(input: String, startDelim: String, endDelim: String, builti
           astbuf += BlockAST(tag, body, els)
           parse(rest, parsingbody, allowelse, tokbuf, astbuf)
         case TagToken(pos, _: ElseAST, _, _) #:: t =>
-          if (parsingbody && allowelse) endOfBlock(t, els = true)
+          if (parsingbody && allowelse) (BlockWithElseAST(endOfBlock), t)
           else pos.error("unexpected 'else' tag")
         case TagToken(pos, _: EndAST, _, _) #:: t =>
-          if (parsingbody) endOfBlock(t, els = false)
+          if (parsingbody) (endOfBlock, t)
           else pos.error("unexpected 'end' tag")
         case TagToken(pos, IfAST(_, cond), _, _) #:: t =>
           if (tokbuf.nonEmpty) {
@@ -62,15 +62,22 @@ class TemplateParser(input: String, startDelim: String, endDelim: String, builti
             tokbuf.clear()
           }
 
-          val (body0, rest0) = parse(t, parsingbody = true, allowelse = true)
-          val (body, els, rest) =
+          val elseifbuf = new ListBuffer[(ExprAST, TemplateParserAST)]
+
+          def elseif(t: LazyList[Token]): (TemplateParserAST, Option[TemplateParserAST], LazyList[Token]) = {
+            val (body0, rest0) = parse(t, parsingbody = true, allowelse = true)
+
             body0 match {
               case BlockWithElseAST(b) =>
                 val (els, rest) = parse(rest0, parsingbody = true, allowelse = false)
 
                 (b, Some(els), rest)
-              case _ => (body0, None, rest0)
+              case BlockWithElseIfAST(b, cond) =>
+              case _                           => (body0, None, rest0)
             }
+          }
+
+          val (body, els, rest) = elseif(t)
 
           if (body == EmptyBlockAST)
             Console.err.println(pos.longErrorText("warning: empty block"))
@@ -82,7 +89,7 @@ class TemplateParser(input: String, startDelim: String, endDelim: String, builti
           parse(t, parsingbody, allowelse, tokbuf, astbuf)
         case EOIToken(pos) #:: _ =>
           if (parsingbody) pos.error("missing end tag")
-          else endOfBlock(LazyList.empty, els = false)
+          else (endOfBlock, LazyList.empty)
       }
     }
 
