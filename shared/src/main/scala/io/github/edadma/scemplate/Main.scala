@@ -24,9 +24,9 @@ object Main extends App {
     OParser.sequence(
       programName("scemplate"),
       head("Scala Template Engine", "v0.1.0"),
-      opt[Boolean]('a', "ast")
+      opt[Unit]('a', "ast")
         .optional()
-        .action((d, c) => c.copy(ast = d))
+        .action((_, c) => c.copy(ast = true))
         .text("pretty print AST"),
       opt[Option[String]]('d', "data")
         .valueName("<YAML>")
