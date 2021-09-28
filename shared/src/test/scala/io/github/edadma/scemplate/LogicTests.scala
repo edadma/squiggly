@@ -69,4 +69,8 @@ class LogicTests extends AnyFreeSpec with Matchers with Testing {
     test(null, "{{ 3 < 4 or 3 < 4 and 4 < 3 }}") shouldBe "true"
   }
 
+  "logic 17" in {
+    test(null, "{{ 3 < 4 + 5 or 3 < 4 + 5 and 4 + 5 < 3 }}") shouldBe "true"
+  }
+
 }
