@@ -16,7 +16,7 @@ package object scemplate {
 
   lazy val platform: Platform = scemplate.platformSpecific
 
-  private val ZERO = BigDecimal(0)
+  private[scemplate] val ZERO = BigDecimal(0)
 
   def falsy(a: Any): Boolean =
     a match {

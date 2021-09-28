@@ -12,7 +12,8 @@ object Main extends App {
   val data = List(BigDecimal(3), BigDecimal(4), BigDecimal(5), BigDecimal(6))
 //  val data = BigDecimal(5)
   //  val input = "zxcv {{ with .jonny -}} name: {{ .name }} age: {{ .age }} {{- end }} asdf "
-  val input = "{{ for i, e <- . | filter <. > 3> | take 2 }}index: {{ i }}, element: {{ e }}{{'\\n'}}{{ end }}"
+//  val input = "{{ for i, e <- . | filter <. > 3> | take 2 }}index: {{ i }}, element: {{ e }}{{'\\n'}}{{ end }}"
+  val input = "{{ ' asdf '.trim }}"
   val parser = new TemplateParser(input, "{{", "}}", Builtin.functions)
   val ast = parser.parse
 
