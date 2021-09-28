@@ -46,7 +46,7 @@ lazy val scemplate = crossProject(JSPlatform, JVMPlatform, NativePlatform)
   )
   .nativeSettings(
     nativeLinkStubs := true,
-    libraryDependencies += "io.github.edadma" %%% "libyaml" % "0.1.3"
+    libraryDependencies += "io.github.edadma" %%% "libyaml" % "0.1.4"
   )
   .jsSettings(
     jsEnv := new org.scalajs.jsenv.nodejs.NodeJSEnv(),
