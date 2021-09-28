@@ -12,7 +12,7 @@ object Main extends App {
 //  val data = List(BigDecimal(3), BigDecimal(4), "asdf")
   val data = BigDecimal(5)
   //  val input = "zxcv {{ with .jonny -}} name: {{ .name }} age: {{ .age }} {{- end }} asdf "
-  val input = "[{{ if . = 3 }}three{{ else if . = 4 }}four{{ else }}none{{ end }}]"
+  val input = "{{ true and true }}"
   val parser = new TemplateParser(input, "{{", "}}", Builtin.functions)
   val ast = parser.parse
 
