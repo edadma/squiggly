@@ -42,47 +42,31 @@ class LogicTests extends AnyFreeSpec with Matchers with Testing {
   }
 
   "logic 10" in {
-    test(null, "{{true or true and false }}") shouldBe "true"
+    test(null, "{{ true or true and false }}") shouldBe "true"
   }
 
   "logic 11" in {
-    test(null, "{{(true or true) and false }}") shouldBe "false"
+    test(null, "{{ (true or true) and false }}") shouldBe "false"
   }
 
   "logic 12" in {
-    test(null, "{{ 3 + 4 * 5 }}") shouldBe "23"
+    test(null, "{{ not true }}") shouldBe "false"
   }
 
   "logic 13" in {
-    test(null, "{{ -3 + 4 * 5 }}") shouldBe "17"
+    test(null, "{{ not false }}") shouldBe "true"
   }
 
   "logic 14" in {
-    test(null, "{{ 3 + -4 * 5 }}") shouldBe "-17"
+    test(null, "{{ not 3 < 4 }}") shouldBe "false"
   }
 
   "logic 15" in {
-    test(null, "{{ 3 + 4 * -5 }}") shouldBe "-17"
+    test(null, "{{ not 4 < 3 }}") shouldBe "true"
   }
 
   "logic 16" in {
-    test(null, "{{ (3 + 4) * 5 }}") shouldBe "35"
-  }
-
-  "logic 17" in {
-    test(null, "{{ (-3 + 4) * 5 }}") shouldBe "5"
-  }
-
-  "logic 18" in {
-    test(null, "{{ (3 + -4) * 5 }}") shouldBe "-5"
-  }
-
-  "logic 19" in {
-    test(null, "{{ (3 + 4) * -5 }}") shouldBe "-35"
-  }
-
-  "logic 20" in {
-    test(null, "{{ -(3 + 4) * 5 }}") shouldBe "-35"
+    test(null, "{{ 3 < 4 or 3 < 4 and 4 < 3 }}") shouldBe "true"
   }
 
 }
