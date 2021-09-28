@@ -1,5 +1,7 @@
 package io.github.edadma.scemplate
 
+import io.github.edadma.cross_platform._
+
 import io.github.edadma.datetime.Datetime
 
 import scala.language.postfixOps
@@ -27,6 +29,7 @@ object Builtin {
         }
       ),
       BuiltinFunction("drop", 2, { case (con, Seq(n: Num, s: Iterable[_])) => s drop n.toIntExact }),
+      BuiltinFunction("fileExists", 1, { case (con, Seq(file: String))     => readableFile(file) }),
       BuiltinFunction("filter", 2, {
         case (con, Seq(NonStrictExpr(expr), s: Iterable[_])) => s filter (e => con.copy(data = e).beval(expr))
         case (con, Seq(s: String))                           => s // todo
@@ -57,3 +60,5 @@ object Builtin {
     ) map (f => (f.name, f)) toMap
 
 }
+
+// todo: continue at https://gohugo.io/functions/findre/
