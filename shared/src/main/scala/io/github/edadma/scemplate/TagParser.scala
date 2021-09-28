@@ -121,6 +121,7 @@ class TagParser(val input: ParserInput, line: Int, col: Int, builtins: Map[Strin
       element |
       map |
       seq |
+      "<" ~ expression ~ ">" ~> NonStrictExpr |
       "(" ~ expression ~ ")"
   }
 

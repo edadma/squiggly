@@ -12,6 +12,8 @@ object Renderer {
 
 }
 
+case class Context(data: Any, functions: Map[String, BuiltinFunction], vars: mutable.HashMap[String, Any])
+
 class Renderer(builtins: Map[String, BuiltinFunction]) {
 
   import Renderer._
