@@ -6,7 +6,7 @@ import scala.collection.immutable
 
 package object scemplate {
 
-  case class BuiltinFunction(name: String, arity: Int, function: PartialFunction[Seq[Any], Any])
+  case class BuiltinFunction(name: String, arity: Int, function: PartialFunction[(Context, Seq[Any]), Any])
 
   type Num = BigDecimal
 
@@ -15,6 +15,15 @@ package object scemplate {
   }
 
   lazy val platform: Platform = scemplate.platformSpecific
+
+  private val ZERO = BigDecimal(0)
+
+  def falsy(a: Any): Boolean =
+    a match {
+      case () | false | null | "" | ZERO          => true
+      case s: collection.Iterable[_] if s.isEmpty => true
+      case _                                      => false
+    }
 
   private val HEX = {
     val a = new Array[Int](128)
