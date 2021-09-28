@@ -16,9 +16,13 @@ object Builtin {
         case (con, s: Seq[_]) if s.last.isInstanceOf[Seq[_]] => s.last.asInstanceOf[Seq[_]] ++ s.init
       }),
       BuiltinFunction("drop", 2, { case (con, Seq(n: Num, s: Iterable[_])) => s drop n.toIntExact }),
+      BuiltinFunction("filter", 2, {
+        case (con, Seq(NonStrictExpr(expr), s: Iterable[_])) => s filter (e => con.copy(data = e).beval(expr))
+        case (con, Seq(s: String))                           => s // todo
+      }),
       BuiltinFunction("map", 2, {
         case (con, Seq(NonStrictExpr(expr), s: Iterable[_])) => s map (e => con.copy(data = e).eval(expr))
-        case (con, Seq(s: String))                           => BigDecimal(s)
+        case (con, Seq(s: String))                           => s // todo
       }),
       BuiltinFunction("now", 0, _ => Datetime.now().timestamp),
       BuiltinFunction("number", 1, { case (con, Seq(s: String))            => BigDecimal(s) }),
