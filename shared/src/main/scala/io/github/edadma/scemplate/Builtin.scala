@@ -17,6 +17,7 @@ object Builtin {
       }),
       BuiltinFunction("drop", 2, { case Seq(n: Num, s: Iterable[_]) => s drop n.toIntExact }),
       BuiltinFunction("now", 0, _ => Datetime.now().timestamp),
+      BuiltinFunction("number", 1, { case Seq(s: String)            => BigDecimal(s) }),
       BuiltinFunction("take", 2, { case Seq(n: Num, s: Iterable[_]) => s take n.toIntExact }),
       BuiltinFunction("unix", 1, { case Seq(d: Datetime)            => BigDecimal(d.epochMillis) }),
     ) map (f => (f.name, f)) toMap

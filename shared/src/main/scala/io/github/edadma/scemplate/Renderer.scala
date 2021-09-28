@@ -126,6 +126,7 @@ class Renderer(builtins: Map[String, BuiltinFunction]) {
             case "*"   => l * r
             case "/"   => l / r
             case "mod" => l remainder r
+            case "\\"  => l quot r
             case "^"   => l.pow(r.toIntExact)
           }
         case UnaryExpr("-", expr) => -neval(context, expr)

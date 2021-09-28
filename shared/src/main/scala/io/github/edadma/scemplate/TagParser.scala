@@ -90,7 +90,8 @@ class TagParser(val input: ParserInput, line: Int, col: Int, builtins: Map[Strin
       negative ~ zeroOrMore(
         kw("*") ~ negative ~> BinaryExpr
           | kw("/") ~ negative ~> BinaryExpr
-          | kw("mod") ~ negative ~> BinaryExpr)
+          | kw("mod") ~ negative ~> BinaryExpr
+          | kw("\\") ~ negative ~> BinaryExpr)
     }
 
   def negative: Rule1[ExprAST] =
