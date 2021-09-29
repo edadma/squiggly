@@ -80,7 +80,8 @@ class TagParser(val input: ParserInput,
 
   def applicative: Rule1[ExprAST] = rule(apply | additive)
 
-  def apply: Rule1[ApplyExpr] = rule(identnsp ~ test(cursorChar != '.') ~ sp ~ oneOrMore(additive) ~> ApplyExpr)
+  def apply: Rule1[ApplyExpr] =
+    rule(identnsp ~ test(cursorChar != '.' && cursorChar != '[') ~ sp ~ oneOrMore(additive) ~> ApplyExpr)
 
   def additive: Rule1[ExprAST] =
     rule {
