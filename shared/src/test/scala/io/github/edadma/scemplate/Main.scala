@@ -13,8 +13,8 @@ object Main extends App {
   //  val data = BigDecimal(5)
   //  val input = "zxcv {{ with .jonny -}} name: {{ .name }} age: {{ .age }} {{- end }} asdf "
   //  val input = "{{ for i, e <- . | filter <. > 3> | take 2 }}index: {{ i }}, element: {{ e }}{{'\\n'}}{{ end }}"
-  val input = "{{/*asdf*/}}{{ ' asdf '.trim }}"
-  val parser = new TemplateParser(input, "{{", "}}", Builtin.functions)
+  val input = "{{ ' asdf '.trim }}"
+  val parser = new TemplateParser(input, "{{", "}}", Builtin.functions, Builtin.namespaces)
   val ast = parser.parse
 
   pprintln(ast)

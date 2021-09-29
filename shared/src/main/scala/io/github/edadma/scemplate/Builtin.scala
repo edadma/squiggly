@@ -8,6 +8,11 @@ import scala.language.postfixOps
 
 object Builtin {
 
+  val namespaces: Map[String, Map[String, BuiltinFunction]] =
+    Map(
+      "images" -> Map(),
+      "lang" -> Map()
+    )
   val functions: Map[String, BuiltinFunction] =
     List(
       BuiltinFunction("anchorize", 1, {
@@ -19,6 +24,14 @@ object Builtin {
       }),
       // todo: https://gohugo.io/functions/base64/
       // todo: https://gohugo.io/functions/complement/
+      BuiltinFunction(
+        "contains",
+        2, {
+          case (con, Seq(elem: Any, s: Seq[_]))            => s contains elem
+          case (con, Seq(elem: String, s: Map[String, _])) => s contains elem
+          case (con, Seq(substr: String, s: String))       => s contains substr
+        }
+      ),
       BuiltinFunction(
         "default",
         2, {
@@ -34,7 +47,22 @@ object Builtin {
         case (con, Seq(NonStrictExpr(expr), s: Iterable[_])) => s filter (e => con.copy(data = e).beval(expr))
         case (con, Seq(s: String))                           => s // todo
       }),
+      //BuiltinFunction("findRE", 2, { case (con, Seq(pattern: String, input: String)) => }), // todo: https://gohugo.io/functions/findre/
+      // todo: https://gohugo.io/functions/getenv/
+      // todo: https://gohugo.io/functions/group/
+      // todo: https://gohugo.io/functions/highlight/
+      // todo: https://gohugo.io/functions/hmac/
+      BuiltinFunction("htmlEscape", 1, {
+        case (con, Seq(s: String)) =>
+          s replace ("&", "&amp;") replace ("<", "&lt;") replace (">", "&gt;") replace ("'", "&#39;") replace ("\"", "&#34;")
+      }),
+      // todo: htmlUnescape
+      // todo: https://gohugo.io/functions/humanize/
+      // todo: https://gohugo.io/functions/i18n/
+      // todo: https://gohugo.io/functions/index-function/
+      // todo: https://gohugo.io/functions/intersect/
       // todo: "join" https://gohugo.io/functions/delimit/
+      // todo: https://gohugo.io/functions/jsonify/
       BuiltinFunction("length", 1, {
         case (con, Seq(s: String))      => s.length
         case (con, Seq(s: Iterable[_])) => s.size
@@ -54,9 +82,10 @@ object Builtin {
           case (con, Seq(from: Num, until: Num, s: String))      => s slice (from.toIntExact, until.toIntExact)
         }
       ),
-      BuiltinFunction("take", 2, { case (con, Seq(n: Num, s: Iterable[_])) => s take n.toIntExact }),
-      BuiltinFunction("trim", 1, { case (con, Seq(s: String))              => s.trim }),
-      BuiltinFunction("unix", 1, { case (con, Seq(d: Datetime))            => BigDecimal(d.epochMillis) }),
+      BuiltinFunction("startsWith", 2, { case (con, Seq(prefix: String, s: String)) => s startsWith prefix }),
+      BuiltinFunction("take", 2, { case (con, Seq(n: Num, s: Iterable[_]))          => s take n.toIntExact }),
+      BuiltinFunction("trim", 1, { case (con, Seq(s: String))                       => s.trim }),
+      BuiltinFunction("unix", 1, { case (con, Seq(d: Datetime))                     => BigDecimal(d.epochMillis) }),
     ) map (f => (f.name, f)) toMap
 
 }

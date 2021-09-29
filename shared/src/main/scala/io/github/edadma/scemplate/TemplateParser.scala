@@ -5,7 +5,11 @@ import io.github.edadma.char_reader.CharReader
 import scala.annotation.tailrec
 import scala.collection.mutable.{ArrayBuffer, ListBuffer}
 
-class TemplateParser(input: String, startDelim: String, endDelim: String, builtins: Map[String, BuiltinFunction]) {
+class TemplateParser(input: String,
+                     startDelim: String,
+                     endDelim: String,
+                     functions: Map[String, BuiltinFunction],
+                     namespaces: Map[String, Map[String, BuiltinFunction]]) {
 
   def parse: TemplateParserAST = {
     val seq = new ListBuffer[TemplateParserAST]
@@ -159,7 +163,7 @@ class TemplateParser(input: String, startDelim: String, endDelim: String, builti
                 val tag1 = if (trimLeft) tag drop 1 else tag
                 val trimRight = tag1.endsWith("-")
                 val tag2 = if (trimRight) tag1 dropRight 1 else tag1
-                val tagParser = new TagParser(tag2, tagrest.line, tagrest.col, builtins)
+                val tagParser = new TagParser(tag2, tagrest.line, tagrest.col, functions, namespaces)
                 val ast = tagParser.parseTag
 
                 Some((rest, TagToken(r, ast, trimLeft, trimRight)))

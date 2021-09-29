@@ -6,7 +6,12 @@ import org.parboiled2._
 import scala.annotation.tailrec
 import scala.language.implicitConversions
 
-class TagParser(val input: ParserInput, line: Int, col: Int, builtins: Map[String, BuiltinFunction]) extends Parser {
+class TagParser(val input: ParserInput,
+                line: Int,
+                col: Int,
+                functions: Map[String, BuiltinFunction],
+                namespaces: Map[String, Map[String, BuiltinFunction]])
+    extends Parser {
   val buf = new StringBuilder
 
   implicit def wsStr(s: String): Rule0 = rule(str(s) ~ sp)
@@ -171,7 +176,7 @@ class TagParser(val input: ParserInput, line: Int, col: Int, builtins: Map[Strin
 
       next()
 
-      builtins get buf.toString match {
+      functions get buf.toString match {
         case Some(BuiltinFunction(_, arity, _)) if arity >= 1 => true
         case _                                                => false
       }

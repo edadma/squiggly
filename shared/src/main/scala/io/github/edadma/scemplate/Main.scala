@@ -83,7 +83,7 @@ object Main extends App {
       else ""
     }
 
-    val parser = new TemplateParser(template, "{{", "}}", Builtin.functions)
+    val parser = new TemplateParser(template, "{{", "}}", Builtin.functions, Builtin.namespaces)
     val ast = parser.parse
 
     if (c.ast)
