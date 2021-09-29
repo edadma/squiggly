@@ -107,14 +107,16 @@ class TagParser(val input: ParserInput,
 
   def power: Rule1[ExprAST] =
     rule {
-      method ~ kw("^") ~ power ~> BinaryExpr |
-        method
+      index ~ kw("^") ~ power ~> BinaryExpr |
+        index
     }
 
-  def method: Rule1[ExprAST] =
+  // todo: index should be associative (should use zeroOrMore)
+  def index: Rule1[ExprAST] =
     rule {
       primary ~ test(cursor == 0 || !lastChar.isWhitespace) ~ '.' ~ (identnsp ~ test(cursorChar != '.') ~ sp ~
         oneOrMore(primary) | ident ~ push(Nil)) ~> MethodExpr |
+        primary ~ "[" ~ expression ~ "]" ~> IndexExpr |
         primary
     }
 
@@ -220,11 +222,11 @@ class TagParser(val input: ParserInput,
 
   def withTag: Rule1[WithAST] = rule(pos ~ "with" ~ expression ~> WithAST)
 
-  def index: Rule1[(Option[Ident], Ident)] =
+  def forIndex: Rule1[(Option[Ident], Ident)] =
     rule(optional(ident ~ ",") ~ ident ~ "<-" ~> Tuple2[Option[Ident], Ident] _)
 
   def forTag: Rule1[ForAST] =
-    rule(pos ~ "for" ~ optional(index) ~ expression ~> ForAST)
+    rule(pos ~ "for" ~ optional(forIndex) ~ expression ~> ForAST)
 
   def commentTag: Rule1[CommentAST] =
     rule("/*" ~ capture(zeroOrMore(!(sp ~ str("*/")) ~ ANY)) ~ sp ~ "*/" ~> CommentAST)

@@ -38,6 +38,8 @@ case class CompareExpr(left: ExprAST, right: Seq[(String, ExprAST)]) extends Exp
 
 case class MethodExpr(expr: ExprAST, method: Ident, args: Seq[ExprAST]) extends ExprAST
 
+case class IndexExpr(expr: ExprAST, index: ExprAST) extends ExprAST
+
 case class PipeExpr(left: ExprAST, right: ApplyExpr) extends ExprAST
 
 case class NonStrictExpr(expr: ExprAST) extends ExprAST

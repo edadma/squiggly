@@ -73,7 +73,6 @@ object Builtin {
       // todo: htmlUnescape
       // todo: https://gohugo.io/functions/humanize/
       // todo: https://gohugo.io/functions/i18n/
-      // todo: https://gohugo.io/functions/index-function/
       // todo: https://gohugo.io/functions/intersect/
       // todo: "join" https://gohugo.io/functions/delimit/
       // todo: https://gohugo.io/functions/jsonify/

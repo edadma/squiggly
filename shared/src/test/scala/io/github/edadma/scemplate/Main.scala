@@ -23,3 +23,5 @@ object Main extends App {
 }
 
 // todo: https://pkg.go.dev/text/template#hdr-Arguments
+
+// todo: https://gohugo.io/functions/index-function/; do indexing the way liquid does [...]
