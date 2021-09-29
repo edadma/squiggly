@@ -73,10 +73,11 @@ case class Context(data: Any, functions: Map[String, BuiltinFunction], vars: mut
 
             val res =
               op match {
-                case "<"  => ln < r
-                case "<=" => ln <= r
-                case ">"  => ln > r
-                case ">=" => ln >= r
+                case "<"   => ln < r
+                case "<="  => ln <= r
+                case ">"   => ln > r
+                case ">="  => ln >= r
+                case "div" => (r remainder ln) == ZERO
               }
 
             l = r

@@ -66,7 +66,7 @@ class TagParser(val input: ParserInput,
   def comparitive: Rule1[ExprAST] =
     rule {
       pipe ~ oneOrMore(
-        (kw("<=") | kw(">=") | kw("!=") | kw("<") | kw(">") | kw("=")) ~
+        (kw("<=") | kw(">=") | kw("!=") | kw("<") | kw(">") | kw("=") | kw("div")) ~
           pipe ~> Tuple2[String, ExprAST] _) ~> CompareExpr |
         pipe
     }

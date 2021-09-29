@@ -11,7 +11,9 @@ object Builtin {
   val namespaces: Map[String, Map[String, BuiltinFunction]] =
     Map(
       "images" -> Map(),
-      "lang" -> Map()
+      "lang" -> Map(),
+      "math" -> Map(),
+      "path" -> Map()
     )
   val functions: Map[String, BuiltinFunction] =
     List(
@@ -41,8 +43,15 @@ object Builtin {
           case (con, Seq(_, input))                         => input
         }
       ),
-      BuiltinFunction("drop", 2, { case (con, Seq(n: Num, s: Iterable[_])) => s drop n.toIntExact }),
-      BuiltinFunction("fileExists", 1, { case (con, Seq(file: String))     => readableFile(file) }),
+      BuiltinFunction("drop", 2, {
+        case (con, Seq(n: Num, s: Iterable[_])) => s drop n.toIntExact
+        case (con, Seq(n: Num, s: String))      => s drop n.toIntExact
+      }),
+      BuiltinFunction("dropRight", 2, {
+        case (con, Seq(n: Num, s: Iterable[_])) => s dropRight n.toIntExact
+        case (con, Seq(n: Num, s: String))      => s dropRight n.toIntExact
+      }),
+      BuiltinFunction("fileExists", 1, { case (con, Seq(file: String)) => readableFile(file) }),
       BuiltinFunction("filter", 2, {
         case (con, Seq(NonStrictExpr(expr), s: Iterable[_])) => s filter (e => con.copy(data = e).beval(expr))
         case (con, Seq(s: String))                           => s // todo
@@ -67,10 +76,14 @@ object Builtin {
         case (con, Seq(s: String))      => s.length
         case (con, Seq(s: Iterable[_])) => s.size
       }),
+      BuiltinFunction("lower", 1, { case (con, Seq(s: String)) => s.toLowerCase }),
       BuiltinFunction("map", 2, {
         case (con, Seq(NonStrictExpr(expr), s: Iterable[_])) => s map (e => con.copy(data = e).eval(expr))
-        case (con, Seq(s: String))                           => s // todo
+        case (con, Seq(s: String))                           => s // todo: map named function
       }),
+      // todo: https://gohugo.io/functions/markdownify/
+      // todo: https://gohugo.io/functions/md5/
+      // todo: https://gohugo.io/functions/merge/
       BuiltinFunction("now", 0, _ => Datetime.now().timestamp),
       BuiltinFunction("number", 1, { case (con, Seq(s: String)) => BigDecimal(s) }),
       BuiltinFunction(
@@ -82,10 +95,25 @@ object Builtin {
           case (con, Seq(from: Num, until: Num, s: String))      => s slice (from.toIntExact, until.toIntExact)
         }
       ),
+      // todo: https://gohugo.io/functions/path.base/
+      // todo: https://gohugo.io/functions/pluralize/
+      // todo: https://gohugo.io/functions/querify/
+      // todo: https://gohugo.io/functions/readdir/
+      // todo: https://gohugo.io/functions/replace/
+      // todo: https://gohugo.io/functions/replaceRE/
+      // todo: https://gohugo.io/functions/sha/
       BuiltinFunction("startsWith", 2, { case (con, Seq(prefix: String, s: String)) => s startsWith prefix }),
-      BuiltinFunction("take", 2, { case (con, Seq(n: Num, s: Iterable[_]))          => s take n.toIntExact }),
-      BuiltinFunction("trim", 1, { case (con, Seq(s: String))                       => s.trim }),
-      BuiltinFunction("unix", 1, { case (con, Seq(d: Datetime))                     => BigDecimal(d.epochMillis) }),
+      BuiltinFunction("take", 2, {
+        case (con, Seq(n: Num, s: Iterable[_])) => s take n.toIntExact
+        case (con, Seq(n: Num, s: String))      => s take n.toIntExact
+      }),
+      BuiltinFunction("takeRight", 2, {
+        case (con, Seq(n: Num, s: Iterable[_])) => s takeRight n.toIntExact
+        case (con, Seq(n: Num, s: String))      => s takeRight n.toIntExact
+      }),
+      BuiltinFunction("trim", 1, { case (con, Seq(s: String))   => s.trim }),
+      BuiltinFunction("unix", 1, { case (con, Seq(d: Datetime)) => BigDecimal(d.epochMillis) }),
+      BuiltinFunction("upper", 1, { case (con, Seq(s: String))  => s.toUpperCase }),
     ) map (f => (f.name, f)) toMap
 
 }
