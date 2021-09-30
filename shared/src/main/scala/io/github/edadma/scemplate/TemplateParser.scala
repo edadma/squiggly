@@ -130,7 +130,8 @@ class TemplateParser(input: String,
 
     if (r.more) {
       r.matchDelimited(startDelim, endDelim) match {
-        case Some((tag, rest)) =>
+        case None => r.error("unclosed tag")
+        case Some(Some((tag, rest))) =>
           if (buf.isEmpty) {
             val trimLeft = tag.startsWith("-")
             val tag1 = if (trimLeft) tag drop 1 else tag
@@ -141,7 +142,7 @@ class TemplateParser(input: String,
 
             Some((rest, TagToken(r, ast, trimLeft, trimRight)))
           } else Some(text(r))
-        case None =>
+        case Some(None) =>
           if (buf.nonEmpty && (r.ch.isWhitespace ^ buf.last.isWhitespace)) Some(text(r))
           else {
             buf += r.ch

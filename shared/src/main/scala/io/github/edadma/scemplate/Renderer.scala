@@ -1,6 +1,5 @@
 package io.github.edadma.scemplate
 
-import scala.annotation.tailrec
 import scala.collection.mutable
 import scala.language.postfixOps
 
