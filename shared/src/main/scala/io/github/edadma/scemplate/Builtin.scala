@@ -30,9 +30,9 @@ object Builtin {
       BuiltinFunction(
         "contains",
         2, {
-          case (con, Seq(elem: Any, s: Seq[_]))            => s contains elem
-          case (con, Seq(elem: String, s: Map[String, _])) => s contains elem
-          case (con, Seq(substr: String, s: String))       => s contains substr
+          case (con, Seq(elem: Any, s: Seq[_]))       => s contains elem
+          case (con, Seq(elem: String, m: Map[_, _])) => m.asInstanceOf[Map[String, _]] contains elem
+          case (con, Seq(substr: String, s: String))  => s contains substr
         }
       ),
       BuiltinFunction(
