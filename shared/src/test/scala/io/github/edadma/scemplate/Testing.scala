@@ -7,7 +7,7 @@ trait Testing {
     val parser = new TemplateParser(template, "{{", "}}", Builtin.functions, Builtin.namespaces)
     val ast = parser.parse
 
-    Renderer.defaultRenderer.render(data, ast)
+    TemplateRenderer.defaultRenderer.render(data, ast)
   }
 
 }

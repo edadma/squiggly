@@ -124,7 +124,6 @@ class TemplateParser(input: String,
     }
 
   def token(r: CharReader, start: CharReader, buf: StringBuilder = new StringBuilder): Option[(CharReader, Token)] = {
-
     def text(r: CharReader): (CharReader, Token) =
       (r, if (buf.last.isWhitespace) SpaceToken(start, buf.toString) else TextToken(start, buf.toString))
 

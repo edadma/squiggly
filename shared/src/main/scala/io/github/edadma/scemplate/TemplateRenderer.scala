@@ -3,13 +3,13 @@ package io.github.edadma.scemplate
 import scala.collection.mutable
 import scala.language.postfixOps
 
-object Renderer {
+object TemplateRenderer {
 
-  val defaultRenderer = new Renderer(Builtin.functions)
+  val defaultRenderer = new TemplateRenderer(Builtin.functions)
 
 }
 
-class Renderer(functions: Map[String, BuiltinFunction]) {
+class TemplateRenderer(functions: Map[String, BuiltinFunction]) {
 
   def render(globalData: Any, ast: TemplateParserAST): String = {
     val globalContext = Context(globalData, functions, new mutable.HashMap[String, Any])

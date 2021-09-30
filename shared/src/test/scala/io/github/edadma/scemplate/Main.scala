@@ -18,7 +18,7 @@ object Main extends App {
   val ast = parser.parse
 
   pprintln(ast)
-  println(Renderer.defaultRenderer.render(data, ast))
+  println(TemplateRenderer.defaultRenderer.render(data, ast))
 
 }
 
