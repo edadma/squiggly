@@ -5,7 +5,7 @@ lazy val scemplate = crossProject(JSPlatform, JVMPlatform, NativePlatform)
   .in(file("."))
   .settings(
     name := "scemplate",
-    version := "0.1.1",
+    version := "0.1.2-pre.1",
     scalaVersion := "2.13.6",
     scalacOptions ++=
       Seq(
