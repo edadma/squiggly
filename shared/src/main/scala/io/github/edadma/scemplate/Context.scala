@@ -67,6 +67,8 @@ case class Context(data: Any, functions: Map[String, BuiltinFunction], vars: mut
         if (beval(cond)) eval(yes)
         else if (no.isDefined) eval(no.get)
         else ""
+      case OrExpr(left, right)  => beval(left) || beval(right)
+      case AndExpr(left, right) => beval(left) && beval(right)
       case CompareExpr(lpos, left, right) =>
         var l = eval(left)
 
@@ -101,21 +103,28 @@ case class Context(data: Any, functions: Map[String, BuiltinFunction], vars: mut
           case Some(value) => value
           case None        => ()
         }
-      case BinaryExpr(left, "and", _, right) => beval(left) && beval(right)
-      case BinaryExpr(left, "or", _, right)  => beval(left) || beval(right)
-      case UnaryExpr("not", _, expr)         => !beval(expr)
-      case BinaryExpr( /*lpos,*/ left, op, rpos, right) =>
-        val l = neval(null, left)
-        val r = neval(rpos, right)
+      case UnaryExpr("not", _, expr) => !beval(expr)
+      case LeftInfixExpr(lpos, left, right) =>
+        def binary(l: Num, op: String, r: Num): Num = {
+          op match {
+            case "+"   => l + r
+            case "-"   => l - r
+            case "*"   => l * r
+            case "/"   => l / r
+            case "mod" => l remainder r
+            case "\\"  => l quot r
+          }
+        }
+
+        val l = neval(lpos, left)
+        val r = right map { case (o, p, e) => (o, neval(p, e)) }
+
+        r.foldLeft(l) { case (l, (o, r)) => binary(l, o, r) }
+      case RightInfixExpr(lpos, left, op, rpos, right) =>
+        val l = neval(lpos, left)
 
         op match {
-          case "+"   => l + r
-          case "-"   => l - r
-          case "*"   => l * r
-          case "/"   => l / r
-          case "mod" => l remainder r
-          case "\\"  => l quot r
-          case "^"   => l pow ieval(rpos, right)
+          case "^" => l pow ieval(rpos, right)
         }
       case UnaryExpr("-", pos, expr)                => -neval(pos, expr)
       case MethodExpr(expr, Ident(pos, name), args) => callFunction(pos, name, (args map eval) :+ eval(expr))

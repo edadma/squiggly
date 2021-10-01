@@ -59,16 +59,12 @@ class TagParser(val input: ParserInput,
 
   def disjunctive: Rule1[ExprAST] =
     rule {
-      conjunctive ~ zeroOrMore(
-        kw("or") ~ pos ~ conjunctive ~> BinaryExpr
-      )
+      conjunctive ~ zeroOrMore("or" ~ conjunctive ~> OrExpr)
     }
 
   def conjunctive: Rule1[ExprAST] =
     rule {
-      not ~ zeroOrMore(
-        kw("and") ~ pos ~ not ~> BinaryExpr
-      )
+      not ~ zeroOrMore("and" ~ not ~> AndExpr)
     }
 
   def not: Rule1[ExprAST] =
@@ -99,12 +95,15 @@ class TagParser(val input: ParserInput,
 
   def additive: Rule1[ExprAST] =
     rule {
-      multiplicative ~ oneOrMore((kw("+") | kw("-")) ~ pos ~ multiplicative ~> BinaryExpr)
+      pos ~ multiplicative ~ oneOrMore(
+        (kw("+") | kw("-")) ~ pos ~ multiplicative ~> Tuple3[String, Position, ExprAST] _) ~> LeftInfixExpr | multiplicative
     }
 
   def multiplicative: Rule1[ExprAST] =
     rule {
-      negative ~ zeroOrMore((kw("*") | kw("/") | kw("mod") | kw("\\")) ~ pos ~ negative ~> BinaryExpr)
+      pos ~ negative ~ oneOrMore(
+        (kw("*") | kw("/") | kw("mod") | kw("\\")) ~
+          pos ~ negative ~> Tuple3[String, Position, ExprAST] _) ~> LeftInfixExpr | negative
     }
 
   def negative: Rule1[ExprAST] =
@@ -115,7 +114,7 @@ class TagParser(val input: ParserInput,
 
   def power: Rule1[ExprAST] =
     rule {
-      index ~ kw("^") ~ pos ~ power ~> BinaryExpr |
+      pos ~ index ~ kw("^") ~ pos ~ power ~> RightInfixExpr |
         index
     }
 
