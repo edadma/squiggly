@@ -20,9 +20,9 @@ case class Context(data: Any, functions: Map[String, BuiltinFunction], vars: mut
 
   def beval(expr: ExprAST): Boolean = !falsy(eval(expr))
 
-  def neval(pos: TagParser#Position, expr: ExprAST): BigDecimal =
-    eval(expr) match {
-      case n: BigDecimal => n
+  def num(pos: TagParser#Position, v: Any): Num =
+    v match {
+      case n: Num => n
       case s: String =>
         try {
           BigDecimal(s)
@@ -30,6 +30,8 @@ case class Context(data: Any, functions: Map[String, BuiltinFunction], vars: mut
           case _: NumberFormatException => pos.error(s"not a number: $s")
         }
     }
+
+  def neval(pos: TagParser#Position, expr: ExprAST): Num = num(pos, eval(expr))
 
   def ieval(pos: TagParser#Position, expr: ExprAST): Int =
     try {
@@ -71,26 +73,41 @@ case class Context(data: Any, functions: Map[String, BuiltinFunction], vars: mut
       case AndExpr(left, right) => beval(left) && beval(right)
       case CompareExpr(lpos, left, right) =>
         var l = eval(left)
+        var lp = lpos
 
         right forall {
-          case ("=", rpos, expr)  => l == eval(expr)
-          case ("!=", rpos, expr) => l != eval(expr)
+          case ("=", _, expr)  => l == eval(expr)
+          case ("!=", _, expr) => l != eval(expr)
           case (op, rpos, expr) =>
-            val r = neval(rpos, expr)
-            val ln = l.asInstanceOf[BigDecimal]
-
+            val r = eval(expr)
             val res =
-              op match {
-                case "<"   => ln < r
-                case "<="  => ln <= r
-                case ">"   => ln > r
-                case ">="  => ln >= r
-                case "div" => (r remainder ln) == ZERO
+              (l, r) match {
+                case (l: String, r: String) =>
+                  op match {
+                    case "<"  => l < r
+                    case "<"  => l < r
+                    case "<=" => l <= r
+                    case ">"  => l > r
+                    case ">=" => l >= r
+                  }
+                case _ =>
+                  val ln = num(lp, l)
+                  val rn = num(rpos, r)
+
+                  op match {
+                    case "<"   => ln < rn
+                    case "<="  => ln <= rn
+                    case ">"   => ln > rn
+                    case ">="  => ln >= rn
+                    case "div" => (rn remainder ln) == ZERO
+                  }
               }
 
             l = r
+            lp = rpos
             res
         }
+
       case BooleanExpr(_, b)  => b
       case StringExpr(pos, s) => unescape(pos, s)
       case NumberExpr(_, n)   => n
@@ -142,8 +159,11 @@ case class Context(data: Any, functions: Map[String, BuiltinFunction], vars: mut
     v match {
       case null | ()               => None
       case m: collection.Map[_, _] => m.asInstanceOf[collection.Map[String, Any]] get id.name
-      case p: Product              => p.productElementNames zip p.productIterator find { case (k, _) => k == id.name } map (_._2)
-      case _                       => sys.error(s"not an object (i.e., Map or case class): $v")
+      case p: Product =>
+        p.productElementNames zip p.productIterator find {
+          case (k, _) => k == id.name
+        } map (_._2)
+      case _ => sys.error(s"not an object (i.e., Map or case class): $v")
     }
 
   @tailrec

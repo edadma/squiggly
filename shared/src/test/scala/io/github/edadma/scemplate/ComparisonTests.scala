@@ -149,4 +149,40 @@ class ComparisonTests extends AnyFreeSpec with Matchers with Testing {
         """.trim.stripMargin
   }
 
+  "comparison 4" in {
+    test(null,
+         """
+        |{{ 3 div 12 }}
+        """.trim.stripMargin) shouldBe
+      """
+        |true 
+        """.trim.stripMargin
+  }
+
+  "comparison 5" in {
+    test(null,
+         """
+        |{{ 3 div 11 }}
+        """.trim.stripMargin) shouldBe
+      """
+        |false 
+        """.trim.stripMargin
+  }
+
+  "comparison 6" in {
+    (the[RuntimeException] thrownBy
+      test(null,
+           """
+           |{{ 'asdf' < 3 }}
+        """.trim.stripMargin)).getMessage should startWith("not a number")
+  }
+
+  "comparison 7" in {
+    (the[RuntimeException] thrownBy
+      test(null,
+           """
+           |{{ 3 < 'asdf' }}
+        """.trim.stripMargin)).getMessage should startWith("not a number")
+  }
+
 }

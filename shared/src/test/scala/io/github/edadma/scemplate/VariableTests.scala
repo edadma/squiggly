@@ -30,9 +30,6 @@ class VariableTests extends AnyFreeSpec with Matchers with Testing {
                                          """
         |{{ v := 345 }}{{ asdf }}
         """.trim.stripMargin)).getMessage should startWith("unknown variable: asdf")
-    """
-        |
-        """.trim.stripMargin
   }
 
   "vars 4" in {
