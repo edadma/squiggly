@@ -185,4 +185,24 @@ class ComparisonTests extends AnyFreeSpec with Matchers with Testing {
         """.trim.stripMargin)).getMessage should startWith("not a number")
   }
 
+  "comparison 8" in {
+    test(null,
+         """
+        |{{ 'a' < 'b' }}
+        """.trim.stripMargin) shouldBe
+      """
+        |true 
+        """.trim.stripMargin
+  }
+
+  "comparison 9" in {
+    test(null,
+         """
+        |{{ 'b' < 'a' }}
+        """.trim.stripMargin) shouldBe
+      """
+        |false 
+        """.trim.stripMargin
+  }
+
 }
