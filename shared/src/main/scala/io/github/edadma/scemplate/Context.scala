@@ -116,7 +116,7 @@ case class Context(data: Any, functions: Map[String, BuiltinFunction], vars: mut
         if (user == "$") getVar(pos, name)
         else callFunction(pos, name, Nil)
       case ElementExpr(pos, globalvar, ids) =>
-        lookupSeq(if (globalvar == "$") global else data, ids) match {
+        lookupSeq(pos, if (globalvar == "$") global else data, ids) match {
           case Some(value) => value
           case None        => ()
         }
@@ -155,25 +155,26 @@ case class Context(data: Any, functions: Map[String, BuiltinFunction], vars: mut
     }
 
   // todo: add position info for error
-  private def lookup(v: Any, id: Ident): Option[Any] =
+  private def lookup(pos: TagParser#Position, v: Any, id: Ident): Option[Any] =
     v match {
-      case null | ()               => None
+      case ()                      => pos.error(s"attempt to lookup property '${id.name}' of undefined")
+      case null                    => None
       case m: collection.Map[_, _] => m.asInstanceOf[collection.Map[String, Any]] get id.name
       case p: Product =>
         p.productElementNames zip p.productIterator find {
           case (k, _) => k == id.name
         } map (_._2)
-      case _ => sys.error(s"not an object (i.e., Map or case class): $v")
+      case _ => pos.error(s"not an object (i.e., Map or case class): $v")
     }
 
   @tailrec
-  private def lookupSeq(v: Any, ids: Seq[Ident]): Option[Any] =
+  private def lookupSeq(pos: TagParser#Position, v: Any, ids: Seq[Ident]): Option[Any] =
     ids.toList match {
       case Nil      => Some(v)
-      case h :: Nil => lookup(v, h)
+      case h :: Nil => lookup(pos, v, h)
       case h :: t =>
-        lookup(v, h) match {
-          case Some(value) => lookupSeq(value, t)
+        lookup(pos, v, h) match {
+          case Some(value) => lookupSeq(pos, value, t)
           case None        => None
         }
     }

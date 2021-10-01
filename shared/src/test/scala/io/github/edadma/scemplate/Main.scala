@@ -9,11 +9,11 @@ object Main extends App {
   case class Person(name: String, age: Int)
 
   //  val data = Map("jonny" -> Person("jonny", 45))
-  val data = List(BigDecimal(3), BigDecimal(4), BigDecimal(5), BigDecimal(6))
-  //  val data = BigDecimal(5)
+  //  val data = List(BigDecimal(3), BigDecimal(4), BigDecimal(5), BigDecimal(6))
+  val data = ()
   //  val input = "zxcv {{ with .jonny -}} name: {{ .name }} age: {{ .age }} {{- end }} asdf "
-  val input = "{{ 'zxcv' < 3 }}"
-//  val input = "{{ m := {a: 3, b: 4} }}{{ m['a'] }}"
+  val input = "{{ .x.b }}"
+  //  val input = "{{ .asdf }}"
   val parser = new TemplateParser(input, "{{", "}}", Builtin.functions, Builtin.namespaces)
   val ast = parser.parse
 
