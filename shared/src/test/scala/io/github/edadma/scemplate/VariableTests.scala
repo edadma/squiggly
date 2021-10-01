@@ -25,6 +25,24 @@ class VariableTests extends AnyFreeSpec with Matchers with Testing {
         """.trim.stripMargin
   }
 
-}
+  "vars 3" in {
+    (the[RuntimeException] thrownBy test(null,
+                                         """
+        |{{ v := 345 }}{{ asdf }}
+        """.trim.stripMargin)).getMessage should startWith("unknown variable: asdf")
+    """
+        |
+        """.trim.stripMargin
+  }
 
-// todo: missing variables should be handled correctly
+  "vars 4" in {
+    test("{a: {b: 3, c: {d: 4}}}",
+         """
+        |[{{ .a.d }}]
+        """.trim.stripMargin) shouldBe
+      """
+        |[]
+        """.trim.stripMargin
+  }
+
+}
