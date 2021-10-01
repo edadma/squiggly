@@ -58,13 +58,16 @@ package object scemplate {
 
   def hex(c: Char): Int = if (c < 128) HEX(c) else 0
 
-  def unescape(s: String): String = {
+  def unescape(pos: TagParser#Position, s: String): String = {
     val buf = new StringBuilder
     val it = s.iterator
+    var idx = -1
 
     def ch =
-      if (it.hasNext) it.next()
-      else sys.error("unescape: unexpected end of string")
+      if (it.hasNext) {
+        idx += 1
+        it.next()
+      } else pos.shift(idx).error("unexpected end of string")
 
     while (it.hasNext) {
       ch match {
@@ -81,7 +84,7 @@ package object scemplate {
               case 'r'  => '\r'
               case 't'  => '\t'
               case 'u'  => (hex(ch) << 12 | hex(ch) << 8 | hex(ch) << 4 | hex(ch)).toChar
-              case c    => sys.error(s"unescape: non-escapable character: '$c' (${c.toInt})")
+              case c    => pos.shift(idx + 1).error(s"non-escapable character: '$c' (${c.toInt})")
             })
         case c => buf += c
       }

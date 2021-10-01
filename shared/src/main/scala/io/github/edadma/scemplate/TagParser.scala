@@ -16,7 +16,7 @@ class TagParser(val input: ParserInput,
     extends Parser {
   val buf = new StringBuilder
 
-  class Position(offset: Int) {
+  class Position(val offset: Int) {
     def error(msg: String): Nothing = {
       var p = startpos
 
@@ -24,6 +24,8 @@ class TagParser(val input: ParserInput,
 
       p.error(msg)
     }
+
+    def shift(n: Int) = new Position(offset + n)
   }
 
   implicit def wsStr(s: String): Rule0 = rule(str(s) ~ sp)
@@ -58,28 +60,28 @@ class TagParser(val input: ParserInput,
   def disjunctive: Rule1[ExprAST] =
     rule {
       conjunctive ~ zeroOrMore(
-        kw("or") ~ conjunctive ~> BinaryExpr
+        kw("or") ~ pos ~ conjunctive ~> BinaryExpr
       )
     }
 
   def conjunctive: Rule1[ExprAST] =
     rule {
       not ~ zeroOrMore(
-        kw("and") ~ not ~> BinaryExpr
+        kw("and") ~ pos ~ not ~> BinaryExpr
       )
     }
 
   def not: Rule1[ExprAST] =
     rule {
-      kw("not") ~ not ~> UnaryExpr |
+      kw("not") ~ pos ~ not ~> UnaryExpr |
         comparitive
     }
 
   def comparitive: Rule1[ExprAST] =
     rule {
-      pipe ~ oneOrMore(
+      pos ~ pipe ~ oneOrMore(
         (kw("<=") | kw(">=") | kw("!=") | kw("<") | kw(">") | kw("=") | kw("div")) ~
-          pipe ~> Tuple2[String, ExprAST] _) ~> CompareExpr |
+          pos ~ pipe ~> Tuple3[String, Position, ExprAST] _) ~> CompareExpr |
         pipe
     }
 
@@ -97,30 +99,23 @@ class TagParser(val input: ParserInput,
 
   def additive: Rule1[ExprAST] =
     rule {
-      multiplicative ~ zeroOrMore(
-        kw("+") ~ multiplicative ~> BinaryExpr
-          | kw("-") ~ multiplicative ~> BinaryExpr
-      )
+      multiplicative ~ oneOrMore((kw("+") | kw("-")) ~ pos ~ multiplicative ~> BinaryExpr)
     }
 
   def multiplicative: Rule1[ExprAST] =
     rule {
-      negative ~ zeroOrMore(
-        kw("*") ~ negative ~> BinaryExpr
-          | kw("/") ~ negative ~> BinaryExpr
-          | kw("mod") ~ negative ~> BinaryExpr
-          | kw("\\") ~ negative ~> BinaryExpr)
+      negative ~ zeroOrMore((kw("*") | kw("/") | kw("mod") | kw("\\")) ~ pos ~ negative ~> BinaryExpr)
     }
 
   def negative: Rule1[ExprAST] =
     rule {
-      kw("-") ~ negative ~> UnaryExpr |
+      kw("-") ~ pos ~ negative ~> UnaryExpr |
         power
     }
 
   def power: Rule1[ExprAST] =
     rule {
-      index ~ kw("^") ~ power ~> BinaryExpr |
+      index ~ kw("^") ~ pos ~ power ~> BinaryExpr |
         index
     }
 
@@ -129,7 +124,7 @@ class TagParser(val input: ParserInput,
     rule {
       primary ~ test(cursor == 0 || !lastChar.isWhitespace) ~ '.' ~ (identnsp ~ test(cursorChar != '.') ~ sp ~
         oneOrMore(primary) | ident ~ push(Nil)) ~> MethodExpr |
-        primary ~ "[" ~ expression ~ "]" ~> IndexExpr |
+        primary ~ "[" ~ pos ~ expression ~ "]" ~> IndexExpr |
         primary
     }
 
@@ -207,7 +202,7 @@ class TagParser(val input: ParserInput,
         .separatedBy('.') ~ sp ~> ElementExpr)
 
   def string: Rule1[StringExpr] =
-    rule(pos ~ (singleQuoteString | doubleQuoteString) ~> ((p: Position, s: String) => StringExpr(p, unescape(s))))
+    rule(pos ~ (singleQuoteString | doubleQuoteString) ~> ((p: Position, s: String) => StringExpr(p, s)))
 
   def backtickString: Rule1[String] = rule(capture('`' ~ zeroOrMore("\\`" | noneOf("`"))) ~ '`' ~ sp)
 

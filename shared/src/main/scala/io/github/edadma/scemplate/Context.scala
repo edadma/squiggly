@@ -20,11 +20,22 @@ case class Context(data: Any, functions: Map[String, BuiltinFunction], vars: mut
 
   def beval(expr: ExprAST): Boolean = !falsy(eval(expr))
 
-  def neval(expr: ExprAST): BigDecimal =
+  def neval(pos: TagParser#Position, expr: ExprAST): BigDecimal =
     eval(expr) match {
       case n: BigDecimal => n
-      case s: String     => BigDecimal(s)
-      case v             => sys.error(s"not a number: $v")
+      case s: String =>
+        try {
+          BigDecimal(s)
+        } catch {
+          case _: NumberFormatException => pos.error(s"not a number: $s")
+        }
+    }
+
+  def ieval(pos: TagParser#Position, expr: ExprAST): Int =
+    try {
+      neval(pos, expr).toIntExact
+    } catch {
+      case _: ArithmeticException => pos.error("must be an exact \"small\" integer")
     }
 
   // todo: should check arguments for "undefined" (i.e., ())
@@ -32,19 +43,19 @@ case class Context(data: Any, functions: Map[String, BuiltinFunction], vars: mut
     functions get name match {
       case Some(BuiltinFunction(_, arity, function)) =>
         if (args.length < arity)
-          sys.error(s"too few arguments for function '$name': expected $arity, found ${args.length}")
+          pos.error(s"too few arguments for function '$name': expected $arity, found ${args.length}")
         else if (!function.isDefinedAt((this, args)))
-          sys.error(s"cannot apply function '$name' to arguments ${args map (a => s"'$a'") mkString ", "}")
+          pos.error(s"cannot apply function '$name' to arguments ${args map (a => s"'$a'") mkString ", "}")
         else function((this, args))
       case None =>
         if (args.isEmpty) getVar(pos, name)
-        else sys.error(s"function found: $name")
+        else pos.error(s"function found: $name")
     }
 
   def getVar(pos: TagParser#Position, name: String): Any =
     vars get name match {
       case Some(value) => value
-      case None        => sys.error(s"unknown variable: $name")
+      case None        => pos.error(s"unknown variable: $name")
     }
 
   def eval(expr: ExprAST): Any =
@@ -56,14 +67,14 @@ case class Context(data: Any, functions: Map[String, BuiltinFunction], vars: mut
         if (beval(cond)) eval(yes)
         else if (no.isDefined) eval(no.get)
         else ""
-      case CompareExpr(left, right) =>
+      case CompareExpr(lpos, left, right) =>
         var l = eval(left)
 
         right forall {
-          case ("=", expr)  => l == eval(expr)
-          case ("!=", expr) => l != eval(expr)
-          case (op, expr) =>
-            val r = neval(expr)
+          case ("=", rpos, expr)  => l == eval(expr)
+          case ("!=", rpos, expr) => l != eval(expr)
+          case (op, rpos, expr) =>
+            val r = neval(rpos, expr)
             val ln = l.asInstanceOf[BigDecimal]
 
             val res =
@@ -78,10 +89,10 @@ case class Context(data: Any, functions: Map[String, BuiltinFunction], vars: mut
             l = r
             res
         }
-      case BooleanExpr(_, b) => b
-      case StringExpr(_, s)  => s
-      case NumberExpr(_, n)  => n
-      case NullExpr(_)       => null
+      case BooleanExpr(_, b)  => b
+      case StringExpr(pos, s) => unescape(pos, s)
+      case NumberExpr(_, n)   => n
+      case NullExpr(_)        => null
       case VarExpr(_, user, Ident(pos, name)) =>
         if (user == "$") getVar(pos, name)
         else callFunction(pos, name, Nil)
@@ -90,12 +101,12 @@ case class Context(data: Any, functions: Map[String, BuiltinFunction], vars: mut
           case Some(value) => value
           case None        => ()
         }
-      case BinaryExpr(left, "and", right) => beval(left) && beval(right)
-      case BinaryExpr(left, "or", right)  => beval(left) || beval(right)
-      case UnaryExpr("not", expr)         => !beval(expr)
-      case BinaryExpr(left, op, right) =>
-        val l = neval(left)
-        val r = neval(right)
+      case BinaryExpr(left, "and", _, right) => beval(left) && beval(right)
+      case BinaryExpr(left, "or", _, right)  => beval(left) || beval(right)
+      case UnaryExpr("not", _, expr)         => !beval(expr)
+      case BinaryExpr( /*lpos,*/ left, op, rpos, right) =>
+        val l = neval(null, left)
+        val r = neval(rpos, right)
 
         op match {
           case "+"   => l + r
@@ -104,27 +115,26 @@ case class Context(data: Any, functions: Map[String, BuiltinFunction], vars: mut
           case "/"   => l / r
           case "mod" => l remainder r
           case "\\"  => l quot r
-          case "^"   => l.pow(r.toIntExact)
+          case "^"   => l pow ieval(rpos, right)
         }
-      case UnaryExpr("-", expr) => -neval(expr)
-      case MethodExpr(expr, Ident(pos, name), args) =>
-        callFunction(pos, name, (args map eval) :+ eval(expr))
-      case IndexExpr(expr, index) =>
+      case UnaryExpr("-", pos, expr)                => -neval(pos, expr)
+      case MethodExpr(expr, Ident(pos, name), args) => callFunction(pos, name, (args map eval) :+ eval(expr))
+      case IndexExpr(expr, pos, index) =>
         eval(expr) match {
           case m: Map[_, _] => m.asInstanceOf[Map[Any, _]](eval(index))
-          case s: Seq[_]    => s(neval(index).toIntExact)
+          case s: Seq[_]    => s(ieval(pos, index))
         }
-      case ApplyExpr(Ident(pos, name), args) => callFunction(pos, name, args map eval)
-      case PipeExpr(left, ApplyExpr(Ident(pos, name), args)) =>
-        callFunction(pos, name, (args map eval) :+ eval(left))
+      case ApplyExpr(Ident(pos, name), args)                 => callFunction(pos, name, args map eval)
+      case PipeExpr(left, ApplyExpr(Ident(pos, name), args)) => callFunction(pos, name, (args map eval) :+ eval(left))
     }
 
+  // todo: add position info for error
   private def lookup(v: Any, id: Ident): Option[Any] =
     v match {
       case null | ()               => None
       case m: collection.Map[_, _] => m.asInstanceOf[collection.Map[String, Any]] get id.name
       case p: Product              => p.productElementNames zip p.productIterator find { case (k, _) => k == id.name } map (_._2)
-      case _                       => sys.error(s"not an object: $v")
+      case _                       => sys.error(s"not an object (i.e., Map or case class): $v")
     }
 
   @tailrec

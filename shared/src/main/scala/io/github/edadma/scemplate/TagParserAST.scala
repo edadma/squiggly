@@ -28,19 +28,24 @@ case class MapExpr(pairs: Seq[(Ident, ExprAST)]) extends ExprAST
 
 case class SeqExpr(elems: Seq[ExprAST]) extends ExprAST
 
-case class UnaryExpr(op: String, expr: ExprAST) extends ExprAST
+case class UnaryExpr(op: String, pos: TagParser#Position, expr: ExprAST) extends ExprAST
 
-case class BinaryExpr(left: ExprAST, op: String, right: ExprAST) extends ExprAST
+case class BinaryExpr( /*lpos: TagParser#Position,*/ left: ExprAST,
+                      op: String,
+                      rpos: TagParser#Position,
+                      right: ExprAST)
+    extends ExprAST
 
 case class ApplyExpr(name: Ident, args: Seq[ExprAST]) extends ExprAST
 
 case class ConditionalAST(cond: ExprAST, yes: ExprAST, no: Option[ExprAST]) extends ExprAST
 
-case class CompareExpr(left: ExprAST, right: Seq[(String, ExprAST)]) extends ExprAST
+case class CompareExpr(lpos: TagParser#Position, left: ExprAST, right: Seq[(String, TagParser#Position, ExprAST)])
+    extends ExprAST
 
 case class MethodExpr(expr: ExprAST, method: Ident, args: Seq[ExprAST]) extends ExprAST
 
-case class IndexExpr(expr: ExprAST, index: ExprAST) extends ExprAST
+case class IndexExpr(expr: ExprAST, pos: TagParser#Position, index: ExprAST) extends ExprAST
 
 case class PipeExpr(left: ExprAST, right: ApplyExpr) extends ExprAST
 
