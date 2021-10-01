@@ -28,7 +28,7 @@ case class MapExpr(pairs: Seq[(Ident, ExprAST)]) extends ExprAST
 
 case class SeqExpr(elems: Seq[ExprAST]) extends ExprAST
 
-case class UnaryExpr(op: String, pos: TagParser#Position, expr: ExprAST) extends ExprAST
+case class PrefixExpr(op: String, pos: TagParser#Position, expr: ExprAST) extends ExprAST
 
 case class LeftInfixExpr(lpos: TagParser#Position, left: ExprAST, right: Seq[(String, TagParser#Position, ExprAST)])
     extends ExprAST

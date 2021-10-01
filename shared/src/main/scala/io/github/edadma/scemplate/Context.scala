@@ -103,7 +103,7 @@ case class Context(data: Any, functions: Map[String, BuiltinFunction], vars: mut
           case Some(value) => value
           case None        => ()
         }
-      case UnaryExpr("not", _, expr) => !beval(expr)
+      case PrefixExpr("not", _, expr) => !beval(expr)
       case LeftInfixExpr(lpos, left, right) =>
         def binary(l: Num, op: String, r: Num): Num = {
           op match {
@@ -126,7 +126,7 @@ case class Context(data: Any, functions: Map[String, BuiltinFunction], vars: mut
         op match {
           case "^" => l pow ieval(rpos, right)
         }
-      case UnaryExpr("-", pos, expr)                => -neval(pos, expr)
+      case PrefixExpr("-", pos, expr)               => -neval(pos, expr)
       case MethodExpr(expr, Ident(pos, name), args) => callFunction(pos, name, (args map eval) :+ eval(expr))
       case IndexExpr(expr, pos, index) =>
         eval(expr) match {

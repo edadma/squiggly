@@ -69,7 +69,7 @@ class TagParser(val input: ParserInput,
 
   def not: Rule1[ExprAST] =
     rule {
-      kw("not") ~ pos ~ not ~> UnaryExpr |
+      kw("not") ~ pos ~ not ~> PrefixExpr |
         comparitive
     }
 
@@ -108,7 +108,7 @@ class TagParser(val input: ParserInput,
 
   def negative: Rule1[ExprAST] =
     rule {
-      kw("-") ~ pos ~ negative ~> UnaryExpr |
+      kw("-") ~ pos ~ negative ~> PrefixExpr |
         power
     }
 
