@@ -132,10 +132,10 @@ class TemplateParser(input: String,
         case None => r.error("unclosed tag")
         case Some(Some((tag, rest))) =>
           if (buf.isEmpty) {
-            val trimLeft = tag.startsWith("-")
-            val tag1 = if (trimLeft) tag drop 1 else tag
-            val trimRight = tag1.endsWith("-")
-            val tag2 = if (trimRight) tag1 dropRight 1 else tag1
+            val trimLeft = tag.length >= 2 && tag.startsWith("-") && tag(1).isWhitespace
+            val tag1 = if (trimLeft) tag drop 2 else tag
+            val trimRight = tag1.length >= 2 && tag1.endsWith("-") && tag1(tag1.length - 2).isWhitespace
+            val tag2 = if (trimRight) tag1 dropRight 2 else tag1
             val tagParser = new TagParser(tag2, rest.line, rest.col, functions, namespaces)
             val ast = tagParser.parseTag
 

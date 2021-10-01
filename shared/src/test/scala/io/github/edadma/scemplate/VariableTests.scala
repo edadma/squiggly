@@ -26,3 +26,5 @@ class VariableTests extends AnyFreeSpec with Matchers with Testing {
   }
 
 }
+
+// todo: missing variables should be handled correctly

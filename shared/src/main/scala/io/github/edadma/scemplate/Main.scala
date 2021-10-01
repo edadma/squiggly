@@ -89,7 +89,7 @@ object Main extends App {
     if (c.ast)
       pprintln(ast)
     else
-      println(TemplateRenderer.defaultRenderer.render(data, ast))
+      println(Renderer.defaultRenderer.render(data, ast))
   }
 
 }
