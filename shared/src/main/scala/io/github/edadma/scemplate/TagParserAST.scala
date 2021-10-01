@@ -49,7 +49,7 @@ case class CompareExpr(lpos: TagParser#Position, left: ExprAST, right: Seq[(Stri
 
 case class MethodExpr(expr: ExprAST, method: Ident, args: Seq[ExprAST]) extends ExprAST
 
-case class IndexExpr(expr: ExprAST, pos: TagParser#Position, index: ExprAST) extends ExprAST
+case class IndexExpr(expr: ExprAST, indices: Seq[(TagParser#Position, ExprAST)]) extends ExprAST
 
 case class PipeExpr(left: ExprAST, right: ApplyExpr) extends ExprAST
 

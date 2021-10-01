@@ -123,7 +123,7 @@ class TagParser(val input: ParserInput,
     rule {
       primary ~ test(cursor == 0 || !lastChar.isWhitespace) ~ '.' ~ (identnsp ~ test(cursorChar != '.') ~ sp ~
         oneOrMore(primary) | ident ~ push(Nil)) ~> MethodExpr |
-        primary ~ "[" ~ pos ~ expression ~ "]" ~> IndexExpr |
+        primary ~ oneOrMore("[" ~ pos ~ expression ~ "]" ~> Tuple2[Position, ExprAST] _) ~> IndexExpr |
         primary
     }
 

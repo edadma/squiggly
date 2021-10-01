@@ -145,11 +145,29 @@ case class Context(data: Any, functions: Map[String, BuiltinFunction], vars: mut
         }
       case PrefixExpr("-", pos, expr)               => -neval(pos, expr)
       case MethodExpr(expr, Ident(pos, name), args) => callFunction(pos, name, (args map eval) :+ eval(expr))
-      case IndexExpr(expr, pos, index) =>
-        eval(expr) match {
-          case m: Map[_, _] => m.asInstanceOf[Map[Any, _]](eval(index))
-          case s: Seq[_]    => s(ieval(pos, index))
+      case IndexExpr(expr, indices) =>
+        val it = indices.iterator
+        var d = eval(expr)
+
+        while (it.hasNext && d != ()) {
+          val (pos, idx) = it.next
+
+          d = d match {
+            case m: Map[_, _] =>
+              m.asInstanceOf[Map[Any, _]] get eval(idx) match {
+                case Some(v) => v
+                case None    => ()
+              }
+            case s: Seq[_] =>
+              ieval(pos, idx) match {
+                case n if n < 0         => pos.error(s"negative array index: $n")
+                case n if n >= s.length => pos.error(s"array index out of range: $n")
+                case n                  => s(n)
+              }
+          }
         }
+
+        d
       case ApplyExpr(Ident(pos, name), args)                 => callFunction(pos, name, args map eval)
       case PipeExpr(left, ApplyExpr(Ident(pos, name), args)) => callFunction(pos, name, (args map eval) :+ eval(left))
     }
