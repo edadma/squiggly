@@ -119,27 +119,29 @@ class TemplateParser(input: String,
 
   def tokenize(r: CharReader): LazyList[Token] =
     token(r, r) match {
-      case Some((rest, tok)) => tok #:: tokenize(rest)
+      case Some((tok, rest)) => tok #:: tokenize(rest)
       case None              => EOIToken(r) #:: LazyList.empty
     }
 
-  def token(r: CharReader, start: CharReader, buf: StringBuilder = new StringBuilder): Option[(CharReader, Token)] = {
-    def text(r: CharReader): (CharReader, Token) =
-      (r, if (buf.last.isWhitespace) SpaceToken(start, buf.toString) else TextToken(start, buf.toString))
+  def token(r: CharReader, start: CharReader, buf: StringBuilder = new StringBuilder): Option[(Token, CharReader)] = {
+    def text(r: CharReader): (Token, CharReader) =
+      (if (buf.last.isWhitespace) SpaceToken(start, buf.toString) else TextToken(start, buf.toString), r)
 
     if (r.more) {
       r.matchDelimited(startDelim, endDelim) match {
         case None => r.error("unclosed tag")
         case Some(Some((tag, rest))) =>
           if (buf.isEmpty) {
+            if (tag contains '\n') r.error("a tag may not occupy more than one line")
+
             val trimLeft = tag.length >= 2 && tag.startsWith("-") && tag(1).isWhitespace
             val tag1 = if (trimLeft) tag drop 2 else tag
             val trimRight = tag1.length >= 2 && tag1.endsWith("-") && tag1(tag1.length - 2).isWhitespace
             val tag2 = if (trimRight) tag1 dropRight 2 else tag1
-            val tagParser = new TagParser(tag2, rest.line, rest.col, functions, namespaces)
+            val tagParser = new TagParser(tag2, r, startDelim.length, functions, namespaces)
             val ast = tagParser.parseTag
 
-            Some((rest, TagToken(r, ast, trimLeft, trimRight)))
+            Some(TagToken(r, ast, trimLeft, trimRight), rest)
           } else Some(text(r))
         case Some(None) =>
           if (buf.nonEmpty && (r.ch.isWhitespace ^ buf.last.isWhitespace)) Some(text(r))

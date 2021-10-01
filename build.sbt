@@ -23,7 +23,7 @@ lazy val scemplate = crossProject(JSPlatform, JVMPlatform, NativePlatform)
     githubRepository := name.value,
     resolvers += Resolver.githubPackages("edadma"),
     mainClass := Some(s"${organization.value}.${name.value}.Main"),
-    libraryDependencies += "org.scalatest" %%% "scalatest" % "3.2.9" % "test",
+    libraryDependencies += "org.scalatest" %%% "scalatest" % "3.2.10" % "test",
     libraryDependencies ++= Seq(
       "io.github.edadma" %%% "cross-platform" % "0.1.1",
       "io.github.edadma" %%% "char-reader" % "0.1.7",

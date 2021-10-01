@@ -1,7 +1,7 @@
 package io.github.edadma.scemplate
 
 import org.scalatest.freespec.AnyFreeSpec
-import org.scalatest.matchers.should.Matchers
+import org.scalatest.matchers.should._
 
 class ForTests extends AnyFreeSpec with Matchers with Testing {
 
@@ -36,11 +36,11 @@ class ForTests extends AnyFreeSpec with Matchers with Testing {
   }
 
   "for 2" in {
-    the[RuntimeException] thrownBy
+    (the[RuntimeException] thrownBy
       test("{a: {b: 3, c: {d: 4}}}",
            """
             |{{ for .a.b }}{{ . }}{{ end }}
-            """.trim.stripMargin) should have message "'for' can only be applied to an iterable object: 3"
+            """.trim.stripMargin)).getMessage should startWith("'for' can only be applied to an iterable object")
   }
 
   "for 3" in {

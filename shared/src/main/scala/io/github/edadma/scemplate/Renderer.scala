@@ -35,7 +35,7 @@ class Renderer(functions: Map[String, BuiltinFunction]) {
             case v if falsy(v) => els foreach (render(context, _))
             case v             => render(context.copy(data = restrict(tpos, v)), body)
           }
-        case BlockAST(tpos, ForAST(pos, index, expr), body, els) =>
+        case BlockAST(tpos, ForAST(index, pos, expr), body, els) =>
           context.eval(expr) match {
             case v if falsy(v) => els foreach (render(context, _))
             case s: Iterable[Any] =>
@@ -51,7 +51,7 @@ class Renderer(functions: Map[String, BuiltinFunction]) {
 
                   render(context.copy(data = e), body)
               }
-            case v => sys.error(s"'for' can only be applied to an iterable object: $v")
+            case v => pos.error(s"'for' can only be applied to an iterable object: $v")
           }
         case ContentAST(toks) =>
           toks foreach {
@@ -59,10 +59,10 @@ class Renderer(functions: Map[String, BuiltinFunction]) {
             case SpaceToken(pos, s)   => buf ++= s
             case TagToken(pos, tag: ExprAST, _, _) =>
               buf ++=
-                context.eval(tag) match {
-                case null | () => ""
-                case v         => v.toString
-              }
+                (context.eval(tag) match {
+                  case null | () => ""
+                  case v         => v.toString
+                })
             case TagToken(pos, AssignmentAST(Ident(_, name), expr), _, _) =>
               context.vars(name) = restrict(pos, context.eval(expr))
             case TagToken(pos, tag: CommentAST, _, _) =>

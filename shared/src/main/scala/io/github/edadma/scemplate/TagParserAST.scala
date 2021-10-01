@@ -1,28 +1,28 @@
 package io.github.edadma.scemplate
 
-case class Ident(pos: Int, name: String)
+case class Ident(pos: TagParser#Position, name: String)
 
 trait TagParserAST
 
 trait Positioned {
-  val pos: Int
+  val pos: TagParser#Position
 }
 
 trait ExprAST extends TagParserAST
 
 trait SimpleExpr extends ExprAST with Positioned
 
-case class StringExpr(pos: Int, s: String) extends SimpleExpr
+case class StringExpr(pos: TagParser#Position, s: String) extends SimpleExpr
 
-case class NumberExpr(pos: Int, n: BigDecimal) extends SimpleExpr
+case class NumberExpr(pos: TagParser#Position, n: BigDecimal) extends SimpleExpr
 
-case class BooleanExpr(pos: Int, b: Boolean) extends SimpleExpr
+case class BooleanExpr(pos: TagParser#Position, b: Boolean) extends SimpleExpr
 
-case class NullExpr(pos: Int) extends SimpleExpr
+case class NullExpr(pos: TagParser#Position) extends SimpleExpr
 
-case class VarExpr(pos: Int, user: String, name: Ident) extends SimpleExpr
+case class VarExpr(pos: TagParser#Position, user: String, name: Ident) extends SimpleExpr
 
-case class ElementExpr(pos: Int, global: String, ids: Seq[Ident]) extends SimpleExpr
+case class ElementExpr(pos: TagParser#Position, global: String, ids: Seq[Ident]) extends SimpleExpr
 
 case class MapExpr(pairs: Seq[(Ident, ExprAST)]) extends ExprAST
 
@@ -54,14 +54,14 @@ trait ConstructAST extends TagParserAST with Positioned
 
 trait SimpleBlockAST extends ConstructAST
 
-case class IfAST(pos: Int, cond: ExprAST) extends ConstructAST
+case class IfAST(pos: TagParser#Position, cond: ExprAST) extends ConstructAST
 
-case class ElseIfAST(pos: Int, cond: ExprAST) extends ConstructAST
+case class ElseIfAST(pos: TagParser#Position, cond: ExprAST) extends ConstructAST
 
-case class ElseAST(pos: Int) extends ConstructAST
+case class ElseAST(pos: TagParser#Position) extends ConstructAST
 
-case class EndAST(pos: Int) extends ConstructAST
+case class EndAST(pos: TagParser#Position) extends ConstructAST
 
-case class WithAST(pos: Int, expr: ExprAST) extends SimpleBlockAST
+case class WithAST(pos: TagParser#Position, expr: ExprAST) extends SimpleBlockAST
 
-case class ForAST(pos: Int, index: Option[(Option[Ident], Ident)], expr: ExprAST) extends SimpleBlockAST
+case class ForAST(index: Option[(Option[Ident], Ident)], pos: TagParser#Position, expr: ExprAST) extends SimpleBlockAST

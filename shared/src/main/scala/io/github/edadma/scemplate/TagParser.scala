@@ -1,5 +1,7 @@
 package io.github.edadma.scemplate
 
+import io.github.edadma.char_reader.CharReader
+
 import scala.util.{Failure, Success}
 import org.parboiled2._
 
@@ -7,12 +9,22 @@ import scala.annotation.tailrec
 import scala.language.implicitConversions
 
 class TagParser(val input: ParserInput,
-                line: Int,
-                col: Int,
+                startpos: CharReader,
+                startoffset: Int,
                 functions: Map[String, BuiltinFunction],
                 namespaces: Map[String, Map[String, BuiltinFunction]])
     extends Parser {
   val buf = new StringBuilder
+
+  class Position(offset: Int) {
+    def error(msg: String): Nothing = {
+      var p = startpos
+
+      for (_ <- 1 to offset + startoffset) p = p.next
+
+      p.error(msg)
+    }
+  }
 
   implicit def wsStr(s: String): Rule0 = rule(str(s) ~ sp)
 
@@ -144,7 +156,7 @@ class TagParser(val input: ParserInput,
   def nul: Rule1[NullExpr] = rule(pos ~ "null" ~> NullExpr)
 
   def boolean: Rule1[BooleanExpr] =
-    rule(pos ~ (kw("true") | kw("false")) ~> ((p: Int, b: String) => BooleanExpr(p, b == "true")))
+    rule(pos ~ (kw("true") | kw("false")) ~> ((p: Position, b: String) => BooleanExpr(p, b == "true")))
 
   def decimal: Rule1[BigDecimal] =
     rule {
@@ -195,7 +207,7 @@ class TagParser(val input: ParserInput,
         .separatedBy('.') ~ sp ~> ElementExpr)
 
   def string: Rule1[StringExpr] =
-    rule(pos ~ (singleQuoteString | doubleQuoteString) ~> ((p: Int, s: String) => StringExpr(p, unescape(s))))
+    rule(pos ~ (singleQuoteString | doubleQuoteString) ~> ((p: Position, s: String) => StringExpr(p, unescape(s))))
 
   def backtickString: Rule1[String] = rule(capture('`' ~ zeroOrMore("\\`" | noneOf("`"))) ~ '`' ~ sp)
 
@@ -211,7 +223,7 @@ class TagParser(val input: ParserInput,
 
   def ident: Rule1[Ident] = rule(identnsp ~ sp)
 
-  def pos: Rule1[Int] = rule(push(cursor))
+  def pos: Rule1[Position] = rule(push(new Position(cursor)))
 
   def sp: Rule0 = rule(quiet(zeroOrMore(anyOf(" \t\r\n"))))
 
@@ -231,7 +243,7 @@ class TagParser(val input: ParserInput,
     rule(optional(ident ~ ",") ~ ident ~ "<-" ~> Tuple2[Option[Ident], Ident] _)
 
   def forTag: Rule1[ForAST] =
-    rule(pos ~ "for" ~ optional(forIndex) ~ expression ~> ForAST)
+    rule("for" ~ optional(forIndex) ~ pos ~ expression ~> ForAST)
 
   def commentTag: Rule1[CommentAST] =
     rule("/*" ~ capture(zeroOrMore(!(sp ~ str("*/")) ~ ANY)) ~ sp ~ "*/" ~> CommentAST)

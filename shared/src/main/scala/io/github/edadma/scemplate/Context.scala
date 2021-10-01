@@ -28,8 +28,7 @@ case class Context(data: Any, functions: Map[String, BuiltinFunction], vars: mut
     }
 
   // todo: should check arguments for "undefined" (i.e., ())
-  // todo: unify position info for errors from within TagParser: cursor should be an offset from CharReader position
-  def callFunction(pos: Int, name: String, args: Seq[Any]): Any =
+  def callFunction(pos: TagParser#Position, name: String, args: Seq[Any]): Any =
     functions get name match {
       case Some(BuiltinFunction(_, arity, function)) =>
         if (args.length < arity)
@@ -42,7 +41,7 @@ case class Context(data: Any, functions: Map[String, BuiltinFunction], vars: mut
         else sys.error(s"function found: $name")
     }
 
-  def getVar(pos: Int, name: String): Any =
+  def getVar(pos: TagParser#Position, name: String): Any =
     vars get name match {
       case Some(value) => value
       case None        => sys.error(s"unknown variable: $name")
