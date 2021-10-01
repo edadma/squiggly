@@ -1,5 +1,7 @@
 package io.github.edadma.scemplate
 
+import io.github.edadma.char_reader.CharReader
+
 trait TemplateParserAST
 
 case class ContentAST(toks: Seq[Token]) extends TemplateParserAST
@@ -10,7 +12,7 @@ case class IfBlockAST(cond: ExprAST,
                       els: Option[TemplateParserAST])
     extends TemplateParserAST
 
-case class BlockAST(block: ConstructAST, body: TemplateParserAST, els: Option[TemplateParserAST])
+case class BlockAST(pos: CharReader, block: ConstructAST, body: TemplateParserAST, els: Option[TemplateParserAST])
     extends TemplateParserAST
 
 case class BlockWithElseAST(body: TemplateParserAST) extends TemplateParserAST

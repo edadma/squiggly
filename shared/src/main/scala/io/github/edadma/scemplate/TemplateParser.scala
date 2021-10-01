@@ -52,7 +52,7 @@ class TemplateParser(input: String,
           if (body == EmptyBlockAST)
             Console.err.println(pos.longErrorText("warning: empty block"))
 
-          astbuf += BlockAST(tag, body, els)
+          astbuf += BlockAST(pos, tag, body, els)
           parse(rest, parsingbody, allowelse, tokbuf, astbuf)
         case TagToken(pos, _: ElseAST, _, _) #:: t =>
           if (parsingbody && allowelse) (BlockWithElseAST(endOfBlock), t)

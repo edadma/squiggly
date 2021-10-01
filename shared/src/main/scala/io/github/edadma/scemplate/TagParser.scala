@@ -124,6 +124,7 @@ class TagParser(val input: ParserInput,
   def primary: Rule1[ExprAST] = rule {
     boolean |
       number |
+      nul |
       variable |
       string |
       element |
@@ -139,6 +140,8 @@ class TagParser(val input: ParserInput,
   def seq: Rule1[SeqExpr] = rule("[" ~ zeroOrMore(expression).separatedBy(",") ~ "]" ~> SeqExpr)
 
   def number: Rule1[NumberExpr] = rule(pos ~ decimal ~> NumberExpr)
+
+  def nul: Rule1[NullExpr] = rule(pos ~ "null" ~> NullExpr)
 
   def boolean: Rule1[BooleanExpr] =
     rule(pos ~ (kw("true") | kw("false")) ~> ((p: Int, b: String) => BooleanExpr(p, b == "true")))
@@ -202,7 +205,8 @@ class TagParser(val input: ParserInput,
 
   def identnsp: Rule1[Ident] =
     rule {
-      pos ~ !"if" ~ !"true" ~ !"false" ~ capture((CharPredicate.Alpha | '_') ~ zeroOrMore(CharPredicate.AlphaNum | '_')) ~> Ident
+      pos ~ !"if" ~ !"true" ~ !"false" ~ !"null" ~ capture(
+        (CharPredicate.Alpha | '_') ~ zeroOrMore(CharPredicate.AlphaNum | '_')) ~> Ident
     }
 
   def ident: Rule1[Ident] = rule(identnsp ~ sp)

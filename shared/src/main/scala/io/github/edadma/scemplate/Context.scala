@@ -27,6 +27,8 @@ case class Context(data: Any, functions: Map[String, BuiltinFunction], vars: mut
       case v             => sys.error(s"not a number: $v")
     }
 
+  // todo: should check arguments for "undefined" (i.e., ())
+  // todo: unify position info for errors from within TagParser: cursor should be an offset from CharReader position
   def callFunction(pos: Int, name: String, args: Seq[Any]): Any =
     functions get name match {
       case Some(BuiltinFunction(_, arity, function)) =>
@@ -80,13 +82,14 @@ case class Context(data: Any, functions: Map[String, BuiltinFunction], vars: mut
       case BooleanExpr(_, b) => b
       case StringExpr(_, s)  => s
       case NumberExpr(_, n)  => n
+      case NullExpr(_)       => null
       case VarExpr(_, user, Ident(pos, name)) =>
         if (user == "$") getVar(pos, name)
         else callFunction(pos, name, Nil)
       case ElementExpr(pos, globalvar, ids) =>
         lookupSeq(if (globalvar == "$") global else data, ids) match {
           case Some(value) => value
-          case None        => () //sys.error(s"not found: .${ids map (_.name) mkString "."}")
+          case None        => ()
         }
       case BinaryExpr(left, "and", right) => beval(left) && beval(right)
       case BinaryExpr(left, "or", right)  => beval(left) || beval(right)
@@ -119,6 +122,7 @@ case class Context(data: Any, functions: Map[String, BuiltinFunction], vars: mut
 
   private def lookup(v: Any, id: Ident): Option[Any] =
     v match {
+      case null | ()               => None
       case m: collection.Map[_, _] => m.asInstanceOf[collection.Map[String, Any]] get id.name
       case p: Product              => p.productElementNames zip p.productIterator find { case (k, _) => k == id.name } map (_._2)
       case _                       => sys.error(s"not an object: $v")

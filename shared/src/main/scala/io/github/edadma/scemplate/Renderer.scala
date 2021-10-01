@@ -1,5 +1,7 @@
 package io.github.edadma.scemplate
 
+import io.github.edadma.char_reader.CharReader
+
 import scala.collection.mutable
 import scala.language.postfixOps
 
@@ -18,16 +20,22 @@ class Renderer(functions: Map[String, BuiltinFunction]) {
 
     val buf = new StringBuilder
 
-    def render(context: Context, ast: TemplateParserAST): Unit =
+    def render(context: Context, ast: TemplateParserAST): Unit = {
+      def restrict(pos: CharReader, v: Any): Any =
+        v match {
+          case () => pos.error("attempting to bind a value of 'undefined'")
+          case _  => v
+        }
+
       ast match {
         case EmptyBlockAST    =>
         case SequenceAST(seq) => seq foreach (render(context, _))
-        case BlockAST(WithAST(pos, expr), body, els) =>
+        case BlockAST(tpos, WithAST(pos, expr), body, els) =>
           context.eval(expr) match {
             case v if falsy(v) => els foreach (render(context, _))
-            case v             => render(context.copy(data = v), body)
+            case v             => render(context.copy(data = restrict(tpos, v)), body)
           }
-        case BlockAST(ForAST(pos, index, expr), body, els) =>
+        case BlockAST(tpos, ForAST(pos, index, expr), body, els) =>
           context.eval(expr) match {
             case v if falsy(v) => els foreach (render(context, _))
             case s: Iterable[Any] =>
@@ -47,11 +55,17 @@ class Renderer(functions: Map[String, BuiltinFunction]) {
           }
         case ContentAST(toks) =>
           toks foreach {
-            case TextToken(pos, text)                                     => buf ++= text
-            case SpaceToken(pos, s)                                       => buf ++= s
-            case TagToken(pos, tag: ExprAST, _, _)                        => buf ++= context.eval(tag).toString
-            case TagToken(pos, AssignmentAST(Ident(_, name), expr), _, _) => context.vars(name) = context.eval(expr)
-            case TagToken(pos, tag: CommentAST, _, _)                     =>
+            case TextToken(pos, text) => buf ++= text
+            case SpaceToken(pos, s)   => buf ++= s
+            case TagToken(pos, tag: ExprAST, _, _) =>
+              buf ++=
+                context.eval(tag) match {
+                case null | () => ""
+                case v         => v.toString
+              }
+            case TagToken(pos, AssignmentAST(Ident(_, name), expr), _, _) =>
+              context.vars(name) = restrict(pos, context.eval(expr))
+            case TagToken(pos, tag: CommentAST, _, _) =>
           }
         case IfBlockAST(cond, yes, elseif, no) =>
           if (context.beval(cond)) render(context, yes)
@@ -62,6 +76,7 @@ class Renderer(functions: Map[String, BuiltinFunction]) {
             }
           }
       }
+    }
 
     render(globalContext, ast)
     buf.toString
