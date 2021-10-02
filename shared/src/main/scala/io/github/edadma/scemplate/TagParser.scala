@@ -17,15 +17,19 @@ class TagParser(val input: ParserInput,
   val buf = new StringBuilder
 
   class Position(val offset: Int) {
-    def error(msg: String): Nothing = {
+    def pos: CharReader = {
       var p = startpos
 
       for (_ <- 1 to offset + startoffset) p = p.next
 
-      p.error(msg)
+      p
     }
 
+    def error(msg: String): Nothing = pos.error(msg)
+
     def shift(n: Int) = new Position(offset + n)
+
+    override def toString: String = pos.toString
   }
 
   implicit def wsStr(s: String): Rule0 = rule(str(s) ~ sp)
@@ -118,7 +122,6 @@ class TagParser(val input: ParserInput,
         index
     }
 
-  // todo: index should be associative (should use zeroOrMore)
   def index: Rule1[ExprAST] =
     rule {
       primary ~ test(cursor == 0 || !lastChar.isWhitespace) ~ '.' ~ (identnsp ~ test(cursorChar != '.') ~ sp ~
