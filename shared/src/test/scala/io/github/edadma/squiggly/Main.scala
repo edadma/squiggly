@@ -16,17 +16,20 @@ object Main extends App {
   //  val data = Datetime.now()
   //  val input = "zxcv {{ with .jonny -}} name: {{ .name }} age: {{ .age }} {{- end }} asdf "
   //  val input = "{{ .date.unix }}"
-  val input = "{{ partial 'asdf' {x :5} }}"
+  val input = "{{ partial '' {x :5} }}{{ return 'asdf' }}"
   val parser = TemplateParser.simple(input)
   val ast = parser.parse
 
   //  pprintln(ast)
   val partial =
     """
-      |{{ return .x + 2 }}""".stripMargin
+      |{{ return .x + 2 }}
+      |""".trim.stripMargin
   val partialTemplate = TemplateParser.simple(partial).parse
+  val ret = Renderer.simple(_ => Some(partialTemplate)).render(data, ast)
 
-  println(Renderer.simple(_ => Some(partialTemplate)).render(data, ast))
+  println
+  println(ret)
 
 }
 
