@@ -23,7 +23,7 @@ object Main extends App {
 
     OParser.sequence(
       programName("scemplate"),
-      head("Scala Template Engine", "v0.1.2"),
+      head("Scala Template Engine", "v0.1.3"),
       opt[Unit]('a', "ast")
         .optional()
         .action((_, c) => c.copy(ast = true))
