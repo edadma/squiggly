@@ -5,17 +5,17 @@ import io.github.edadma.char_reader.CharReader
 import scala.annotation.tailrec
 import scala.collection.mutable.{ArrayBuffer, ListBuffer}
 
-object TemplateParser {
+object Parser {
 
-  def simple(input: String) = new TemplateParser(input, "{{", "}}", Builtin.functions, Builtin.namespaces)
+  def simple(input: String) = new Parser(input, "{{", "}}", Builtin.functions, Builtin.namespaces)
 
 }
 
-class TemplateParser(input: String,
-                     startDelim: String,
-                     endDelim: String,
-                     functions: Map[String, BuiltinFunction],
-                     namespaces: Map[String, Map[String, BuiltinFunction]]) {
+class Parser(input: String,
+             startDelim: String,
+             endDelim: String,
+             functions: Map[String, BuiltinFunction],
+             namespaces: Map[String, Map[String, BuiltinFunction]]) {
 
   def parse: TemplateParserAST = {
     val seq = new ListBuffer[TemplateParserAST]

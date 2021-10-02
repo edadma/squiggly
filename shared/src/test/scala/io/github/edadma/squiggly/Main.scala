@@ -18,7 +18,7 @@ object Main extends App {
   //  val input = "{{ .date.unix }}"
   val data = null
   val input = "{{ partial '' {x :5} }}{{ return 'asdf' }}"
-  val parser = TemplateParser.simple(input)
+  val parser = Parser.simple(input)
   val ast = parser.parse
 
   //  pprintln(ast)
@@ -26,7 +26,7 @@ object Main extends App {
     """
       |{{ return .x + 2 }}
       |""".trim.stripMargin
-  val partialTemplate = TemplateParser.simple(partial).parse
+  val partialTemplate = Parser.simple(partial).parse
   val ret = Renderer.simple(_ => Some(partialTemplate)).render(data, ast)
 
   println()

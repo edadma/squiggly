@@ -23,7 +23,7 @@ object Main extends App {
 
     OParser.sequence(
       programName("squiggly"),
-      head("Squiggly Template Engine", "v0.1.1"),
+      head("Squiggly Template Engine", "v0.1.2"),
       opt[Unit]('a', "ast")
         .optional()
         .action((_, c) => c.copy(ast = true))
@@ -83,13 +83,14 @@ object Main extends App {
       else ""
     }
 
-    val parser = TemplateParser.simple(template)
-    val ast = parser.parse
+    val ast = Parser.simple(template).parse
 
     if (c.ast)
       pprintln(ast)
-    else
-      println(Renderer.simple().render(data, ast))
+    else {
+      Renderer.simple().render(data, ast)
+      println()
+    }
   }
 
 }
