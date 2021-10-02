@@ -1,4 +1,4 @@
-<img align="right" src="logos/squiggly-200.png" alt="squiggly logo">
+<img align="right" src="logos/squiggly-trans-200.png" alt="squiggly logo">
 
 squiggly
 ========
