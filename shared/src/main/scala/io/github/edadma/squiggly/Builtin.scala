@@ -18,9 +18,9 @@ object Builtin {
     )
   val functions: Map[String, BuiltinFunction] =
     List(
-      BuiltinFunction("anchorize", 1, {
-        case (con, Seq(s: String)) =>
-      }),
+//      BuiltinFunction("anchorize", 1, {
+//        case (con, Seq(s: String)) =>
+//      }),
       BuiltinFunction("append", 2, {
         case (con, Seq(c: Seq[_], s: Seq[_]))                => s ++ c
         case (con, s: Seq[_]) if s.last.isInstanceOf[Seq[_]] => s.last.asInstanceOf[Seq[_]] ++ s.init
@@ -68,7 +68,7 @@ object Builtin {
       // todo: https://gohugo.io/functions/hmac/
       BuiltinFunction("htmlEscape", 1, {
         case (con, Seq(s: String)) =>
-          s replace ("&", "&amp;") replace ("<", "&lt;") replace (">", "&gt;") replace ("'", "&#39;") replace ("\"", "&#34;")
+          s replace ("&", "&amp;") replace ("<", "&lt;") replace (">", "&gt;") replace ("'", "&apos;") replace ("\"", "&quot;")
       }),
       // todo: htmlUnescape
       // todo: https://gohugo.io/functions/humanize/

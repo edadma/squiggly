@@ -1,9 +1,12 @@
+<img align="right" src="logos/squiggly-200.png" alt="squiggly logo">
+
 squiggly
 ========
 
 ![GitHub release (latest by date including pre-releases)](https://img.shields.io/github/v/release/edadma/squiggly?include_prereleases) ![GitHub (Pre-)Release Date](https://img.shields.io/github/release-date-pre/edadma/squiggly) ![GitHub last commit](https://img.shields.io/github/last-commit/edadma/squiggly) ![GitHub](https://img.shields.io/github/license/edadma/squiggly)
 
-*squiggly* is a Scala based string templating engine.  *squiggly* is a library and also a Linux command line application for parsing and rendering templates.
+*squiggly* is a Scala based string templating engine.  *squiggly* is a library and also a Linux command line application
+for parsing and rendering templates.
 
 ## Overview
 
@@ -34,8 +37,7 @@ import io.github.edadma.squiggly._
 
 ```
 
-To use the executable, download the file `squiggly` from the root folder of the repository. Make it executable by
-typing
+To use the executable, download the file `squiggly` from the root folder of the repository. Make it executable by typing
 
 ```shell
 chmod a+x path/to/squiggly
