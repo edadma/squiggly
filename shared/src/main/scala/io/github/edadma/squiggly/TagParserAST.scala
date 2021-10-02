@@ -24,7 +24,7 @@ case class VarExpr(pos: TagParser#Position, user: String, name: Ident) extends S
 
 case class ElementExpr(pos: TagParser#Position, global: String, ids: Seq[Ident]) extends SimpleExpr
 
-case class MapExpr(pairs: Seq[(Ident, ExprAST)]) extends ExprAST
+case class MapExpr(pairs: Seq[(Ident, TagParser#Position, ExprAST)]) extends ExprAST
 
 case class SeqExpr(elems: Seq[ExprAST]) extends ExprAST
 

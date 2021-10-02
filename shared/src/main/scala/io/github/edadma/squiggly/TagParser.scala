@@ -144,7 +144,9 @@ class TagParser(val input: ParserInput,
   }
 
   def map: Rule1[MapExpr] =
-    rule("{" ~ zeroOrMore(ident ~ ":" ~ expression ~> Tuple2[Ident, ExprAST] _).separatedBy(",") ~ "}" ~> MapExpr)
+    rule(
+      "{" ~ zeroOrMore(ident ~ ":" ~ pos ~ expression ~> Tuple3[Ident, Position, ExprAST] _)
+        .separatedBy(",") ~ "}" ~> MapExpr)
 
   def seq: Rule1[SeqExpr] = rule("[" ~ zeroOrMore(expression).separatedBy(",") ~ "]" ~> SeqExpr)
 

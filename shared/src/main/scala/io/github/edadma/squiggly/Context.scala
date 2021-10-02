@@ -68,7 +68,7 @@ case class Context(data: Any,
     expr match {
       case e: NonStrictExpr => e
       case SeqExpr(elems)   => elems map eval
-      case MapExpr(pairs)   => pairs map { case (Ident(_, k), v) => (k, eval(v)) } toMap
+      case MapExpr(pairs)   => pairs map { case (Ident(_, k), pos, v) => (k, restrict(pos, eval(v))) } toMap
       case ConditionalAST(cond, yes, no) =>
         if (beval(cond)) eval(yes)
         else if (no.isDefined) eval(no.get)

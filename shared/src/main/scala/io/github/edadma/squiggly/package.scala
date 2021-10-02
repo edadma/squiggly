@@ -1,12 +1,16 @@
 package io.github.edadma
 
-import org.parboiled2.{ParseError, Parser, Position}
-
 import scala.collection.immutable
 
 package object squiggly {
 
   case class BuiltinFunction(name: String, arity: Int, function: PartialFunction[(Context, Seq[Any]), Any])
+
+  def restrict(pos: TagParser#Position, v: Any): Any =
+    v match {
+      case () => pos.error("attempting to bind a value of 'undefined'")
+      case _  => v
+    }
 
   type Num = BigDecimal
 

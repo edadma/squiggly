@@ -22,12 +22,6 @@ class Renderer(out: PrintStream, functions: Map[String, BuiltinFunction]) {
     globalContext.global = globalData
 
     def render(context: Context, ast: TemplateParserAST): Unit = {
-      def restrict(pos: CharReader, v: Any): Any =
-        v match {
-          case () => pos.error("attempting to bind a value of 'undefined'")
-          case _  => v
-        }
-
       ast match {
         case EmptyBlockAST    =>
         case SequenceAST(seq) => seq foreach (render(context, _))
