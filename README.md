@@ -1,5 +1,5 @@
 squiggly
-=========
+========
 
 ![GitHub release (latest by date including pre-releases)](https://img.shields.io/github/v/release/edadma/squiggly?include_prereleases) ![GitHub (Pre-)Release Date](https://img.shields.io/github/release-date-pre/edadma/squiggly) ![GitHub last commit](https://img.shields.io/github/last-commit/edadma/squiggly) ![GitHub](https://img.shields.io/github/license/edadma/squiggly)
 
