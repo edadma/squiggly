@@ -11,7 +11,7 @@ trait Testing {
     val buf = new ByteArrayOutputStream
     val out = new PrintStream(buf)
 
-    Renderer.simple().render(data, ast)
+    new Renderer(out, _ => None, Builtin.functions).render(data, ast)
     buf.toString
   }
 
