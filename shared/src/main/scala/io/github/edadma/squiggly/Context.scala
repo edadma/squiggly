@@ -40,18 +40,22 @@ case class Context(renderer: Renderer, data: Any, vars: mutable.HashMap[String, 
       case _: ArithmeticException => pos.error("must be an exact \"small\" integer")
     }
 
-  // todo: should check arguments for "undefined" (i.e., ())
+  // todo: arguments should have Position for error reporting
   def callFunction(pos: TagParser#Position, name: String, args: Seq[Any]): Any =
-    renderer.functions get name match {
-      case Some(BuiltinFunction(_, arity, function)) =>
-        if (args.length < arity)
-          pos.error(s"too few arguments for function '$name': expected $arity, found ${args.length}")
-        else if (!function.isDefinedAt((this, args)))
-          pos.error(s"cannot apply function '$name' to arguments ${args map (a => s"'$a'") mkString ", "}")
-        else function((this, args))
+    args.find(_ == ()) match {
+      case Some(_) => pos.error("argument of 'undefined' may not be passed to a function")
       case None =>
-        if (args.isEmpty) getVar(pos, name)
-        else pos.error(s"function found: $name")
+        renderer.functions get name match {
+          case Some(BuiltinFunction(_, arity, function)) =>
+            if (args.length < arity)
+              pos.error(s"too few arguments for function '$name': expected $arity, found ${args.length}")
+            else if (!function.isDefinedAt((this, args)))
+              pos.error(s"cannot apply function '$name' to arguments ${args map (a => s"'$a'") mkString ", "}")
+            else function((this, args))
+          case None =>
+            if (args.isEmpty) getVar(pos, name)
+            else pos.error(s"function found: $name")
+        }
     }
 
   def getVar(pos: TagParser#Position, name: String): Any =

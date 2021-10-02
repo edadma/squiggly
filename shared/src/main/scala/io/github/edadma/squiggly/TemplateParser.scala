@@ -5,6 +5,12 @@ import io.github.edadma.char_reader.CharReader
 import scala.annotation.tailrec
 import scala.collection.mutable.{ArrayBuffer, ListBuffer}
 
+object TemplateParser {
+
+  def simple(input: String) = new TemplateParser(input, "{{", "}}", Builtin.functions, Builtin.namespaces)
+
+}
+
 class TemplateParser(input: String,
                      startDelim: String,
                      endDelim: String,

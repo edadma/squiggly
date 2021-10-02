@@ -140,9 +140,10 @@ object Builtin {
       // todo: https://gohugo.io/functions/urlize/
     ) map (f => (f.name, f)) toMap
 
-  private def partial(context: Context, path: String, data: Any): Any =
-    context.renderer.render(data, new TemplateParser())
+  private def partial(context: Context, path: String, data: Any): Any = {
+    val partial = context.renderer.partials(path) getOrElse sys.error(s"partial '$path' count not be loaded")
+
+    context.renderer.render(data, partial)
+  }
 
 }
-
-// todo: continue at https://gohugo.io/functions/findre/

@@ -7,7 +7,7 @@ import scala.language.postfixOps
 
 object Renderer {
 
-  val defaultRenderer = new Renderer(Console.out, _ => None, Builtin.functions)
+  def simple(partials: PartialsLoader = _ => None) = new Renderer(Console.out, partials, Builtin.functions)
 
 }
 
