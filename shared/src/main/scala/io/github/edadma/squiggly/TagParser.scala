@@ -4,6 +4,7 @@ import io.github.edadma.char_reader.CharReader
 
 import scala.util.{Failure, Success}
 import org.parboiled2._
+import shapeless.HNil
 
 import scala.annotation.tailrec
 import scala.language.implicitConversions
@@ -45,6 +46,7 @@ class TagParser(val input: ParserInput,
           | forTag
           | elseTag
           | assignmentTag
+          | returnTag
           | commentTag
           | expression
           | ifTag
@@ -227,6 +229,8 @@ class TagParser(val input: ParserInput,
   def sp: Rule0 = rule(quiet(zeroOrMore(anyOf(" \t\r\n"))))
 
   def assignmentTag: Rule1[AssignmentAST] = rule(ident ~ ":=" ~ expression ~> AssignmentAST)
+
+  def returnTag: Rule1[ReturnAST] = rule("return" ~ optional(expression) ~> ReturnAST)
 
   def ifTag: Rule1[IfAST] = rule(pos ~ "if" ~ condition ~> IfAST)
 

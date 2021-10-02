@@ -1,14 +1,10 @@
 package io.github.edadma.squiggly
 
-import java.io.PrintStream
 import scala.annotation.tailrec
 import scala.collection.mutable
 import scala.language.postfixOps
 
-case class Context(data: Any,
-                   out: PrintStream,
-                   functions: Map[String, BuiltinFunction],
-                   vars: mutable.HashMap[String, Any]) {
+case class Context(renderer: Renderer, data: Any, vars: mutable.HashMap[String, Any]) {
 
   private var _global: Any = _
 
@@ -46,7 +42,7 @@ case class Context(data: Any,
 
   // todo: should check arguments for "undefined" (i.e., ())
   def callFunction(pos: TagParser#Position, name: String, args: Seq[Any]): Any =
-    functions get name match {
+    renderer.functions get name match {
       case Some(BuiltinFunction(_, arity, function)) =>
         if (args.length < arity)
           pos.error(s"too few arguments for function '$name': expected $arity, found ${args.length}")

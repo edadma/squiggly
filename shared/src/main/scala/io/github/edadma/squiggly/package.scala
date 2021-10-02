@@ -6,6 +6,8 @@ package object squiggly {
 
   case class BuiltinFunction(name: String, arity: Int, function: PartialFunction[(Context, Seq[Any]), Any])
 
+  type PartialsLoader = String => Option[TemplateParserAST]
+
   def restrict(pos: TagParser#Position, v: Any): Any =
     v match {
       case () => pos.error("attempting to bind a value of 'undefined'")

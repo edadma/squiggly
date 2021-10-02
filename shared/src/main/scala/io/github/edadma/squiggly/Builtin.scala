@@ -101,6 +101,10 @@ object Builtin {
       ),
       // todo: https://gohugo.io/functions/path.base/
       // todo: https://gohugo.io/functions/pluralize/
+      BuiltinFunction("partial", 1, {
+        case (con, Seq(path: String))            => partial(con, path, null)
+        case (con, Seq(path: String, data: Any)) => partial(con, path, data)
+      }),
       // todo: https://gohugo.io/functions/querify/
       // todo: https://gohugo.io/functions/readdir/
       // todo: https://gohugo.io/functions/replace/
@@ -135,6 +139,9 @@ object Builtin {
       BuiltinFunction("upper", 1, { case (con, Seq(s: String)) => s.toUpperCase }),
       // todo: https://gohugo.io/functions/urlize/
     ) map (f => (f.name, f)) toMap
+
+  private def partial(context: Context, path: String, data: Any): Any =
+    context.renderer.render(data, new TemplateParser())
 
 }
 

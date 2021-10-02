@@ -1,7 +1,5 @@
 package io.github.edadma.squiggly
 
-import io.github.edadma.char_reader.CharReader
-
 import java.io.PrintStream
 
 import scala.collection.mutable
@@ -9,15 +7,17 @@ import scala.language.postfixOps
 
 object Renderer {
 
-  val defaultRenderer = new Renderer(Console.out, Builtin.functions)
+  val defaultRenderer = new Renderer(Console.out, _ => None, Builtin.functions)
 
 }
 
-class Renderer(out: PrintStream, functions: Map[String, BuiltinFunction]) {
+class Renderer(private[squiggly] val out: PrintStream,
+               private[squiggly] val partials: PartialsLoader,
+               private[squiggly] val functions: Map[String, BuiltinFunction]) {
 
   def render(globalData: Any, ast: TemplateParserAST): Any = {
-    val globalContext = Context(globalData, out, functions, new mutable.HashMap[String, Any])
-    val returnValue: Any = ()
+    val globalContext = Context(this, globalData, new mutable.HashMap[String, Any])
+    var returnValue: Any = ()
 
     globalContext.global = globalData
 
@@ -58,8 +58,10 @@ class Renderer(out: PrintStream, functions: Map[String, BuiltinFunction]) {
                   case null | () => ""
                   case v         => v.toString
                 })
-            case TagToken(pos, AssignmentAST(Ident(_, name), expr), _, _) =>
-              context.vars(name) = context.eval(expr)
+            case TagToken(_, AssignmentAST(Ident(_, name), expr), _, _) => context.vars(name) = context.eval(expr)
+            case TagToken(_, ReturnAST(expr), _, _) =>
+              returnValue = expr map context.eval getOrElse ()
+              throw new ReturnException
             case TagToken(_, _: CommentAST, _, _) =>
           }
         case IfBlockAST(cond, yes, elseif, no) =>
