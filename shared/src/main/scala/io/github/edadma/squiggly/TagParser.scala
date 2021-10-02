@@ -218,7 +218,7 @@ class TagParser(val input: ParserInput,
 
   def identnsp: Rule1[Ident] =
     rule {
-      pos ~ !"if" ~ !"true" ~ !"false" ~ !"null" ~ capture(
+      pos ~ !"if" ~ !"true" ~ !"false" ~ !"null" ~ !"elsif" ~ !"switch" ~ capture(
         (CharPredicate.Alpha | '_') ~ zeroOrMore(CharPredicate.AlphaNum | '_')) ~> Ident
     }
 
@@ -234,7 +234,7 @@ class TagParser(val input: ParserInput,
 
   def ifTag: Rule1[IfAST] = rule(pos ~ "if" ~ condition ~> IfAST)
 
-  def elseIfTag: Rule1[ElseIfAST] = rule(pos ~ "else" ~ "if" ~ condition ~> ElseIfAST)
+  def elseIfTag: Rule1[ElseIfAST] = rule(pos ~ "elsif" ~ condition ~> ElseIfAST)
 
   def elseTag: Rule1[ElseAST] = rule(pos ~ "else" ~> ElseAST)
 

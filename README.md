@@ -5,16 +5,25 @@ squiggly
 
 ![GitHub release (latest by date including pre-releases)](https://img.shields.io/github/v/release/edadma/squiggly?include_prereleases) ![GitHub (Pre-)Release Date](https://img.shields.io/github/release-date-pre/edadma/squiggly) ![GitHub last commit](https://img.shields.io/github/last-commit/edadma/squiggly) ![GitHub](https://img.shields.io/github/license/edadma/squiggly)
 
-*squiggly* is a Scala based string templating engine.  *squiggly* is a library and also a Linux command line application
-for parsing and rendering templates.
+*squiggly* is a Scala based string templating engine.
 
 ## Overview
 
+*squiggly* is a language, a Scala library, and a Linux command line application for doing string templating.  *squiggly*
+can be compared to [Mustache](https://mustache.github.io/) or [Go templates](https://pkg.go.dev/text/template) or
+[Liquid](https://shopify.github.io/liquid/), which are all great template languages. Basically, a string template
+composed of text and actions (or tags) which are instructions in *squiggly*, is applied to data to produce a textual
+output.
+
+Unlike Mustache, *squiggly* is not logicless, but allows basic very logic to be used in templates.
+
+Curly braces or brackets are sometimes referred to as squiggly brackets, which is where the name "squiggly" comes from.
+
 ## Installation
 
-To use the library in you application:
+### Library
 
-Include the following in your `project/plugins.sbt`:
+To use the library in your application, include the following in your `project/plugins.sbt`:
 
 ```sbt
 addSbtPlugin("com.codecommit" % "sbt-github-packages" % "0.5.2")
@@ -37,7 +46,10 @@ import io.github.edadma.squiggly._
 
 ```
 
-To use the executable, download the file `squiggly` from the root folder of the repository. Make it executable by typing
+### Command line
+
+To use the command line executable, download the file `squiggly` from the root folder of the repository. Make it
+executable by typing
 
 ```shell
 chmod a+x path/to/squiggly
@@ -50,6 +62,10 @@ sudo cp path/to/scamplate /usr/bin
 ```
 
 ## Basic use
+
+### Library
+
+### Command line
 
 Type
 
@@ -72,7 +88,7 @@ Usage: squiggly [options] [[<template>]]
   [<template>]           template string
 ```
 
-For example
+Here's a trivial example:
 
 ```shell
 squiggly -d "{a: 3, b: 4}" "{{ .a }} + {{ .b }} = {{ .a + .b }}"

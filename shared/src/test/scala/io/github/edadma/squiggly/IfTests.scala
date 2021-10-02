@@ -48,7 +48,7 @@ class IfTests extends AnyFreeSpec with Matchers with Testing {
   "if 5" in {
     test("3",
          """
-          |[{{ if . = 3 }}three{{ else if . = 4 }}four{{ else }}none{{ end }}]
+          |[{{ if . = 3 }}three{{ elsif . = 4 }}four{{ else }}none{{ end }}]
           """.trim.stripMargin) shouldBe
       """
         |[three]
@@ -58,7 +58,7 @@ class IfTests extends AnyFreeSpec with Matchers with Testing {
   "if 5a" in {
     test("4",
          """
-          |[{{ if . = 3 }}three{{ else if . = 4 }}four{{ else }}none{{ end }}]
+          |[{{ if . = 3 }}three{{ elsif . = 4 }}four{{ else }}none{{ end }}]
           """.trim.stripMargin) shouldBe
       """
         |[four]
@@ -68,7 +68,7 @@ class IfTests extends AnyFreeSpec with Matchers with Testing {
   "if 5b" in {
     test("5",
          """
-          |[{{ if . = 3 }}three{{ else if . = 4 }}four{{ else }}none{{ end }}]
+          |[{{ if . = 3 }}three{{ elsif . = 4 }}four{{ else }}none{{ end }}]
           """.trim.stripMargin) shouldBe
       """
         |[none]
@@ -78,7 +78,7 @@ class IfTests extends AnyFreeSpec with Matchers with Testing {
   "if 6" in {
     test("3",
          """
-          |[{{ if . = 3 }}three{{ else if . = 4 }}four{{ end }}]
+          |[{{ if . = 3 }}three{{ elsif . = 4 }}four{{ end }}]
           """.trim.stripMargin) shouldBe
       """
         |[three]
@@ -88,7 +88,7 @@ class IfTests extends AnyFreeSpec with Matchers with Testing {
   "if 7" in {
     test("4",
          """
-          |[{{ if . = 3 }}three{{ else if . = 4 }}four{{ end }}]
+          |[{{ if . = 3 }}three{{ elsif . = 4 }}four{{ end }}]
           """.trim.stripMargin) shouldBe
       """
         |[four]
@@ -98,7 +98,7 @@ class IfTests extends AnyFreeSpec with Matchers with Testing {
   "if 8" in {
     test("5",
          """
-          |[{{ if . = 3 }}three{{ else if . = 4 }}four{{ end }}]
+          |[{{ if . = 3 }}three{{ elsif . = 4 }}four{{ end }}]
           """.trim.stripMargin) shouldBe
       """
         |[]
@@ -108,7 +108,7 @@ class IfTests extends AnyFreeSpec with Matchers with Testing {
   "if 9" in {
     test("3",
          """
-          |[{{ if . = 3 }}three{{ else if . = 4 }}four{{ else if . = 5 }}five{{ else }}none{{ end }}]
+          |[{{ if . = 3 }}three{{ elsif . = 4 }}four{{ elsif . = 5 }}five{{ else }}none{{ end }}]
           """.trim.stripMargin) shouldBe
       """
         |[three]
@@ -118,7 +118,7 @@ class IfTests extends AnyFreeSpec with Matchers with Testing {
   "if 10" in {
     test("4",
          """
-          |[{{ if . = 3 }}three{{ else if . = 4 }}four{{ else if . = 5 }}five{{ else }}none{{ end }}]
+          |[{{ if . = 3 }}three{{ elsif . = 4 }}four{{ elsif . = 5 }}five{{ else }}none{{ end }}]
           """.trim.stripMargin) shouldBe
       """
         |[four]
@@ -128,7 +128,7 @@ class IfTests extends AnyFreeSpec with Matchers with Testing {
   "if 11" in {
     test("5",
          """
-          |[{{ if . = 3 }}three{{ else if . = 4 }}four{{ else if . = 5 }}five{{ else }}none{{ end }}]
+          |[{{ if . = 3 }}three{{ elsif . = 4 }}four{{ elsif . = 5 }}five{{ else }}none{{ end }}]
           """.trim.stripMargin) shouldBe
       """
         |[five]
@@ -138,7 +138,7 @@ class IfTests extends AnyFreeSpec with Matchers with Testing {
   "if 12" in {
     test("6",
          """
-          |[{{ if . = 3 }}three{{ else if . = 4 }}four{{ else if . = 5 }}five{{ else }}none{{ end }}]
+          |[{{ if . = 3 }}three{{ elsif . = 4 }}four{{ elsif . = 5 }}five{{ else }}none{{ end }}]
           """.trim.stripMargin) shouldBe
       """
         |[none]
@@ -148,7 +148,7 @@ class IfTests extends AnyFreeSpec with Matchers with Testing {
   "if 13" in {
     test("3",
          """
-          |[{{ if . = 3 }}three{{ else if . = 4 }}four{{ else if . = 5 }}five{{ end }}]
+          |[{{ if . = 3 }}three{{ elsif . = 4 }}four{{ elsif . = 5 }}five{{ end }}]
           """.trim.stripMargin) shouldBe
       """
         |[three]
@@ -158,7 +158,7 @@ class IfTests extends AnyFreeSpec with Matchers with Testing {
   "if 14" in {
     test("4",
          """
-          |[{{ if . = 3 }}three{{ else if . = 4 }}four{{ else if . = 5 }}five{{ end }}]
+          |[{{ if . = 3 }}three{{ elsif . = 4 }}four{{ elsif . = 5 }}five{{ end }}]
           """.trim.stripMargin) shouldBe
       """
         |[four]
@@ -168,7 +168,7 @@ class IfTests extends AnyFreeSpec with Matchers with Testing {
   "if 15" in {
     test("5",
          """
-          |[{{ if . = 3 }}three{{ else if . = 4 }}four{{ else if . = 5 }}five{{ end }}]
+          |[{{ if . = 3 }}three{{ elsif . = 4 }}four{{ elsif . = 5 }}five{{ end }}]
           """.trim.stripMargin) shouldBe
       """
         |[five]
@@ -178,7 +178,7 @@ class IfTests extends AnyFreeSpec with Matchers with Testing {
   "if 16" in {
     test("6",
          """
-          |[{{ if . = 3 }}three{{ else if . = 4 }}four{{ else if . = 5 }}five{{ end }}]
+          |[{{ if . = 3 }}three{{ elsif . = 4 }}four{{ elsif . = 5 }}five{{ end }}]
           """.trim.stripMargin) shouldBe
       """
         |[]
