@@ -1,4 +1,4 @@
-package io.github.edadma.scemplate
+package io.github.edadma.squiggly
 
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should._

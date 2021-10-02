@@ -1,4 +1,4 @@
-package io.github.edadma.scemplate
+package io.github.edadma.squiggly
 
 import io.github.edadma.libyaml.{Constructor, YAMLBigInt, YAMLInteger, YAMLValue, parseFromString}
 

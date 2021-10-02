@@ -1,4 +1,4 @@
-package io.github.edadma.scemplate
+package io.github.edadma.squiggly
 
 import io.github.edadma.cross_platform._
 

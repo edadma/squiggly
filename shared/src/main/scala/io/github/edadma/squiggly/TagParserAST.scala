@@ -1,4 +1,4 @@
-package io.github.edadma.scemplate
+package io.github.edadma.squiggly
 
 case class Ident(pos: TagParser#Position, name: String)
 

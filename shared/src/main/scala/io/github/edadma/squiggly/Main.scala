@@ -1,4 +1,4 @@
-package io.github.edadma.scemplate
+package io.github.edadma.squiggly
 
 import java.io.File
 import scopt.OParser
@@ -22,8 +22,8 @@ object Main extends App {
     // todo: add -v varname=value,...
 
     OParser.sequence(
-      programName("scemplate"),
-      head("Scala Template Engine", "v0.1.3"),
+      programName("squiggly"),
+      head("Scala Template Engine", "v0.1.0"),
       opt[Unit]('a', "ast")
         .optional()
         .action((_, c) => c.copy(ast = true))

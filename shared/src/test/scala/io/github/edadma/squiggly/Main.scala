@@ -1,4 +1,4 @@
-//package io.github.edadma.scemplate
+//package io.github.edadma.squiggly
 //
 //import io.github.edadma.datetime.Datetime
 //import pprint.pprintln

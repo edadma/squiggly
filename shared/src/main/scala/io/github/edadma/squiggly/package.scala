@@ -4,7 +4,7 @@ import org.parboiled2.{ParseError, Parser, Position}
 
 import scala.collection.immutable
 
-package object scemplate {
+package object squiggly {
 
   case class BuiltinFunction(name: String, arity: Int, function: PartialFunction[(Context, Seq[Any]), Any])
 
@@ -14,9 +14,9 @@ package object scemplate {
     def yaml(s: String): Any
   }
 
-  lazy val platform: Platform = scemplate.platformSpecific
+  lazy val platform: Platform = squiggly.platformSpecific
 
-  private[scemplate] val ZERO = BigDecimal(0)
+  private[squiggly] val ZERO = BigDecimal(0)
 
   def falsy(a: Any): Boolean =
     a match {

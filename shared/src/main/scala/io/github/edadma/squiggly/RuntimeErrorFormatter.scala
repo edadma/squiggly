@@ -1,4 +1,4 @@
-package io.github.edadma.scemplate
+package io.github.edadma.squiggly
 
 import org.parboiled2.{ErrorFormatter, ParseError, ParserInput}
 
