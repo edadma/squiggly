@@ -85,7 +85,6 @@ case class Context(data: Any, functions: Map[String, BuiltinFunction], vars: mut
                 case (l: String, r: String) =>
                   op match {
                     case "<"  => l < r
-                    case "<"  => l < r
                     case "<=" => l <= r
                     case ">"  => l > r
                     case ">=" => l >= r
@@ -150,7 +149,7 @@ case class Context(data: Any, functions: Map[String, BuiltinFunction], vars: mut
         var d = eval(expr)
 
         while (it.hasNext && d != ()) {
-          val (pos, idx) = it.next
+          val (pos, idx) = it.next()
 
           d = d match {
             case m: Map[_, _] =>
