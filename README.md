@@ -24,7 +24,7 @@ Include the following in your `build.sbt`:
 ```sbt
 resolvers += Resolver.githubPackages("edadma")
 
-libraryDependencies += "io.github.edadma" %%% "scemplate" % "0.1.0"
+libraryDependencies += "io.github.edadma" %%% "scemplate" % "0.1.2"
 
 ```
 
@@ -59,7 +59,7 @@ scemplate -h
 to get the following usage text:
 
 ```
-Scala Template Engine v0.1.0
+Scala Template Engine v0.1.2
 Usage: scemplate [options] [[<template>]]
 
   -a, --ast              pretty print AST
