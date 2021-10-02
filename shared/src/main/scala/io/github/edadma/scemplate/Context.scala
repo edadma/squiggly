@@ -171,7 +171,6 @@ case class Context(data: Any, functions: Map[String, BuiltinFunction], vars: mut
       case PipeExpr(left, ApplyExpr(Ident(pos, name), args)) => callFunction(pos, name, (args map eval) :+ eval(left))
     }
 
-  // todo: add position info for error
   private def lookup(pos: TagParser#Position, v: Any, id: Ident): Option[Any] =
     v match {
       case ()                      => pos.error(s"attempt to lookup property '${id.name}' of undefined")
