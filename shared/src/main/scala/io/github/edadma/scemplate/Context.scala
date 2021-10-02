@@ -1,10 +1,14 @@
 package io.github.edadma.scemplate
 
+import java.io.PrintStream
 import scala.annotation.tailrec
 import scala.collection.mutable
 import scala.language.postfixOps
 
-case class Context(data: Any, functions: Map[String, BuiltinFunction], vars: mutable.HashMap[String, Any]) {
+case class Context(data: Any,
+                   out: PrintStream,
+                   functions: Map[String, BuiltinFunction],
+                   vars: mutable.HashMap[String, Any]) {
 
   private var _global: Any = _
 
@@ -121,21 +125,20 @@ case class Context(data: Any, functions: Map[String, BuiltinFunction], vars: mut
         }
       case PrefixExpr("not", _, expr) => !beval(expr)
       case LeftInfixExpr(lpos, left, right) =>
-        def binary(l: Num, op: String, r: Num): Num = {
-          op match {
-            case "+"   => l + r
-            case "-"   => l - r
-            case "*"   => l * r
-            case "/"   => l / r
-            case "mod" => l remainder r
-            case "\\"  => l quot r
-          }
-        }
-
         val l = neval(lpos, left)
         val r = right map { case (o, p, e) => (o, neval(p, e)) }
 
-        r.foldLeft(l) { case (l, (o, r)) => binary(l, o, r) }
+        r.foldLeft(l) {
+          case (l, (o, r)) =>
+            o match {
+              case "+"   => l + r
+              case "-"   => l - r
+              case "*"   => l * r
+              case "/"   => l / r
+              case "mod" => l remainder r
+              case "\\"  => l quot r
+            }
+        }
       case RightInfixExpr(lpos, left, op, rpos, right) =>
         val l = neval(lpos, left)
 

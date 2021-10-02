@@ -2,23 +2,24 @@ package io.github.edadma.scemplate
 
 import io.github.edadma.char_reader.CharReader
 
+import java.io.PrintStream
+
 import scala.collection.mutable
 import scala.language.postfixOps
 
 object Renderer {
 
-  val defaultRenderer = new Renderer(Builtin.functions)
+  val defaultRenderer = new Renderer(Console.out, Builtin.functions)
 
 }
 
-class Renderer(functions: Map[String, BuiltinFunction]) {
+class Renderer(out: PrintStream, functions: Map[String, BuiltinFunction]) {
 
-  def render(globalData: Any, ast: TemplateParserAST): String = {
-    val globalContext = Context(globalData, functions, new mutable.HashMap[String, Any])
+  def render(globalData: Any, ast: TemplateParserAST): Any = {
+    val globalContext = Context(globalData, out, functions, new mutable.HashMap[String, Any])
+    val returnValue: Any = ()
 
     globalContext.global = globalData
-
-    val buf = new StringBuilder
 
     def render(context: Context, ast: TemplateParserAST): Unit = {
       def restrict(pos: CharReader, v: Any): Any =
@@ -30,12 +31,12 @@ class Renderer(functions: Map[String, BuiltinFunction]) {
       ast match {
         case EmptyBlockAST    =>
         case SequenceAST(seq) => seq foreach (render(context, _))
-        case BlockAST(tpos, WithAST(pos, expr), body, els) =>
+        case BlockAST(tpos, WithAST(_, expr), body, els) =>
           context.eval(expr) match {
             case v if falsy(v) => els foreach (render(context, _))
-            case v             => render(context.copy(data = restrict(tpos, v)), body)
+            case v             => render(context.copy(data = v), body)
           }
-        case BlockAST(tpos, ForAST(index, pos, expr), body, els) =>
+        case BlockAST(_, ForAST(index, pos, expr), body, els) =>
           context.eval(expr) match {
             case v if falsy(v) => els foreach (render(context, _))
             case s: Iterable[Any] =>
@@ -55,17 +56,17 @@ class Renderer(functions: Map[String, BuiltinFunction]) {
           }
         case ContentAST(toks) =>
           toks foreach {
-            case TextToken(pos, text) => buf ++= text
-            case SpaceToken(pos, s)   => buf ++= s
-            case TagToken(pos, tag: ExprAST, _, _) =>
-              buf ++=
+            case TextToken(_, text) => out print text
+            case SpaceToken(_, s)   => out print s
+            case TagToken(_, tag: ExprAST, _, _) =>
+              out print
                 (context.eval(tag) match {
                   case null | () => ""
                   case v         => v.toString
                 })
             case TagToken(pos, AssignmentAST(Ident(_, name), expr), _, _) =>
-              context.vars(name) = restrict(pos, context.eval(expr))
-            case TagToken(pos, tag: CommentAST, _, _) =>
+              context.vars(name) = context.eval(expr)
+            case TagToken(_, _: CommentAST, _, _) =>
           }
         case IfBlockAST(cond, yes, elseif, no) =>
           if (context.beval(cond)) render(context, yes)
@@ -78,8 +79,13 @@ class Renderer(functions: Map[String, BuiltinFunction]) {
       }
     }
 
-    render(globalContext, ast)
-    buf.toString
+    try {
+      render(globalContext, ast)
+    } catch {
+      case _: ReturnException =>
+    }
+
+    returnValue
   }
 
 }

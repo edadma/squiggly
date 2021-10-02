@@ -93,11 +93,13 @@ package object scemplate {
     buf.toString
   }
 
-  def problem(pos: Int, parser: Parser, msg: String, line: Int, col: Int): Nothing = {
-    val p = Position(pos, parser.input)
-    //    val offset = p.copy(line = p.line + line - 1, column = p.column + col - 1)
+  //  def problem(pos: Int, parser: Parser, msg: String, line: Int, col: Int): Nothing = {
+  //    val p = Position(pos, parser.input)
+  //    //    val offset = p.copy(line = p.line + line - 1, column = p.column + col - 1)
+  //
+  //    sys.error(new RuntimeErrorFormatter(msg).customFormat(ParseError(p, p, Nil), parser.input))
+  //  }
 
-    sys.error(new RuntimeErrorFormatter(msg).customFormat(ParseError(p, p, Nil), parser.input))
-  }
+  class ReturnException extends RuntimeException
 
 }
