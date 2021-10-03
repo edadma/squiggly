@@ -192,7 +192,7 @@ syntax but more boilerplate. Both languages have good features that the other is
 
 ### Values
 
-*squiggly* values are pieces of data that are either computer in the template or retrieved from the *context* that is
+*squiggly* values are pieces of data that are either computed in the template or retrieved from the *context* that is
 provided when a template is rendered. A value that is written manually inside a template is called a literal value.
 
 #### Literals
