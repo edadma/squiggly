@@ -223,14 +223,14 @@ TO DO
 Squiggly templates are plain text with the addition of *tags* that are normally between `{{` and `}}` delimiters. The
 tag delimiter strings are configurable. Following are the currently available tags.
 
-#### `{{` _value_ `}}`
+#### {{ _value_ }}
 
 where *value* is any valid *squiggly* expression which results in a data value of some kind. The resulting value is
 converted to a string of characters if it is not already, and sent to the output stream.
 
 For example `{{ .title }}` will be replaced by the value of a context property called `title`.
 
-#### `{{ with` _value_ `}}` ... `{{ end }}`
+#### {{ with _value_ }} ... {{ end }}
 
 The *with* tag binds *value* to the current context, and is often used to simply using code that will be referring to
 properties of a single data structure. For example `{{ with .user }}{{ .firstName }} {{ .lastName }}{{ end }}` will be
