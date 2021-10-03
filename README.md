@@ -35,7 +35,7 @@ Include the following in your `build.sbt`:
 ```sbt
 resolvers += Resolver.githubPackages("edadma")
 
-libraryDependencies += "io.github.edadma" %%% "squiggly" % "0.1.2"
+libraryDependencies += "io.github.edadma" %%% "squiggly" % "0.1.3"
 
 ```
 
@@ -65,6 +65,88 @@ sudo cp path/to/scamplate /usr/bin
 
 ### Library
 
+Here's a simple example of using *squiggly* to render a template in your application.
+
+```scala
+import io.github.edadma.squiggly.{Parser, Renderer}
+
+object Main extends App {
+
+   case class Task(task: String, done: Boolean)
+
+   case class User(user: String, tasks: List[Task])
+
+   val data =
+      User("ed",
+         List(Task("Improve Parser and Renderer API", done = true),
+            Task("Code template example", done = false),
+            Task("Update README", done = false)))
+   val template =
+      """
+        |<!DOCTYPE html>
+        |<html>
+        |  <head>
+        |    <title>To-Do list</title>
+        |  </head>
+        |  <body>
+        |    <p>
+        |      To-Do list for user '{{ .user }}'
+        |    </p>
+        |    <table>
+        |      <tr>
+        |        <td>Task</td>
+        |        <td>Done</td>
+        |      </tr>
+        |      {{ for .tasks -}}
+        |      <tr>
+        |        <td>{{ .task }}</td>
+        |        <td>{{ if .done }}Yes{{ else }}No{{ end }}</td>
+        |      </tr>
+        |      {{- end }}
+        |    </table>
+        |  </body>
+        |</html>
+        |""".trim.stripMargin
+   val ast = Parser.basic.parse(template)
+
+   Renderer.basic.render(data, ast)
+
+}
+
+```
+
+output:
+
+```
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>To-Do list</title>
+  </head>
+  <body>
+    <p>
+      To-Do list for user 'ed'
+    </p>
+    <table>
+      <tr>
+        <td>Task</td>
+        <td>Done</td>
+      </tr>
+      <tr>
+        <td>Improve Parser and Renderer API</td>
+        <td>Yes</td>
+      </tr><tr>
+        <td>Code template example</td>
+        <td>No</td>
+      </tr><tr>
+        <td>Update README</td>
+        <td>No</td>
+      </tr>
+    </table>
+  </body>
+</html>
+```
+
 ### Command line
 
 Type
@@ -76,7 +158,7 @@ squiggly -h
 to get the following usage text:
 
 ```
-Squiggly v0.1.2
+Squiggly v0.1.3
 Usage: squiggly [options] [[<template>]]
 
   -a, --ast              pretty print AST
@@ -100,9 +182,21 @@ output:
 3 + 4 = 7
 ```
 
-## API
+## Templates
+
+TODO
+
+### Syntax
+
+TODO
+
+### Functions
+
+TODO
 
 ## Examples
+
+TODO
 
 ## Tests
 

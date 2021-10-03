@@ -7,19 +7,16 @@ import scala.collection.mutable.{ArrayBuffer, ListBuffer}
 
 object Parser {
 
-  def simple(input: String) = new Parser(input, "{{", "}}", Builtin.functions, Builtin.namespaces)
+  val basic = new Parser()
 
 }
 
-class Parser(input: String,
-             startDelim: String,
-             endDelim: String,
-             functions: Map[String, BuiltinFunction],
-             namespaces: Map[String, Map[String, BuiltinFunction]]) {
+class Parser(startDelim: String = "{{",
+             endDelim: String = "}}",
+             functions: Map[String, BuiltinFunction] = Builtin.functions,
+             namespaces: Map[String, Map[String, BuiltinFunction]] = Builtin.namespaces) {
 
-  def parse: TemplateParserAST = {
-    val seq = new ListBuffer[TemplateParserAST]
-
+  def parse(input: String): TemplateParserAST = {
     def parse(ts: LazyList[Token],
               parsingbody: Boolean,
               allowelse: Boolean,
@@ -118,10 +115,8 @@ class Parser(input: String,
       }
     }
 
-    parse(tokenize, parsingbody = false, allowelse = false)._1
+    parse(tokenize(CharReader.fromString(input)), parsingbody = false, allowelse = false)._1
   }
-
-  def tokenize: LazyList[Token] = tokenize(CharReader.fromString(input))
 
   def tokenize(r: CharReader): LazyList[Token] =
     token(r, r) match {
