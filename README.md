@@ -72,44 +72,44 @@ import io.github.edadma.squiggly.{Parser, Renderer}
 
 object Main extends App {
 
-   case class Task(task: String, done: Boolean)
+  case class Task(task: String, done: Boolean)
 
-   case class User(user: String, tasks: List[Task])
+  case class User(user: String, tasks: List[Task])
 
-   val data =
-      User("ed",
-         List(Task("Improve Parser and Renderer API", done = true),
-            Task("Code template example", done = false),
-            Task("Update README", done = false)))
-   val template =
-      """
-        |<!DOCTYPE html>
-        |<html>
-        |  <head>
-        |    <title>To-Do list</title>
-        |  </head>
-        |  <body>
-        |    <p>
-        |      To-Do list for user '{{ .user }}'
-        |    </p>
-        |    <table>
-        |      <tr>
-        |        <td>Task</td>
-        |        <td>Done</td>
-        |      </tr>
-        |      {{ for .tasks -}}
-        |      <tr>
-        |        <td>{{ .task }}</td>
-        |        <td>{{ if .done }}Yes{{ else }}No{{ end }}</td>
-        |      </tr>
-        |      {{- end }}
-        |    </table>
-        |  </body>
-        |</html>
-        |""".trim.stripMargin
-   val ast = Parser.default.parse(template)
+  val data =
+    User("ed",
+      List(Task("Improve Parser and Renderer API", done = true),
+        Task("Code template example", done = false),
+        Task("Update README", done = false)))
+  val template =
+    """
+      |<!DOCTYPE html>
+      |<html>
+      |  <head>
+      |    <title>To-Do list</title>
+      |  </head>
+      |  <body>
+      |    <p>
+      |      To-Do list for user '{{ .user }}'
+      |    </p>
+      |    <table>
+      |      <tr>
+      |        <td>Task</td>
+      |        <td>Done</td>
+      |      </tr>
+      |      {{ for .tasks -}}
+      |      <tr>
+      |        <td>{{ .task }}</td>
+      |        <td>{{ if .done }}Yes{{ else }}No{{ end }}</td>
+      |      </tr>
+      |      {{- end }}
+      |    </table>
+      |  </body>
+      |</html>
+      |""".trim.stripMargin
+  val ast = Parser.default.parse(template)
 
-   Renderer.default.render(data, ast)
+  Renderer.default.render(data, ast)
 
 }
 
@@ -184,19 +184,62 @@ output:
 
 ## Templates
 
-TODO
+Squiggly templates are written using a language that is inspired by
+both [Hugo](https://gohugo.io/templates/introduction/) and [Liquid](https://shopify.github.io/liquid/). The goal is low
+boilerplate and readability. Hugo is compact and boilerplate free, but it is also a *prefix* language where operations
+must always precede their operands. Prefix languages tend not to be conducive to readability. Liquid has better infix
+syntax but more boilerplate. Both languages have good features that the other is missing.
 
-### Syntax
+### Values
 
-TODO
+*squiggly* values are pieces of data that are either computer in the template or retrieved from the *context* that is
+provided when a template is rendered. A value that is written manually inside a template is called a literal value.
+
+#### Literals
+
+- `null`. The null value simply represents no value, and is rendered in a template as an empty string. It corresponds to
+  a Scala `null`.
+- `true`, `false`. These correspond to the values of the Scala Boolean class.
+- numbers. Numbers in *squiggly* are all instances of one type internally: the Scala `BigDecimal` number type. This was
+  chosen mainly because it provides exact decimal arithmetic which is desirable when representing currency
+  values.  `BigDecimals` can also represent arbitrarily large integers.
+- strings. String literals are written between `'` and `'`, or `"` and `"`, whichever is more convenient. Strings may
+  contain any of the standard escapes: `\n`, `\uxxxx`, etc.
+- lists. List literals are written between `[` and `]` with each item in the list separated by a `,`.
+- maps. Map literals are written between `{` and `}` with each property in the map separated by a `,`, and where a
+  property is a *key* (property name) and a value separated by a `:`. For example: `{one: 1, two: 2, three: 3}`
+
+The is a special *undefined* value which purposely cannot be expressed literally. It represents a property that is
+missing, and is always rendered in a template as an empty string. It is not the same as `null` because a property that
+is not missing can contain a `null` value and one may wish to distinguish between them. The undefined value corresponds
+to the Scala `()` value, the only instance of the `Unit`
+class.
+
+### Tags
+
+Squiggly templates are plain text with the addition of *tags* that are between `{{` and `}}` delimiters. Actually, the
+delimiters are configurable. Following are the currently available tags.
+
+#### `{{` value `}}`
+
+where *value* is any valid *squiggly* expression which results in a data value of some kind. The resulting value is
+converted to a string of characters if it is not already, and sent to the output stream.
+
+For example `{{ .title }}` will be replaced by the value of a context property called `title`.
+
+#### `{{` `with` value `}}`
+
+The *with* tag simplifies using properties of a data structure.
+
+TO DO
 
 ### Functions
 
-TODO
+TO DO
 
 ## Examples
 
-TODO
+TO DO
 
 ## Tests
 
