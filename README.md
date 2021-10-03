@@ -229,7 +229,8 @@ For example `{{ .title }}` will be replaced by the value of a context property c
 #### `{{` `with` _value_ `}}`
 
 The *with* tag binds *value* to the current context, and is often used to simply using code that will be referring to
-properties of a single data structure. For example `{{ with .user }}{{ .firstName }} {{ .lastName }}{{ end }}`
+properties of a single data structure. For example `{{ with .user }}{{ .firstName }} {{ .lastName }}{{ end }}` will be
+replaced by the first and last name of `.user`.
 
 TO DO
 
