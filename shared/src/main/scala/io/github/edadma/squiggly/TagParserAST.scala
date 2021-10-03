@@ -65,6 +65,8 @@ trait ConstructAST extends TagParserAST with Positioned
 
 trait SimpleBlockAST extends ConstructAST
 
+trait BasicBlockAST extends ConstructAST
+
 case class IfAST(pos: TagParser#Position, cond: ExprAST) extends ConstructAST
 
 case class ElseIfAST(pos: TagParser#Position, cond: ExprAST) extends ConstructAST
@@ -76,3 +78,7 @@ case class EndAST(pos: TagParser#Position) extends ConstructAST
 case class WithAST(pos: TagParser#Position, expr: ExprAST) extends SimpleBlockAST
 
 case class ForAST(index: Option[(Option[Ident], Ident)], pos: TagParser#Position, expr: ExprAST) extends SimpleBlockAST
+
+case class DefineAST(pos: TagParser#Position, name: Ident) extends BasicBlockAST
+
+case class BlockAST(pos: TagParser#Position, name: Ident, expr: ExprAST) extends BasicBlockAST

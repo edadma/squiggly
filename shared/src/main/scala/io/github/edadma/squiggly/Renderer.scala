@@ -11,25 +11,29 @@ object Renderer {
 
 }
 
-class Renderer(private[squiggly] val partials: PartialsLoader = _ => None,
-               private[squiggly] val functions: Map[String, BuiltinFunction] = Builtin.functions) {
+class Renderer(protected[squiggly] val partials: PartialsLoader = _ => None,
+               protected[squiggly] val blocks: Blocks = new mutable.HashMap[String, ParserAST],
+               protected[squiggly] val functions: Map[String, BuiltinFunction] = Builtin.functions) {
 
-  def render(globalData: Any, ast: TemplateParserAST, out: PrintStream = Console.out): Any = {
+  def render(globalData: Any, ast: ParserAST, out: PrintStream = Console.out): Any = {
     val globalContext = Context(this, globalData, new mutable.HashMap[String, Any], out)
     var returnValue: Any = ()
 
     globalContext.global = globalData
 
-    def render(context: Context, ast: TemplateParserAST): Unit = {
+    def render(context: Context, ast: ParserAST): Unit = {
       ast match {
-        case EmptyBlockAST    =>
-        case SequenceAST(seq) => seq foreach (render(context, _))
-        case BlockAST(tpos, WithAST(_, expr), body, els) =>
+        case EmptyBlockAST                          =>
+        case SequenceAST(seq)                       => seq foreach (render(context, _))
+        case DefineBlockAST(Ident(pos, name), body) => blocks(name) = body
+        case BlockBlockAST(Ident(pos, name), body, expr) =>
+          render(context.copy(data = restrict(pos, expr)), blocks.getOrElse(name, body))
+        case TemplateBlockAST(tpos, WithAST(_, expr), body, els) =>
           context.eval(expr) match {
             case v if falsy(v) => els foreach (render(context, _))
             case v             => render(context.copy(data = v), body)
           }
-        case BlockAST(_, ForAST(index, pos, expr), body, els) =>
+        case TemplateBlockAST(_, ForAST(index, pos, expr), body, els) =>
           context.eval(expr) match {
             case v if falsy(v) => els foreach (render(context, _))
             case s: Iterable[Any] =>

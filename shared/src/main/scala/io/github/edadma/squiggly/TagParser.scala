@@ -41,6 +41,7 @@ class TagParser(val input: ParserInput,
     rule {
       sp ~ (
         elseIfTag
+          | defineTag
           | endTag
           | withTag
           | forTag
@@ -218,7 +219,7 @@ class TagParser(val input: ParserInput,
 
   def identnsp: Rule1[Ident] =
     rule {
-      pos ~ !"if" ~ !"true" ~ !"false" ~ !"null" ~ !"elsif" ~ !"switch" ~ capture(
+      pos ~ !("if" | "true" | "false" | "null" | "elsif" | "switch" | "unless" | "define" | "block") ~ capture(
         (CharPredicate.Alpha | '_') ~ zeroOrMore(CharPredicate.AlphaNum | '_')) ~> Ident
     }
 
@@ -227,6 +228,10 @@ class TagParser(val input: ParserInput,
   def pos: Rule1[Position] = rule(push(new Position(cursor)))
 
   def sp: Rule0 = rule(quiet(zeroOrMore(anyOf(" \t\r\n"))))
+
+  def defineTag: Rule1[DefineAST] = rule(pos ~ "define" ~ ident ~> DefineAST)
+
+  def blockTag: Rule1[BlockAST] = rule(pos ~ "block" ~ ident ~ expression ~> BlockAST)
 
   def assignmentTag: Rule1[AssignmentAST] = rule(ident ~ ":=" ~ expression ~> AssignmentAST)
 

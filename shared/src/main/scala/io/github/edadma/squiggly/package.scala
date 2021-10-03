@@ -1,12 +1,14 @@
 package io.github.edadma
 
-import scala.collection.immutable
+import scala.collection.{immutable, mutable}
 
 package object squiggly {
 
+  type Blocks = mutable.HashMap[String, ParserAST]
+
   case class BuiltinFunction(name: String, arity: Int, function: PartialFunction[(Context, Seq[Any]), Any])
 
-  type PartialsLoader = String => Option[TemplateParserAST]
+  type PartialsLoader = String => Option[ParserAST]
 
   def restrict(pos: TagParser#Position, v: Any): Any =
     v match {

@@ -16,13 +16,13 @@ class Parser(startDelim: String = "{{",
              functions: Map[String, BuiltinFunction] = Builtin.functions,
              namespaces: Map[String, Map[String, BuiltinFunction]] = Builtin.namespaces) {
 
-  def parse(input: String): TemplateParserAST = {
+  def parse(input: String): ParserAST = {
     def parse(ts: LazyList[Token],
               parsingbody: Boolean,
               allowelse: Boolean,
               tokbuf: ListBuffer[Token] = new ListBuffer,
-              astbuf: ListBuffer[TemplateParserAST] = new ListBuffer): (TemplateParserAST, LazyList[Token]) = {
-      def endOfBlock: TemplateParserAST = {
+              astbuf: ListBuffer[ParserAST] = new ListBuffer): (ParserAST, LazyList[Token]) = {
+      def endOfBlock: ParserAST = {
         if (tokbuf.nonEmpty)
           astbuf += ContentAST(tokbuf.toList)
 
@@ -36,6 +36,20 @@ class Parser(startDelim: String = "{{",
           parse(h #:: t, parsingbody, allowelse, tokbuf, astbuf)
         case (_: SpaceToken) #:: (h @ TagToken(_, _, true, _)) #:: t =>
           parse(h #:: t, parsingbody, allowelse, tokbuf, astbuf)
+        case TagToken(pos, tag: BasicBlockAST, _, _) #:: t =>
+          if (tokbuf.nonEmpty) {
+            astbuf += ContentAST(tokbuf.toList)
+            tokbuf.clear()
+          }
+
+          val (body, rest) = parse(t, parsingbody = true, allowelse = false)
+
+          astbuf +=
+            (tag match {
+              case BlockAST(pos, name, expr) => BlockBlockAST(name, body, expr)
+              case DefineAST(pos, name)      => DefineBlockAST(name, body)
+            })
+          parse(rest, parsingbody, allowelse, tokbuf, astbuf)
         case TagToken(pos, tag: SimpleBlockAST, _, _) #:: t =>
           if (tokbuf.nonEmpty) {
             astbuf += ContentAST(tokbuf.toList)
@@ -55,7 +69,7 @@ class Parser(startDelim: String = "{{",
           if (body == EmptyBlockAST)
             Console.err.println(pos.longErrorText("warning: empty block"))
 
-          astbuf += BlockAST(pos, tag, body, els)
+          astbuf += TemplateBlockAST(pos, tag, body, els)
           parse(rest, parsingbody, allowelse, tokbuf, astbuf)
         case TagToken(pos, _: ElseAST, _, _) #:: t =>
           if (parsingbody && allowelse) (BlockWithElseAST(endOfBlock), t)
@@ -72,10 +86,10 @@ class Parser(startDelim: String = "{{",
             tokbuf.clear()
           }
 
-          val elseifbuf = new ArrayBuffer[(ExprAST, TemplateParserAST)]
+          val elseifbuf = new ArrayBuffer[(ExprAST, ParserAST)]
 
           @tailrec
-          def elseif(t: LazyList[Token]): (TemplateParserAST, Option[TemplateParserAST], LazyList[Token]) = {
+          def elseif(t: LazyList[Token]): (ParserAST, Option[ParserAST], LazyList[Token]) = {
             val (body0, rest0) = parse(t, parsingbody = true, allowelse = true)
 
             body0 match {
@@ -95,7 +109,7 @@ class Parser(startDelim: String = "{{",
           if (body == EmptyBlockAST)
             Console.err.println(pos.longErrorText("warning: empty block"))
 
-          var next: TemplateParserAST = body
+          var next: ParserAST = body
 
           for (i <- elseifbuf.indices.reverse) {
             val cur = elseifbuf(i)._2
