@@ -216,8 +216,8 @@ to the Scala `()` value, the only instance of the `Unit` class.
 
 ### Tags
 
-Squiggly templates are plain text with the addition of *tags* that are between `{{` and `}}` delimiters. Actually, the
-delimiters are configurable. Following are the currently available tags.
+Squiggly templates are plain text with the addition of *tags* that are normally between `{{` and `}}` delimiters. The
+tag delimiter strings are configurable. Following are the currently available tags.
 
 #### `{{` value `}}`
 
