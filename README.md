@@ -226,9 +226,10 @@ converted to a string of characters if it is not already, and sent to the output
 
 For example `{{ .title }}` will be replaced by the value of a context property called `title`.
 
-#### `{{` `with` value `}}`
+#### `{{` `with` _value_ `}}`
 
-The *with* tag simplifies using properties of a data structure.
+The *with* tag binds *value* to the current context, and is often used to simply using code that will be referring to
+properties of a single data structure. For example `{{ with .user }}{{ .firstName }} {{ .lastName }}{{ end }}`
 
 TO DO
 
