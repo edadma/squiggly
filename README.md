@@ -11,11 +11,11 @@ squiggly
 
 *squiggly* is a language, a Scala library, and a Linux command line application for doing string templating.  *squiggly*
 can be compared to [Mustache](https://mustache.github.io/) or [Go templates](https://pkg.go.dev/text/template) or
-[Liquid](https://shopify.github.io/liquid/), which are all great template languages. Basically, a string template
-composed of text and actions (or tags) which are instructions in *squiggly*, is applied to data to produce a textual
+[Liquid](https://shopify.github.io/liquid/), which are all great template languages. Basically, a string template that
+is composed of text and *tags* which are instructions in *squiggly*, is applied to context data producing a textual
 output.
 
-Unlike Mustache, *squiggly* is not logicless, but allows basic very logic to be used in templates.
+Unlike Mustache, *squiggly* is not logic-less, but allows some basic logic to be used in templates.
 
 Curly braces or brackets are sometimes referred to as squiggly brackets, which is where the name "squiggly" comes from.
 
