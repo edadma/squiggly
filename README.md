@@ -232,11 +232,14 @@ For example `{{ .title }}` will be replaced by the value of a context property c
 
 #### {{ with _value_ }} ...(truthy) {{ else }} ...(falsy) {{ end }}
 
-The *with* tag binds *value* to the current context, and is often used to simply using code that will be referring to
+The *with* tag binds the current context to *value*, and is often used to simply using code that will be referring to
 properties of a single data structure. For example `{{ with .user }}{{ .firstName }} {{ .lastName }}{{ end }}` will be
 replaced by the first and last name of `.user`.
 
 #### {{ for [ [ _i_ , ] _e_ <- ] _value_ }} ... [ {{ else }} ... ] }}
+
+The *for* tag binds context to successive elements of *value* which must be a Scala Iterable (i.e. a Seq or Map).
+Optionally, *i* is set to the 0-based index, and *e* is also set to each value.
 
 TO DO
 
