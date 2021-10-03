@@ -4,7 +4,6 @@ import io.github.edadma.char_reader.CharReader
 
 import scala.util.{Failure, Success}
 import org.parboiled2._
-import shapeless.HNil
 
 import scala.annotation.tailrec
 import scala.language.implicitConversions
@@ -222,7 +221,7 @@ class TagParser(val input: ParserInput,
 
   def identnsp: Rule1[Ident] =
     rule {
-      pos ~ !("if" | "true" | "false" | "null" | "elsif" | "switch" | "unless" | "define" | "block" | "match" | "case") ~ capture(
+      pos ~ !("if" | "true" | "false" | "null" | "elsif" | "switch" | "unless" | "define" | "block" | "match" | "case" | "no" ~ "output") ~ capture(
         (CharPredicate.Alpha | '_') ~ zeroOrMore(CharPredicate.AlphaNum | '_')) ~> Ident
     }
 
@@ -239,6 +238,8 @@ class TagParser(val input: ParserInput,
   def assignmentTag: Rule1[AssignmentAST] = rule(ident ~ ":=" ~ expression ~> AssignmentAST)
 
   def returnTag: Rule1[ReturnAST] = rule("return" ~ optional(expression) ~> ReturnAST)
+
+  def ifTag: Rule1[IfAST] = rule(pos ~ "if" ~ condition ~> IfAST)
 
   def ifTag: Rule1[IfAST] = rule(pos ~ "if" ~ condition ~> IfAST)
 

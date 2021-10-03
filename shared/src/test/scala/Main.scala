@@ -52,3 +52,9 @@ object Main extends App {
   Renderer.default.render(data, ast)
 
 }
+
+// todo: tags should be allowed to occupy multiple lines
+// todo: implement 'capture' https://shopify.github.io/liquid/tags/variable/
+// todo: implement 'unless' https://shopify.github.io/liquid/tags/control-flow/
+// todo: implement 'no output' https://shopify.github.io/liquid/tags/template/
+// todo: "filters": https://shopify.github.io/liquid/
