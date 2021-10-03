@@ -75,6 +75,10 @@ case class ElseAST(pos: TagParser#Position) extends ConstructAST
 
 case class EndAST(pos: TagParser#Position) extends ConstructAST
 
+case class MatchAST(pos: TagParser#Position, cond: ExprAST) extends ConstructAST
+
+case class CaseAST(pos: TagParser#Position, cond: ExprAST) extends ConstructAST
+
 case class WithAST(pos: TagParser#Position, expr: ExprAST) extends SimpleBlockAST
 
 case class ForAST(index: Option[(Option[Ident], Ident)], pos: TagParser#Position, expr: ExprAST) extends SimpleBlockAST

@@ -42,6 +42,9 @@ class TagParser(val input: ParserInput,
       sp ~ (
         elseIfTag
           | defineTag
+          | blockTag
+          | matchTag
+          | caseTag
           | endTag
           | withTag
           | forTag
@@ -244,6 +247,10 @@ class TagParser(val input: ParserInput,
   def elseTag: Rule1[ElseAST] = rule(pos ~ "else" ~> ElseAST)
 
   def endTag: Rule1[EndAST] = rule(pos ~ "end" ~> EndAST)
+
+  def matchTag: Rule1[MatchAST] = rule(pos ~ "match" ~ condition ~> MatchAST)
+
+  def caseTag: Rule1[CaseAST] = rule(pos ~ "case" ~ condition ~> CaseAST)
 
   def withTag: Rule1[WithAST] = rule(pos ~ "with" ~ expression ~> WithAST)
 

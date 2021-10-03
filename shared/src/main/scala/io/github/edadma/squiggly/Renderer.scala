@@ -27,7 +27,7 @@ class Renderer(protected[squiggly] val partials: PartialsLoader = _ => None,
         case SequenceAST(seq)                       => seq foreach (render(context, _))
         case DefineBlockAST(Ident(pos, name), body) => blocks(name) = body
         case BlockBlockAST(Ident(pos, name), body, expr) =>
-          render(context.copy(data = restrict(pos, expr)), blocks.getOrElse(name, body))
+          render(context.copy(data = restrict(pos, context.eval(expr))), blocks.getOrElse(name, body))
         case TemplateBlockAST(tpos, WithAST(_, expr), body, els) =>
           context.eval(expr) match {
             case v if falsy(v) => els foreach (render(context, _))
@@ -74,6 +74,13 @@ class Renderer(protected[squiggly] val partials: PartialsLoader = _ => None,
               case Some(e) => render(context, e._2)
               case None    => no foreach (render(context, _))
             }
+          }
+        case MatchBlockAST(expr, cases, els) =>
+          val value = context.eval(expr)
+
+          cases find { case (c, _) => context.eval(c) == value } match {
+            case Some(e) => render(context, e._2)
+            case None    => els foreach (render(context, _))
           }
       }
     }

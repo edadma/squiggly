@@ -1,44 +1,54 @@
-import io.github.edadma.squiggly.{Parser, Renderer}
+import io.github.edadma.squiggly.{Parser, Renderer, platform}
 
 object Main extends App {
 
-  case class Task(task: String, done: Boolean)
-
-  case class User(user: String, tasks: List[Task])
-
-  val data =
-    User("ed",
-         List(Task("Improve Parser and Renderer API", done = true),
-              Task("Code template example", done = false),
-              Task("Update README", done = false)))
+  //  case class Task(task: String, done: Boolean)
+  //
+  //  case class User(user: String, tasks: List[Task])
+  //
+  //  val data =
+  //    User("ed",
+  //         List(Task("Improve Parser and Renderer API", done = true),
+  //              Task("Code template example", done = false),
+  //              Task("Update README", done = false)))
+  //  val template =
+  //    """
+  //      |<!DOCTYPE html>
+  //      |<html>
+  //      |  <head>
+  //      |    <title>To-Do list</title>
+  //      |  </head>
+  //      |  <body>
+  //      |    <p>
+  //      |      To-Do list for user '{{ .user }}'
+  //      |    </p>
+  //      |    <table>
+  //      |      <tr>
+  //      |        <td>Task</td>
+  //      |        <td>Done</td>
+  //      |      </tr>
+  //      |      {{ for .tasks -}}
+  //      |      <tr>
+  //      |        <td>{{ .task }}</td>
+  //      |        <td>{{ if .done }}Yes{{ else }}No{{ end }}</td>
+  //      |      </tr>
+  //      |      {{- end }}
+  //      |    </table>
+  //      |  </body>
+  //      |</html>
+  //      |""".trim.stripMargin
+  val data = platform.yaml("4")
+  //  val template =
+  //    """
+  //      |{{ define asdfx }}qwer {{ . }} zxcv{{ end }}{{ block asdf . + 2 }}default: {{ . }}{{ end }}
+  //      |""".trim.stripMargin
   val template =
     """
-      |<!DOCTYPE html>
-      |<html>
-      |  <head>
-      |    <title>To-Do list</title>
-      |  </head>
-      |  <body>
-      |    <p>
-      |      To-Do list for user '{{ .user }}'
-      |    </p>
-      |    <table>
-      |      <tr>
-      |        <td>Task</td>
-      |        <td>Done</td>
-      |      </tr>
-      |      {{ for .tasks -}}
-      |      <tr>
-      |        <td>{{ .task }}</td>
-      |        <td>{{ if .done }}Yes{{ else }}No{{ end }}</td>
-      |      </tr>
-      |      {{- end }}
-      |    </table>
-      |  </body>
-      |</html>
-      |""".trim.stripMargin
+    |[{{ match . }}{{ case 4 }}four{{ case 5 }}five{{ end }}]
+    |""".trim.stripMargin
   val ast = Parser.default.parse(template)
 
+  pprint.pprintln(ast)
   Renderer.default.render(data, ast)
 
 }

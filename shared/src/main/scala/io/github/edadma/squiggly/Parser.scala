@@ -77,6 +77,9 @@ class Parser(startDelim: String = "{{",
         case TagToken(pos, ElseIfAST(_, cond), _, _) #:: t =>
           if (parsingbody && allowelse) (BlockWithElseIfAST(endOfBlock, cond), t)
           else pos.error("unexpected 'else if' tag")
+        case TagToken(pos, CaseAST(_, expr), _, _) #:: t =>
+          if (parsingbody && allowelse) (BlockWithCaseAST(endOfBlock, expr), t)
+          else pos.error("unexpected 'case' tag")
         case TagToken(pos, _: EndAST, _, _) #:: t =>
           if (parsingbody) (endOfBlock, t)
           else pos.error("unexpected 'end' tag")
@@ -119,6 +122,44 @@ class Parser(startDelim: String = "{{",
           }
 
           astbuf += IfBlockAST(cond, next, elseifbuf.toSeq, els)
+          parse(rest, parsingbody, allowelse, tokbuf, astbuf)
+        case TagToken(pos, MatchAST(_, cond), _, _) #:: t =>
+          if (tokbuf.nonEmpty) {
+            astbuf += ContentAST(tokbuf.toList)
+            tokbuf.clear()
+          }
+
+          val casebuf = new ArrayBuffer[(ExprAST, ParserAST)]
+
+          @tailrec
+          def cases(t: LazyList[Token]): (ParserAST, Option[ParserAST], LazyList[Token]) = {
+            val (body0, rest0) = parse(t, parsingbody = true, allowelse = true)
+
+            body0 match {
+              case BlockWithElseAST(b) =>
+                val (els, rest) = parse(rest0, parsingbody = true, allowelse = false)
+
+                (b, Some(els), rest)
+              case BlockWithCaseAST(b, cond) =>
+                casebuf += ((cond, b))
+                cases(rest0)
+              case _ => (body0, None, rest0)
+            }
+          }
+
+          val (body, els, rest) = cases(t)
+          var next: ParserAST = body
+
+          for (i <- casebuf.indices.reverse) {
+            val cur = casebuf(i)._2
+
+            casebuf(i) = (casebuf(i)._1, next)
+            next = cur
+          }
+
+          // todo: next should only contain whitespace content, error otherwise
+
+          astbuf += MatchBlockAST(cond, casebuf.toSeq, els)
           parse(rest, parsingbody, allowelse, tokbuf, astbuf)
         case h #:: t if !h.eoi =>
           tokbuf += h
