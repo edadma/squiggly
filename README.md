@@ -201,7 +201,7 @@ provided when a template is rendered. A value that is written manually inside a 
   a Scala `null`.
 - `true`, `false`. These correspond to the values of the Scala Boolean class.
 - numbers. Numbers in *squiggly* are all instances of one type internally: the Scala `BigDecimal` number type. This was
-  chosen mainly because it provides exact decimal arithmetic which is desirable when representing currency
+  chosen mainly because it provides exact decimal arithmetic which is desirable when working with currency
   values.  `BigDecimals` can also represent arbitrarily large integers.
 - strings. String literals are written between `'` and `'`, or `"` and `"`, whichever is more convenient. Strings may
   contain any of the standard escapes: `\n`, `\uxxxx`, etc.
