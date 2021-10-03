@@ -200,13 +200,13 @@ provided when a template is rendered. A value that is written manually inside a 
 - `null`. The null value simply represents no value, and is rendered in a template as an empty string. It corresponds to
   a Scala `null`.
 - `true`, `false`. These correspond to the values of the Scala Boolean class.
-- numbers. Numbers in *squiggly* are all instances of one type internally: the Scala `BigDecimal` number type. This was
-  chosen mainly because it provides exact decimal arithmetic which is desirable when working with currency
+- _numbers_. Numbers in *squiggly* are all instances of one type internally: the Scala `BigDecimal` number type. This
+  was chosen mainly because it provides exact decimal arithmetic which is desirable when working with currency
   values.  `BigDecimals` can also represent arbitrarily large integers.
-- strings. String literals are written between `'` and `'`, or `"` and `"`, whichever is more convenient. Strings may
+- _strings_. String literals are written between `'` and `'`, or `"` and `"`, whichever is more convenient. Strings may
   contain any of the standard escapes: `\n`, `\uxxxx`, etc.
-- lists. List literals are written between `[` and `]` with each item in the list separated by a `,`.
-- maps. Map literals are written between `{` and `}` with each property in the map separated by a `,`, and where a
+- _lists_. List literals are written between `[` and `]` with each item in the list separated by a `,`.
+- _maps_. Map literals are written between `{` and `}` with each property in the map separated by a `,`, and where a
   property is a *key* (property name) and a value separated by a `:`. For example: `{one: 1, two: 2, three: 3}`
 
 The is a special *undefined* value which purposely cannot be expressed literally. It represents a property that is
