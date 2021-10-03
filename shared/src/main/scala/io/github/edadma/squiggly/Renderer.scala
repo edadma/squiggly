@@ -7,16 +7,15 @@ import scala.language.postfixOps
 
 object Renderer {
 
-  val basic = new Renderer()
+  val default = new Renderer()
 
 }
 
-class Renderer(private[squiggly] val out: PrintStream = Console.out,
-               private[squiggly] val partials: PartialsLoader = _ => None,
+class Renderer(private[squiggly] val partials: PartialsLoader = _ => None,
                private[squiggly] val functions: Map[String, BuiltinFunction] = Builtin.functions) {
 
-  def render(globalData: Any, ast: TemplateParserAST): Any = {
-    val globalContext = Context(this, globalData, new mutable.HashMap[String, Any])
+  def render(globalData: Any, ast: TemplateParserAST, out: PrintStream = Console.out): Any = {
+    val globalContext = Context(this, globalData, new mutable.HashMap[String, Any], out)
     var returnValue: Any = ()
 
     globalContext.global = globalData

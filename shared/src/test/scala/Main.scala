@@ -37,8 +37,8 @@ object Main extends App {
       |  </body>
       |</html>
       |""".trim.stripMargin
-  val ast = Parser.basic.parse(template)
+  val ast = Parser.default.parse(template)
 
-  Renderer.basic.render(data, ast)
+  Renderer.default.render(data, ast)
 
 }

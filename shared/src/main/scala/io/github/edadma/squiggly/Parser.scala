@@ -7,7 +7,7 @@ import scala.collection.mutable.{ArrayBuffer, ListBuffer}
 
 object Parser {
 
-  val basic = new Parser()
+  val default = new Parser()
 
 }
 

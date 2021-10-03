@@ -6,11 +6,11 @@ trait Testing {
 
   def test(yaml: String, template: String): String = {
     val data = if (yaml eq null) null else platform.yaml(yaml)
-    val ast = Parser.basic.parse(template)
+    val ast = Parser.default.parse(template)
     val buf = new ByteArrayOutputStream
     val out = new PrintStream(buf)
 
-    Console.withOut(out)(Renderer.basic.render(data, ast))
+    Renderer.default.render(data, ast, out)
     buf.toString
   }
 

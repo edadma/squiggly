@@ -88,7 +88,7 @@ object Main extends App {
     if (c.ast)
       pprintln(ast)
     else {
-      Renderer.basic.render(data, ast)
+      Renderer.default.render(data, ast)
       println()
     }
   }

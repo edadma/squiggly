@@ -143,7 +143,7 @@ object Builtin {
   private def partial(context: Context, path: String, data: Any): Any = {
     val partial = context.renderer.partials(path) getOrElse sys.error(s"partial '$path' count not be loaded")
 
-    context.renderer.render(data, partial)
+    context.renderer.render(data, partial, context.out)
   }
 
 }
