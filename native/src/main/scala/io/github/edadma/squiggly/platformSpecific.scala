@@ -1,6 +1,6 @@
 package io.github.edadma.squiggly
 
-import io.github.edadma.libyaml.{Constructor, YAMLBigInt, YAMLInteger, YAMLValue, parseFromString}
+import io.github.edadma.libyaml.{Constructor, YAMLBigInt, YAMLInteger, YAMLTimestamp, YAMLValue, parseFromString}
 
 object platformSpecific extends Platform {
 
@@ -8,9 +8,10 @@ object platformSpecific extends Platform {
     new Constructor {
       override def construct(v: YAMLValue): Any = {
         v match {
-          case YAMLInteger(n) => BigDecimal(n)
-          case YAMLBigInt(n)  => BigDecimal(n)
-          case _              => super.construct(v)
+          case YAMLInteger(n)   => BigDecimal(n)
+          case YAMLBigInt(n)    => BigDecimal(n)
+          case YAMLTimestamp(t) => t
+          case _                => super.construct(v)
         }
       }
     }

@@ -44,7 +44,7 @@ lazy val squiggly = crossProject(JSPlatform, JVMPlatform, NativePlatform)
   )
   .nativeSettings(
     nativeLinkStubs := true,
-    libraryDependencies += "io.github.edadma" %%% "libyaml" % "0.1.7"
+    libraryDependencies += "io.github.edadma" %%% "libyaml" % "0.1.8"
   )
   .jsSettings(
     jsEnv := new org.scalajs.jsenv.nodejs.NodeJSEnv(),
