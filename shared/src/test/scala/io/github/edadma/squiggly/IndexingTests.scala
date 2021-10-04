@@ -3,7 +3,7 @@ package io.github.edadma.squiggly
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers
 
-class FunctionTests extends AnyFreeSpec with Matchers with Testing {
+class IndexingTests extends AnyFreeSpec with Matchers with Testing {
 
   "filter 1" in {
     test(
@@ -33,6 +33,16 @@ class FunctionTests extends AnyFreeSpec with Matchers with Testing {
         |index: 0, element: 4
         |index: 1, element: 6
         |""".trim.stripMargin
+  }
+
+  "vars 2" in {
+    test(null,
+         """
+        |{{ v := 345 }}{{ v }} {{ v := 678 }}{{ v }}
+        """.trim.stripMargin) shouldBe
+      """
+        |345 678
+        """.trim.stripMargin
   }
 
 }
