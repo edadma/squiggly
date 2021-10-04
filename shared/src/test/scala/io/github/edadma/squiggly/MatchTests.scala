@@ -5,180 +5,180 @@ import org.scalatest.matchers.should.Matchers
 
 class MatchTests extends AnyFreeSpec with Matchers with Testing {
 
-  "if 1" in {
-    test(null,
+  "match 1" in {
+    test("3",
          """
-          |[{{ if true }}yes{{ end }}]
+          |[{{ match . }}{{ case 3 }}three{{ end }}]
           """.trim.stripMargin) shouldBe
       """
-        |[yes]
+        |[three]
         """.trim.stripMargin
   }
 
-  "if 2" in {
+  "match 2" in {
     test(null,
          """
-          |[{{ if true }}yes{{ else }}no{{ end }}]
+          |[{{ match 3 }}{{ case 3 }}three{{ else }}no{{ end }}]
           """.trim.stripMargin) shouldBe
       """
-        |[yes]
+        |[three]
         """.trim.stripMargin
   }
 
-  "if 3" in {
+  "match 3" in {
     test(null,
          """
-          |[{{ if false }}yes{{ end }}]
+          |[{{ match 4 }}{{ case 3 }}three{{ end }}]
           """.trim.stripMargin) shouldBe
       """
         |[]
         """.trim.stripMargin
   }
 
-  "if 4" in {
+  "match 4" in {
     test(null,
          """
-          |[{{ if false }}yes{{ else }}no{{ end }}]
+          |[{{ match 4 }}{{ case 3 }}three{{ else }}no{{ end }}]
           """.trim.stripMargin) shouldBe
       """
         |[no]
         """.trim.stripMargin
   }
 
-  "if 5" in {
-    test("3",
+  "match 5" in {
+    test(null,
          """
-          |[{{ if . = 3 }}three{{ elsif . = 4 }}four{{ else }}none{{ end }}]
+          |[{{ match 3 }}{{ case 3 }}three{{ case 4 }}four{{ else }}none{{ end }}]
           """.trim.stripMargin) shouldBe
       """
         |[three]
         """.trim.stripMargin
   }
 
-  "if 5a" in {
+  "match 5a" in {
     test("4",
          """
-          |[{{ if . = 3 }}three{{ elsif . = 4 }}four{{ else }}none{{ end }}]
+          |[{{ match . }}{{ case 3 }}three{{ case 4 }}four{{ else }}none{{ end }}]
           """.trim.stripMargin) shouldBe
       """
         |[four]
         """.trim.stripMargin
   }
 
-  "if 5b" in {
+  "match 5b" in {
     test("5",
          """
-          |[{{ if . = 3 }}three{{ elsif . = 4 }}four{{ else }}none{{ end }}]
+          |[{{ match . }}{{ case 3 }}three{{ case 4 }}four{{ else }}none{{ end }}]
           """.trim.stripMargin) shouldBe
       """
         |[none]
         """.trim.stripMargin
   }
 
-  "if 6" in {
+  "match 6" in {
     test("3",
          """
-          |[{{ if . = 3 }}three{{ elsif . = 4 }}four{{ end }}]
+          |[{{ match . }}{{ case 3 }}three{{ case 4 }}four{{ end }}]
           """.trim.stripMargin) shouldBe
       """
         |[three]
         """.trim.stripMargin
   }
 
-  "if 7" in {
+  "match 7" in {
     test("4",
          """
-          |[{{ if . = 3 }}three{{ elsif . = 4 }}four{{ end }}]
+          |[{{ match . }}{{ case 3 }}three{{ case 4 }}four{{ end }}]
           """.trim.stripMargin) shouldBe
       """
         |[four]
         """.trim.stripMargin
   }
 
-  "if 8" in {
+  "match 8" in {
     test("5",
          """
-          |[{{ if . = 3 }}three{{ elsif . = 4 }}four{{ end }}]
+          |[{{ match . }}{{ case 3 }}three{{ case4 }}four{{ end }}]
           """.trim.stripMargin) shouldBe
       """
         |[]
         """.trim.stripMargin
   }
 
-  "if 9" in {
+  "match 9" in {
     test("3",
          """
-          |[{{ if . = 3 }}three{{ elsif . = 4 }}four{{ elsif . = 5 }}five{{ else }}none{{ end }}]
+          |[{{ match . }}{{ case 3 }}three{{ case 4 }}four{{ case 5 }}five{{ else }}none{{ end }}]
           """.trim.stripMargin) shouldBe
       """
         |[three]
         """.trim.stripMargin
   }
 
-  "if 10" in {
+  "match 10" in {
     test("4",
          """
-          |[{{ if . = 3 }}three{{ elsif . = 4 }}four{{ elsif . = 5 }}five{{ else }}none{{ end }}]
+          |[{{ match . }}{{ case 3 }}three{{ case 4 }}four{{ case 5 }}five{{ else }}none{{ end }}]
           """.trim.stripMargin) shouldBe
       """
         |[four]
         """.trim.stripMargin
   }
 
-  "if 11" in {
+  "match 11" in {
     test("5",
          """
-          |[{{ if . = 3 }}three{{ elsif . = 4 }}four{{ elsif . = 5 }}five{{ else }}none{{ end }}]
+          |[{{ match . }}{{ case 3 }}three{{ case 4 }}four{{ case 5 }}five{{ else }}none{{ end }}]
           """.trim.stripMargin) shouldBe
       """
         |[five]
         """.trim.stripMargin
   }
 
-  "if 12" in {
+  "match 12" in {
     test("6",
          """
-          |[{{ if . = 3 }}three{{ elsif . = 4 }}four{{ elsif . = 5 }}five{{ else }}none{{ end }}]
+          |[{{ match . }}{{ case 3 }}three{{ case 4 }}four{{ case 5 }}five{{ else }}none{{ end }}]
           """.trim.stripMargin) shouldBe
       """
         |[none]
         """.trim.stripMargin
   }
 
-  "if 13" in {
+  "match 13" in {
     test("3",
          """
-          |[{{ if . = 3 }}three{{ elsif . = 4 }}four{{ elsif . = 5 }}five{{ end }}]
+          |[{{ match . }}{{ case 3 }}three{{ case 4 }}four{{ case 5 }}five{{ end }}]
           """.trim.stripMargin) shouldBe
       """
         |[three]
         """.trim.stripMargin
   }
 
-  "if 14" in {
+  "match 14" in {
     test("4",
          """
-          |[{{ if . = 3 }}three{{ elsif . = 4 }}four{{ elsif . = 5 }}five{{ end }}]
+          |[{{ match . }}{{ case 3 }}three{{ case 4 }}four{{ case 5 }}five{{ end }}]
           """.trim.stripMargin) shouldBe
       """
         |[four]
         """.trim.stripMargin
   }
 
-  "if 15" in {
+  "match 15" in {
     test("5",
          """
-          |[{{ if . = 3 }}three{{ elsif . = 4 }}four{{ elsif . = 5 }}five{{ end }}]
+          |[{{match . }}{{ case 3 }}three{{ case 4 }}four{{ case 5 }}five{{ end }}]
           """.trim.stripMargin) shouldBe
       """
         |[five]
         """.trim.stripMargin
   }
 
-  "if 16" in {
+  "match 16" in {
     test("6",
          """
-          |[{{ if . = 3 }}three{{ elsif . = 4 }}four{{ elsif . = 5 }}five{{ end }}]
+          |[{{ match . }}{{ case 3 }}three{{ case 4 }}four{{ case 5 }}five{{ end }}]
           """.trim.stripMargin) shouldBe
       """
         |[]
