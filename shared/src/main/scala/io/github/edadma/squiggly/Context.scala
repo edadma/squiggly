@@ -170,19 +170,24 @@ case class Context(renderer: Renderer, data: Any, vars: mutable.HashMap[String, 
       case PipeExpr(left, ApplyExpr(Ident(pos, name), args)) => callFunction(pos, name, (args map eval) :+ eval(left))
     }
 
-  private def lookup(pos: TagParser#Position, v: Any, id: Ident): Option[Any] =
+  private def lookup(pos: TagParser#Position, v: Any, id: Ident): Option[Any] = {
+    def tryMethod: Any =
+      if (renderer.methods contains id.name)
+        callFunction(id.pos, id.name, Seq(v))
+      else
+        pos.error(s"not an object (i.e., Map or case class): $v")
+
     v match {
       case ()                      => pos.error(s"attempt to lookup property '${id.name}' of undefined")
       case null                    => None
-      case m: collection.Map[_, _] => m.asInstanceOf[collection.Map[String, Any]] get id.name
+      case m: collection.Map[_, _] => Some(m.asInstanceOf[collection.Map[String, Any]] getOrElse (id.name, tryMethod))
       case p: Product =>
-        p.productElementNames zip p.productIterator find {
+        Some(p.productElementNames zip p.productIterator find {
           case (k, _) => k == id.name
-        } map (_._2)
-      case _ if renderer.methods contains id.name => Some(callFunction(id.pos, id.name, Seq(v)))
-      case _                                      => pos.error(s"not an object (i.e., Map or case class): $v")
-
+        } map (_._2) getOrElse tryMethod)
+      case _ => Some(tryMethod)
     }
+  }
 
   @tailrec
   private def lookupSeq(pos: TagParser#Position, v: Any, ids: Seq[Ident]): Option[Any] =
