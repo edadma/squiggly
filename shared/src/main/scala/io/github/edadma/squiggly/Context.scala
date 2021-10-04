@@ -152,14 +152,21 @@ case class Context(renderer: Renderer, data: Any, vars: mutable.HashMap[String, 
       case IndexExpr(expr, pos, index) =>
         eval(expr) match {
           case m: collection.Map[_, _] => m.asInstanceOf[collection.Map[Any, _]] getOrElse (eval(index), ())
-          case p: Product =>
-            p.productElementNames zip p.productIterator find { case (k, _) => k == seval(pos, index) } map (_._2) getOrElse ()
-          case s: Seq[_] =>
+          case s: collection.Seq[_] =>
             ieval(pos, index) match {
               case n if n < 0         => pos.error(s"negative array index: $n")
-              case n if n >= s.length => pos.error(s"array index out of range: $n")
+              case n if n >= s.length => pos.error(s"array index out of bounds: $n")
               case n                  => s(n)
             }
+          case p: Product =>
+            p.productElementNames zip p.productIterator find { case (k, _) => k == seval(pos, index) } map (_._2) getOrElse ()
+          case s: String =>
+            ieval(pos, index) match {
+              case n if n < 0         => pos.error(s"negative array index: $n")
+              case n if n >= s.length => pos.error(s"array index out of bounds: $n")
+              case n                  => s(n).toString
+            }
+          case v => pos.error(s"not indexable: $v")
         }
       case ApplyExpr(Ident(pos, name), args)                 => callFunction(pos, name, args map eval)
       case PipeExpr(left, ApplyExpr(Ident(pos, name), args)) => callFunction(pos, name, (args map eval) :+ eval(left))

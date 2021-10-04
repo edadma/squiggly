@@ -37,14 +37,14 @@ object Main extends App {
   //      |  </body>
   //      |</html>
   //      |""".trim.stripMargin
-  val data = platform.yaml("{unix: 2021-10-04T18:33:25.004Z}")
+  val data = platform.yaml("5")
   //  val template =
   //    """
   //      |{{ define asdfx }}qwer {{ . }} zxcv{{ end }}{{ block asdf . + 2 }}default: {{ . }}{{ end }}
   //      |""".trim.stripMargin
   val template =
     """
-    |{{ now.unix }}
+    |{{ .[0] }}
     |""".trim.stripMargin
   val ast = Parser.default.parse(template)
 
@@ -59,3 +59,4 @@ object Main extends App {
 // todo: implement 'unless' https://shopify.github.io/liquid/tags/control-flow/
 // todo: implement 'no output' https://shopify.github.io/liquid/tags/template/
 // todo: "filters": https://shopify.github.io/liquid/
+// todo: add boolean test for null and undefined
