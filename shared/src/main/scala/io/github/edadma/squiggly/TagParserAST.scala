@@ -81,7 +81,7 @@ case class CaseAST(pos: TagParser#Position, cond: ExprAST) extends ConstructAST
 
 case class WithAST(pos: TagParser#Position, expr: ExprAST) extends SimpleBlockAST
 
-case class ForAST(index: Option[(Option[Ident], Ident)], pos: TagParser#Position, expr: ExprAST) extends SimpleBlockAST
+case class ForAST(index: Option[(Ident, Option[Ident])], pos: TagParser#Position, expr: ExprAST) extends SimpleBlockAST
 
 case class DefineAST(pos: TagParser#Position, name: Ident) extends BasicBlockAST
 

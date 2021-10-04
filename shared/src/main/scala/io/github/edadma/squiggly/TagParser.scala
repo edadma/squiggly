@@ -144,7 +144,7 @@ class TagParser(val input: ParserInput,
       element |
       map |
       seq |
-      "<" ~ expression ~ ">" ~> NonStrictExpr |
+      "`" ~ expression ~ "`" ~> NonStrictExpr |
       "(" ~ expression ~ ")"
   }
 
@@ -213,8 +213,6 @@ class TagParser(val input: ParserInput,
   def string: Rule1[StringExpr] =
     rule(pos ~ (singleQuoteString | doubleQuoteString) ~> ((p: Position, s: String) => StringExpr(p, s)))
 
-  def backtickString: Rule1[String] = rule(capture('`' ~ zeroOrMore("\\`" | noneOf("`"))) ~ '`' ~ sp)
-
   def singleQuoteString: Rule1[String] = rule('\'' ~ capture(zeroOrMore("\\'" | noneOf("'\n"))) ~ '\'' ~ sp)
 
   def doubleQuoteString: Rule1[String] = rule('"' ~ capture(zeroOrMore("\\\"" | noneOf("\"\n"))) ~ '"' ~ sp)
@@ -253,8 +251,8 @@ class TagParser(val input: ParserInput,
 
   def withTag: Rule1[WithAST] = rule(pos ~ "with" ~ expression ~> WithAST)
 
-  def forIndex: Rule1[(Option[Ident], Ident)] =
-    rule(optional(ident ~ ",") ~ ident ~ "<-" ~> Tuple2[Option[Ident], Ident] _)
+  def forIndex: Rule1[(Ident, Option[Ident])] =
+    rule(ident ~ optional("," ~ ident) ~ "<-" ~> Tuple2[Ident, Option[Ident]] _)
 
   def forTag: Rule1[ForAST] =
     rule("for" ~ optional(forIndex) ~ pos ~ expression ~> ForAST)

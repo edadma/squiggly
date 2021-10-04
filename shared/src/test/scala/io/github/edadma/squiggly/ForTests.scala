@@ -28,7 +28,7 @@ class ForTests extends AnyFreeSpec with Matchers with Testing {
   "for 1b" in {
     test("l: [3, 4]",
          """
-          |{{ for i, e <- .l }}[{{ i }}, {{ e }}, {{ . }}]{{ end }}
+          |{{ for e, i <- .l }}[{{ i }}, {{ e }}, {{ . }}]{{ end }}
           """.trim.stripMargin) shouldBe
       """
         |[0, 3, 3][1, 4, 4]

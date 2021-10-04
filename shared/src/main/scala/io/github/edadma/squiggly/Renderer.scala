@@ -40,10 +40,10 @@ class Renderer(protected[squiggly] val partials: PartialsLoader = _ => None,
               s.zipWithIndex foreach {
                 case (e, i) =>
                   index match {
-                    case Some((Some(Ident(_, idx)), Ident(_, elem))) =>
+                    case Some((Ident(_, elem), Some(Ident(_, idx)))) =>
                       context.vars(idx) = i
                       context.vars(elem) = e
-                    case Some((None, Ident(_, elem))) => context.vars(elem) = e
+                    case Some((Ident(_, elem), None)) => context.vars(elem) = e
                     case None                         =>
                   }
 

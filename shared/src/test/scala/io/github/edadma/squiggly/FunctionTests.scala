@@ -9,7 +9,7 @@ class FunctionTests extends AnyFreeSpec with Matchers with Testing {
     test(
       "[3, 4, 5, 6]",
       """
-        |{{ for i, e <- . | filter < . > 4 > -}}
+        |{{ for e, i <- . | filter `. > 4` -}}
         |  index: {{ i }}, element: {{ e }}
         |{{ end }}
         """.trim.stripMargin
@@ -24,7 +24,7 @@ class FunctionTests extends AnyFreeSpec with Matchers with Testing {
     test(
       "[3, 4, 5, 6]",
       """
-        |{{ for i, e <- . | filter < 2 div . > -}}
+        |{{ for e, i <- . | filter `2 div .` -}}
         |  index: {{ i }}, element: {{ e }}
         |{{ end }}
         """.trim.stripMargin

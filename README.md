@@ -35,7 +35,7 @@ Include the following in your `build.sbt`:
 ```sbt
 resolvers += Resolver.githubPackages("edadma")
 
-libraryDependencies += "io.github.edadma" %%% "squiggly" % "0.1.5"
+libraryDependencies += "io.github.edadma" %%% "squiggly" % "0.1.6"
 
 ```
 
@@ -158,7 +158,7 @@ squiggly -h
 to get the following usage text:
 
 ```
-Squiggly v0.1.5
+Squiggly v0.1.6
 Usage: squiggly [options] [[<template>]]
 
   -a, --ast              pretty print AST
@@ -209,10 +209,10 @@ provided when a template is rendered. A value that is written manually inside a 
 - _maps_. Map literals are written between `{` and `}` with each property in the map separated by a `,`, and where a
   property is a *key* (property name) and a value separated by a `:`. For example: `{one: 1, two: 2, three: 3}`
 
-There is a special *undefined* value which purposely cannot be expressed literally because it represents a property that is
-missing, and is always rendered in a template as an empty string. It is not the same as `null` because a property that
-is not missing can contain a `null` value, and one may wish to distinguish between them. The undefined value corresponds
-to the Scala `()` value, the only instance of the `Unit` class.
+There is a special *undefined* value which purposely cannot be expressed literally because it represents a property that
+is missing, and is always rendered in a template as an empty string. It is not the same as `null` because a property
+that is not missing can contain a `null` value, and one may wish to distinguish between them. The undefined value
+corresponds to the Scala `()` value, the only instance of the `Unit` class.
 
 #### Expressions
 
@@ -236,10 +236,10 @@ The *with* tag binds the current context to *value*, and is often used to simply
 properties of a single data structure. For example `{{ with .user }}{{ .firstName }} {{ .lastName }}{{ end }}` will be
 replaced by the first and last name of `.user`.
 
-#### {{ for [ [ _i_ , ] _e_ <- ] _value_ }} ... [ {{ else }} ... ] }}
+#### {{ for [ _e_ [ , _i_ ] <- ] _value_ }} ... [ {{ else }} ... ] }}
 
 The *for* tag binds context to successive elements of *value* which must be a Scala Iterable (i.e. a Seq or Map).
-Optionally, *i* is set to the 0-based index, and *e* is also set to each value.
+Optionally, *e* is also set to each value, and *i* is set to the 0-based index.
 
 TO DO
 
