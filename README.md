@@ -209,7 +209,7 @@ provided when a template is rendered. A value that is written manually inside a 
 - _maps_. Map literals are written between `{` and `}` with each property in the map separated by a `,`, and where a
   property is a *key* (property name) and a value separated by a `:`. For example: `{one: 1, two: 2, three: 3}`
 
-There is a special *undefined* value which purposely cannot be expressed literally because represents a property that is
+There is a special *undefined* value which purposely cannot be expressed literally because it represents a property that is
 missing, and is always rendered in a template as an empty string. It is not the same as `null` because a property that
 is not missing can contain a `null` value, and one may wish to distinguish between them. The undefined value corresponds
 to the Scala `()` value, the only instance of the `Unit` class.
