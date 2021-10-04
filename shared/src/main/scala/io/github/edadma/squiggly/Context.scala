@@ -140,14 +140,9 @@ case class Context(renderer: Renderer, data: Any, vars: mutable.HashMap[String, 
               case "\\"  => l quot r
             }
         }
-      case RightInfixExpr(lpos, left, op, rpos, right) =>
-        val l = neval(lpos, left)
-
-        op match {
-          case "^" => l pow ieval(rpos, right)
-        }
-      case PrefixExpr("-", pos, expr)               => -neval(pos, expr)
-      case MethodExpr(expr, Ident(pos, name), args) => callFunction(pos, name, (args map eval) :+ eval(expr))
+      case RightInfixExpr(lpos, left, "^", rpos, right) => neval(lpos, left) pow ieval(rpos, right)
+      case PrefixExpr("-", pos, expr)                   => -neval(pos, expr)
+      //      case MethodExpr(expr, Ident(pos, name), args) => callFunction(pos, name, (args map eval) :+ eval(expr))
       case IndexExpr(expr, indices) =>
         val it = indices.iterator
         var d = eval(expr)
@@ -184,7 +179,9 @@ case class Context(renderer: Renderer, data: Any, vars: mutable.HashMap[String, 
         p.productElementNames zip p.productIterator find {
           case (k, _) => k == id.name
         } map (_._2)
-      case _ => pos.error(s"not an object (i.e., Map or case class): $v")
+      case _ if renderer.methods contains id.name => Some(callFunction(id.pos, id.name, Seq(v)))
+      case _                                      => pos.error(s"not an object (i.e., Map or case class): $v")
+
     }
 
   @tailrec

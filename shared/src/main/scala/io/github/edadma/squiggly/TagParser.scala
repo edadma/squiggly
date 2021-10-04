@@ -129,9 +129,9 @@ class TagParser(val input: ParserInput,
 
   def index: Rule1[ExprAST] =
     rule {
-      primary ~ test(cursor == 0 || !lastChar.isWhitespace) ~ '.' ~ (identnsp ~ test(cursorChar != '.') ~ sp ~
-        oneOrMore(primary) | ident ~ push(Nil)) ~> MethodExpr |
-        primary ~ oneOrMore("[" ~ pos ~ expression ~ "]" ~> Tuple2[Position, ExprAST] _) ~> IndexExpr |
+      /*primary ~ test(cursor == 0 || !lastChar.isWhitespace) ~ '.' ~ (identnsp ~ test(cursorChar != '.') ~ sp ~
+        oneOrMore(primary) | ident ~ push(Nil)) ~> MethodExpr |*/
+      primary ~ oneOrMore("[" ~ pos ~ expression ~ "]" ~> Tuple2[Position, ExprAST] _) ~> IndexExpr |
         primary
     }
 
@@ -177,37 +177,37 @@ class TagParser(val input: ParserInput,
 
   def variable: Rule1[VarExpr] = rule(pos ~ capture(optional('$')) ~ ident ~> VarExpr)
 
-  def nextIsMethod: Boolean = {
-    buf.clear()
-
-    if (cursorChar.isLetter || cursorChar == '_') {
-      buf += cursorChar
-
-      var i = 1
-
-      @tailrec
-      def next(): Unit = {
-        val c = charAtRC(i)
-
-        if (c.isLetterOrDigit || c == '_') {
-          buf += c
-          i += 1
-          next()
-        }
-      }
-
-      next()
-
-      functions get buf.toString match {
-        case Some(BuiltinFunction(_, arity, _)) if arity >= 1 => true
-        case _                                                => false
-      }
-    } else false
-  }
+  //  def nextIsMethod: Boolean = {
+  //    buf.clear()
+  //
+  //    if (cursorChar.isLetter || cursorChar == '_') {
+  //      buf += cursorChar
+  //
+  //      var i = 1
+  //
+  //      @tailrec
+  //      def next(): Unit = {
+  //        val c = charAtRC(i)
+  //
+  //        if (c.isLetterOrDigit || c == '_') {
+  //          buf += c
+  //          i += 1
+  //          next()
+  //        }
+  //      }
+  //
+  //      next()
+  //
+  //      functions get buf.toString match {
+  //        case Some(BuiltinFunction(_, arity, _)) if arity >= 1 => true
+  //        case _                                                => false
+  //      }
+  //    } else false
+  //  }
 
   def element: Rule1[ElementExpr] =
     rule(
-      pos ~ capture(optional('$')) ~ '.' ~ zeroOrMore(test(!nextIsMethod) ~ identnsp)
+      pos ~ capture(optional('$')) ~ '.' ~ zeroOrMore( /*test(!nextIsMethod) ~*/ identnsp)
         .separatedBy('.') ~ sp ~> ElementExpr)
 
   def string: Rule1[StringExpr] =

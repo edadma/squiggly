@@ -44,7 +44,17 @@ class VariableTests extends AnyFreeSpec with Matchers with Testing {
 
   "vars 5" in {
     test("{unix: 123}",
+         """
+        |{{ .unix }}
+        """.trim.stripMargin) shouldBe
       """
+        |123
+        """.trim.stripMargin
+  }
+
+  "vars 5" in {
+    test(null,
+         """
         |{{ .unix }}
         """.trim.stripMargin) shouldBe
       """
