@@ -19,28 +19,6 @@ case class Context(renderer: Renderer, data: Any, vars: mutable.HashMap[String, 
     _global
   }
 
-  def beval(expr: ExprAST): Boolean = !falsy(eval(expr))
-
-  def num(pos: TagParser#Position, v: Any): Num =
-    v match {
-      case n: Num => n
-      case s: String =>
-        try {
-          BigDecimal(s)
-        } catch {
-          case _: NumberFormatException => pos.error(s"not a number: $s")
-        }
-    }
-
-  def neval(pos: TagParser#Position, expr: ExprAST): Num = num(pos, eval(expr))
-
-  def ieval(pos: TagParser#Position, expr: ExprAST): Int =
-    try {
-      neval(pos, expr).toIntExact
-    } catch {
-      case _: ArithmeticException => pos.error("must be an exact \"small\" integer")
-    }
-
   // todo: arguments should have Position for error reporting
   def callFunction(pos: TagParser#Position, name: String, args: Seq[Any]): Any =
     args.find(_ == ()) match {
@@ -63,6 +41,34 @@ case class Context(renderer: Renderer, data: Any, vars: mutable.HashMap[String, 
     vars get name match {
       case Some(value) => value
       case None        => pos.error(s"unknown variable: $name")
+    }
+
+  def beval(expr: ExprAST): Boolean = !falsy(eval(expr))
+
+  def num(pos: TagParser#Position, v: Any): Num =
+    v match {
+      case n: Num => n
+      case s: String =>
+        try {
+          BigDecimal(s)
+        } catch {
+          case _: NumberFormatException => pos.error(s"not a number: $s")
+        }
+    }
+
+  def neval(pos: TagParser#Position, expr: ExprAST): Num = num(pos, eval(expr))
+
+  def ieval(pos: TagParser#Position, expr: ExprAST): Int =
+    try {
+      neval(pos, expr).toIntExact
+    } catch {
+      case _: ArithmeticException => pos.error("must be an exact \"small\" integer")
+    }
+
+  def seval(pos: TagParser#Position, expr: ExprAST): String =
+    eval(expr) match {
+      case s: String => s
+      case v         => pos.error(s"field name was expected: $v")
     }
 
   def eval(expr: ExprAST): Any =
@@ -142,30 +148,19 @@ case class Context(renderer: Renderer, data: Any, vars: mutable.HashMap[String, 
         }
       case RightInfixExpr(lpos, left, "^", rpos, right) => neval(lpos, left) pow ieval(rpos, right)
       case PrefixExpr("-", pos, expr)                   => -neval(pos, expr)
-      //      case MethodExpr(expr, Ident(pos, name), args) => callFunction(pos, name, (args map eval) :+ eval(expr))
-      case IndexExpr(expr, indices) =>
-        val it = indices.iterator
-        var d = eval(expr)
-
-        while (it.hasNext && d != ()) {
-          val (pos, idx) = it.next()
-
-          d = d match {
-            case m: Map[_, _] =>
-              m.asInstanceOf[Map[Any, _]] get eval(idx) match {
-                case Some(v) => v
-                case None    => ()
-              }
-            case s: Seq[_] =>
-              ieval(pos, idx) match {
-                case n if n < 0         => pos.error(s"negative array index: $n")
-                case n if n >= s.length => pos.error(s"array index out of range: $n")
-                case n                  => s(n)
-              }
-          }
+      case MethodExpr(expr, id: Ident)                  => lookup(id.pos, eval(expr), id) getOrElse ()
+      case IndexExpr(expr, pos, index) =>
+        eval(expr) match {
+          case m: collection.Map[_, _] => m.asInstanceOf[collection.Map[Any, _]] getOrElse (eval(index), ())
+          case p: Product =>
+            p.productElementNames zip p.productIterator find { case (k, _) => k == seval(pos, index) } map (_._2) getOrElse ()
+          case s: Seq[_] =>
+            ieval(pos, index) match {
+              case n if n < 0         => pos.error(s"negative array index: $n")
+              case n if n >= s.length => pos.error(s"array index out of range: $n")
+              case n                  => s(n)
+            }
         }
-
-        d
       case ApplyExpr(Ident(pos, name), args)                 => callFunction(pos, name, args map eval)
       case PipeExpr(left, ApplyExpr(Ident(pos, name), args)) => callFunction(pos, name, (args map eval) :+ eval(left))
     }

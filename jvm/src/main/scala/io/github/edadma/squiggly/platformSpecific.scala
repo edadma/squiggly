@@ -8,7 +8,7 @@ object platformSpecific extends Platform {
   def yaml(s: String): Any = {
     def construct(n: YamlNode): Any =
       n match {
-        case TimestampYamlNode(t) => Datetime.fromString(t)
+        case TimestampYamlNode(t) => Datetime.fromString(t).timestamp
         case MapYamlNode(entries) => entries map { case (k, v) => (construct(k), construct(v)) } toMap
         case IntYamlNode(n)       => BigDecimal(n)
         case FloatYamlNode(n)     => BigDecimal(n)

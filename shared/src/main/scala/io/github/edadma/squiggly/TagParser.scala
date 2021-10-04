@@ -129,10 +129,8 @@ class TagParser(val input: ParserInput,
 
   def index: Rule1[ExprAST] =
     rule {
-      /*primary ~ test(cursor == 0 || !lastChar.isWhitespace) ~ '.' ~ (identnsp ~ test(cursorChar != '.') ~ sp ~
-        oneOrMore(primary) | ident ~ push(Nil)) ~> MethodExpr |*/
-      primary ~ oneOrMore("[" ~ pos ~ expression ~ "]" ~> Tuple2[Position, ExprAST] _) ~> IndexExpr |
-        primary
+      primary ~ zeroOrMore(
+        "[" ~ pos ~ expression ~ "]" ~> IndexExpr | test(!lastChar.isWhitespace) ~ '.' ~ ident ~> MethodExpr)
     }
 
   def primary: Rule1[ExprAST] = rule {

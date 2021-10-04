@@ -52,13 +52,43 @@ class VariableTests extends AnyFreeSpec with Matchers with Testing {
         """.trim.stripMargin
   }
 
-  "vars 5" in {
-    test(null,
+  "vars 6" in {
+    test("2021-10-04T21:16:20.239Z",
          """
         |{{ .unix }}
         """.trim.stripMargin) shouldBe
       """
-        |123
+        |1633382180239
+        """.trim.stripMargin
+  }
+
+  "vars 7" in {
+    test("{unix: 2021-10-04T21:16:20.239Z}",
+         """
+        |{{ .unix }}
+        """.trim.stripMargin) shouldBe
+      """
+        |2021-10-04T21:16:20.239Z
+        """.trim.stripMargin
+  }
+
+  "vars 8" in {
+    test("{date: {unix: 2021-10-04T21:16:20.239Z}}",
+         """
+        |{{ .date.unix }}
+        """.trim.stripMargin) shouldBe
+      """
+        |2021-10-04T21:16:20.239Z
+        """.trim.stripMargin
+  }
+
+  "vars 9" in {
+    test("{date: 2021-10-04T21:16:20.239Z}",
+         """
+        |{{ date := .date }}{{ date.unix }}
+        """.trim.stripMargin) shouldBe
+      """
+        |1633382180239
         """.trim.stripMargin
   }
 
