@@ -1,8 +1,7 @@
 package io.github.edadma.squiggly
 
 import java.io.PrintStream
-
-import scala.collection.mutable
+import scala.collection.{MapView, mutable}
 import scala.language.postfixOps
 
 object Renderer {
@@ -14,6 +13,8 @@ object Renderer {
 class Renderer(protected[squiggly] val partials: PartialsLoader = _ => None,
                protected[squiggly] val blocks: Blocks = new mutable.HashMap[String, ParserAST],
                protected[squiggly] val functions: Map[String, BuiltinFunction] = Builtin.functions) {
+
+  val methods: MapView[String, Boolean] = functions.view mapValues (_.arity == 1)
 
   def render(globalData: Any, ast: ParserAST, out: PrintStream = Console.out): Any = {
     val globalContext = Context(this, globalData, new mutable.HashMap[String, Any], out)
