@@ -171,21 +171,21 @@ case class Context(renderer: Renderer, data: Any, vars: mutable.HashMap[String, 
     }
 
   private def lookup(pos: TagParser#Position, v: Any, id: Ident): Option[Any] = {
-    def tryMethod: Any =
+    def tryMethod: Option[Any] =
       if (renderer.methods contains id.name)
-        callFunction(id.pos, id.name, Seq(v))
+        Some(callFunction(id.pos, id.name, Seq(v)))
       else
-        pos.error(s"not an object (i.e., Map or case class): $v")
+        None
 
     v match {
       case ()                      => pos.error(s"attempt to lookup property '${id.name}' of undefined")
       case null                    => None
-      case m: collection.Map[_, _] => Some(m.asInstanceOf[collection.Map[String, Any]] getOrElse (id.name, tryMethod))
+      case m: collection.Map[_, _] => m.asInstanceOf[collection.Map[String, Any]] get id.name orElse tryMethod
       case p: Product =>
-        Some(p.productElementNames zip p.productIterator find {
+        p.productElementNames zip p.productIterator find {
           case (k, _) => k == id.name
-        } map (_._2) getOrElse tryMethod)
-      case _ => Some(tryMethod)
+        } map (_._2) orElse tryMethod
+      case _ => tryMethod orElse pos.error(s"not an object (i.e., Map or case class): $v")
     }
   }
 
