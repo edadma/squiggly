@@ -5,7 +5,7 @@ lazy val squiggly = crossProject(JSPlatform, JVMPlatform, NativePlatform)
   .in(file("."))
   .settings(
     name := "squiggly",
-    version := "0.1.9",
+    version := "0.1.10",
     scalaVersion := "2.13.6",
     scalacOptions ++=
       Seq(
