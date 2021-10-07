@@ -37,14 +37,14 @@ object Main extends App {
   //      |  </body>
   //      |</html>
   //      |""".trim.stripMargin
-  val data = platform.yaml("5")
+  val data = platform.yaml("")
   //  val template =
   //    """
   //      |{{ define asdfx }}qwer {{ . }} zxcv{{ end }}{{ block asdf . + 2 }}default: {{ . }}{{ end }}
   //      |""".trim.stripMargin
   val template =
     """
-    |{{ .[0] }}
+    |{{ . }}
     |""".trim.stripMargin
   val ast = Parser.default.parse(template)
 

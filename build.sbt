@@ -5,7 +5,7 @@ lazy val squiggly = crossProject(JSPlatform, JVMPlatform, NativePlatform)
   .in(file("."))
   .settings(
     name := "squiggly",
-    version := "0.1.7",
+    version := "0.1.10",
     scalaVersion := "2.13.6",
     scalacOptions ++=
       Seq(
@@ -40,7 +40,7 @@ lazy val squiggly = crossProject(JSPlatform, JVMPlatform, NativePlatform)
   )
   .jvmSettings(
     libraryDependencies += "org.scala-js" %% "scalajs-stubs" % "1.0.0" % "provided",
-    libraryDependencies += "io.github.edadma" %% "yaml" % "0.1.10"
+    libraryDependencies += "io.github.edadma" %% "yaml" % "0.1.11"
   )
   .nativeSettings(
     nativeLinkStubs := true,
@@ -53,5 +53,5 @@ lazy val squiggly = crossProject(JSPlatform, JVMPlatform, NativePlatform)
     Test / scalaJSUseMainModuleInitializer := false,
     Test / scalaJSUseTestModuleInitializer := true,
     scalaJSUseMainModuleInitializer := true,
-    libraryDependencies += "io.github.edadma" %%% "yaml" % "0.1.10"
+    libraryDependencies += "io.github.edadma" %%% "yaml" % "0.1.11"
   )

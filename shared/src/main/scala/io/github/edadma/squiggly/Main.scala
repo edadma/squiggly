@@ -21,9 +21,21 @@ object Main extends App {
     // todo: add -t templatename=file,...
     // todo: add -v varname=value,...
 
+    val BOLD = Console.BOLD
+    var firstSection = true
+
+    def section(name: String) = {
+      val res =
+        s"${if (!firstSection) "\n" else ""}$BOLD\u2501\u2501\u2501\u2501\u2501 $name ${"\u2501" * (25 - name.length)}${Console.RESET}"
+
+      firstSection = false
+      res
+    }
+
     OParser.sequence(
       programName("squiggly"),
-      head("Squiggly Template Engine", "v0.1.7"),
+      head("Squiggly Template Engine", "v0.1.10"),
+      note(section("first section")),
       opt[Unit]('a', "ast")
         .optional()
         .action((_, c) => c.copy(ast = true))
@@ -33,6 +45,7 @@ object Main extends App {
         .optional()
         .action((d, c) => c.copy(dataString = d))
         .text("YAML document"),
+      note(section("asdf")),
       opt[Option[String]]('f', "template")
         .valueName("<file>")
         .optional()
@@ -44,6 +57,7 @@ object Main extends App {
           else failure("file must exist and be a readable file")
         }
         .text("template file"),
+      note(section("asdf dfgh")),
       help('h', "help").text("prints this usage text"),
       version('v', "version").text("prints the version"),
       opt[Option[String]]('y', "yaml")
