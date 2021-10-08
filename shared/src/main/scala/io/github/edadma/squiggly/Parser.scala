@@ -16,13 +16,13 @@ class Parser(startDelim: String = "{{",
              functions: Map[String, BuiltinFunction] = Builtin.functions,
              namespaces: Map[String, Map[String, BuiltinFunction]] = Builtin.namespaces) {
 
-  def parse(input: String): ParserAST = {
+  def parse(input: String): TemplateAST = {
     def parse(ts: LazyList[Token],
               parsingbody: Boolean,
               allowelse: Boolean,
               tokbuf: ListBuffer[Token] = new ListBuffer,
-              astbuf: ListBuffer[ParserAST] = new ListBuffer): (ParserAST, LazyList[Token]) = {
-      def endOfBlock: ParserAST = {
+              astbuf: ListBuffer[TemplateAST] = new ListBuffer): (TemplateAST, LazyList[Token]) = {
+      def endOfBlock: TemplateAST = {
         if (tokbuf.nonEmpty)
           astbuf += ContentAST(tokbuf.toList)
 
@@ -89,10 +89,10 @@ class Parser(startDelim: String = "{{",
             tokbuf.clear()
           }
 
-          val elseifbuf = new ArrayBuffer[(ExprAST, ParserAST)]
+          val elseifbuf = new ArrayBuffer[(ExprAST, TemplateAST)]
 
           @tailrec
-          def elseif(t: LazyList[Token]): (ParserAST, Option[ParserAST], LazyList[Token]) = {
+          def elseif(t: LazyList[Token]): (TemplateAST, Option[TemplateAST], LazyList[Token]) = {
             val (body0, rest0) = parse(t, parsingbody = true, allowelse = true)
 
             body0 match {
@@ -112,7 +112,7 @@ class Parser(startDelim: String = "{{",
           if (body == EmptyBlockAST)
             Console.err.println(pos.longErrorText("warning: empty block"))
 
-          var next: ParserAST = body
+          var next: TemplateAST = body
 
           for (i <- elseifbuf.indices.reverse) {
             val cur = elseifbuf(i)._2
@@ -129,10 +129,10 @@ class Parser(startDelim: String = "{{",
             tokbuf.clear()
           }
 
-          val casebuf = new ArrayBuffer[(ExprAST, ParserAST)]
+          val casebuf = new ArrayBuffer[(ExprAST, TemplateAST)]
 
           @tailrec
-          def cases(t: LazyList[Token]): (ParserAST, Option[ParserAST], LazyList[Token]) = {
+          def cases(t: LazyList[Token]): (TemplateAST, Option[TemplateAST], LazyList[Token]) = {
             val (body0, rest0) = parse(t, parsingbody = true, allowelse = true)
 
             body0 match {
@@ -148,7 +148,7 @@ class Parser(startDelim: String = "{{",
           }
 
           val (body, els, rest) = cases(t)
-          var next: ParserAST = body
+          var next: TemplateAST = body
 
           for (i <- casebuf.indices.reverse) {
             val cur = casebuf(i)._2

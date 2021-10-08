@@ -11,7 +11,7 @@ object Renderer {
 }
 
 class Renderer(protected[squiggly] val partials: PartialsLoader = _ => None,
-               protected[squiggly] val blocks: Blocks = new mutable.HashMap[String, ParserAST],
+               protected[squiggly] val blocks: Blocks = new mutable.HashMap[String, TemplateAST],
                protected[squiggly] val functions: Map[String, BuiltinFunction] = Builtin.functions) {
 
   protected[squiggly] val methods: MapView[String, BuiltinFunction] =
@@ -19,13 +19,13 @@ class Renderer(protected[squiggly] val partials: PartialsLoader = _ => None,
       case (_, BuiltinFunction(_, arity, _)) => arity == 1
     }
 
-  def render(globalData: Any, ast: ParserAST, out: PrintStream = Console.out): Any = {
+  def render(globalData: Any, ast: TemplateAST, out: PrintStream = Console.out): Any = {
     val globalContext = Context(this, globalData, new mutable.HashMap[String, Any], out)
     var returnValue: Any = ()
 
     globalContext.global = globalData
 
-    def render(context: Context, ast: ParserAST): Unit = {
+    def render(context: Context, ast: TemplateAST): Unit = {
       ast match {
         case EmptyBlockAST                          =>
         case SequenceAST(seq)                       => seq foreach (render(context, _))

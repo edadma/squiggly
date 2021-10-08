@@ -4,11 +4,11 @@ import scala.collection.{immutable, mutable}
 
 package object squiggly {
 
-  type Blocks = mutable.HashMap[String, ParserAST]
+  type Blocks = mutable.HashMap[String, TemplateAST]
 
   case class BuiltinFunction(name: String, arity: Int, function: PartialFunction[(Context, Seq[Any]), Any])
 
-  type PartialsLoader = String => Option[ParserAST]
+  type PartialsLoader = String => Option[TemplateAST]
 
   def restrict(pos: TagParser#Position, v: Any): Any =
     v match {
