@@ -15,9 +15,9 @@ case class MatchBlockAST(expr: ExprAST, cases: Seq[(ExprAST, TemplateAST)], els:
 case class TemplateBlockAST(pos: CharReader, block: ConstructAST, body: TemplateAST, els: Option[TemplateAST])
     extends TemplateAST
 
-case class DefineBlockAST(name: Ident, body: TemplateAST) extends TemplateAST
+case class DefineBlockAST(name: TagParserIdent, body: TemplateAST) extends TemplateAST
 
-case class BlockBlockAST(name: Ident, body: TemplateAST, expr: ExprAST) extends TemplateAST
+case class BlockBlockAST(name: TagParserIdent, body: TemplateAST, expr: ExprAST) extends TemplateAST
 
 case class BlockWithElseAST(body: TemplateAST) extends TemplateAST
 

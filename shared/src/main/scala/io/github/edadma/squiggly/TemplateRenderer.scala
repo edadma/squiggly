@@ -27,10 +27,10 @@ class TemplateRenderer(protected[squiggly] val partials: PartialsLoader = _ => N
 
     def render(context: Context, ast: TemplateAST): Unit = {
       ast match {
-        case EmptyBlockAST                          =>
-        case SequenceAST(seq)                       => seq foreach (render(context, _))
-        case DefineBlockAST(Ident(pos, name), body) => blocks(name) = body
-        case BlockBlockAST(Ident(pos, name), body, expr) =>
+        case EmptyBlockAST                                   =>
+        case SequenceAST(seq)                                => seq foreach (render(context, _))
+        case DefineBlockAST(TagParserIdent(pos, name), body) => blocks(name) = body
+        case BlockBlockAST(TagParserIdent(pos, name), body, expr) =>
           render(context.copy(data = restrict(pos, context.eval(expr))), blocks.getOrElse(name, body))
         case TemplateBlockAST(tpos, WithAST(_, expr), body, els) =>
           context.eval(expr) match {
@@ -44,11 +44,11 @@ class TemplateRenderer(protected[squiggly] val partials: PartialsLoader = _ => N
               s.zipWithIndex foreach {
                 case (e, i) =>
                   index match {
-                    case Some((Ident(_, elem), Some(Ident(_, idx)))) =>
+                    case Some((TagParserIdent(_, elem), Some(TagParserIdent(_, idx)))) =>
                       context.vars(idx) = i
                       context.vars(elem) = e
-                    case Some((Ident(_, elem), None)) => context.vars(elem) = e
-                    case None                         =>
+                    case Some((TagParserIdent(_, elem), None)) => context.vars(elem) = e
+                    case None                                  =>
                   }
 
                   render(context.copy(data = e), body)
@@ -65,7 +65,8 @@ class TemplateRenderer(protected[squiggly] val partials: PartialsLoader = _ => N
                   case null | () => ""
                   case v         => v.toString
                 })
-            case TagToken(_, AssignmentAST(Ident(_, name), expr), _, _) => context.vars(name) = context.eval(expr)
+            case TagToken(_, AssignmentAST(TagParserIdent(_, name), expr), _, _) =>
+              context.vars(name) = context.eval(expr)
             case TagToken(_, ReturnAST(expr), _, _) =>
               returnValue = expr map context.eval getOrElse ()
               throw new ReturnException
