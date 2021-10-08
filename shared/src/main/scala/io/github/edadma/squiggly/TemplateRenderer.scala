@@ -1,6 +1,6 @@
 package io.github.edadma.squiggly
 
-import java.io.OutputStream
+import java.io.{OutputStream, PrintStream}
 import scala.collection.{MapView, mutable}
 import scala.language.postfixOps
 
@@ -20,7 +20,12 @@ class TemplateRenderer(protected[squiggly] val partials: PartialsLoader = _ => N
     }
 
   def render(globalData: Any, ast: TemplateAST, out: OutputStream = Console.out): Any = {
-    val globalContext = Context(this, globalData, new mutable.HashMap[String, Any], out)
+    val pout =
+      out match {
+        case p: PrintStream => p
+        case _              => new PrintStream(out)
+      }
+    val globalContext = Context(this, globalData, new mutable.HashMap[String, Any], pout)
     var returnValue: Any = ()
 
     globalContext.global = globalData
@@ -57,14 +62,14 @@ class TemplateRenderer(protected[squiggly] val partials: PartialsLoader = _ => N
           }
         case ContentAST(toks) =>
           toks foreach {
-            case TextToken(_, text) => out write text.getBytes
-            case SpaceToken(_, s)   => out write s.getBytes
+            case TextToken(_, text) => pout print text
+            case SpaceToken(_, s)   => pout print s
             case TagToken(_, tag: ExprAST, _, _) =>
-              out write
+              pout print
                 (context.eval(tag) match {
                   case null | () => ""
                   case v         => v.toString
-                }).getBytes
+                })
             case TagToken(_, AssignmentAST(TagParserIdent(_, name), expr), _, _) =>
               context.vars(name) = context.eval(expr)
             case TagToken(_, ReturnAST(expr), _, _) =>

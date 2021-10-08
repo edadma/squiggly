@@ -1,11 +1,11 @@
 package io.github.edadma.squiggly
 
-import java.io.OutputStream
+import java.io.PrintStream
 import scala.annotation.tailrec
 import scala.collection.mutable
 import scala.language.postfixOps
 
-case class Context(renderer: TemplateRenderer, data: Any, vars: mutable.HashMap[String, Any], out: OutputStream) {
+case class Context(renderer: TemplateRenderer, data: Any, vars: mutable.HashMap[String, Any], out: PrintStream) {
 
   private var _global: Any = _
 
