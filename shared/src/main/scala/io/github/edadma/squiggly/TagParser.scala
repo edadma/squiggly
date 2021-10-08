@@ -11,8 +11,8 @@ import scala.language.implicitConversions
 class TagParser(val input: ParserInput,
                 startpos: CharReader,
                 startoffset: Int,
-                functions: Map[String, BuiltinFunction],
-                namespaces: Map[String, Map[String, BuiltinFunction]])
+                functions: Map[String, TemplateFunction],
+                namespaces: Map[String, Map[String, TemplateFunction]])
     extends Parser {
   val buf = new StringBuilder
 

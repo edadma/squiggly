@@ -97,12 +97,12 @@ object Main extends App {
       else ""
     }
 
-    val ast = new Parser().parse(template)
+    val ast = new TemplateParser().parse(template)
 
     if (c.ast)
       pprintln(ast)
     else {
-      Renderer.default.render(data, ast)
+      TemplateRenderer.default.render(data, ast)
       println()
     }
   }

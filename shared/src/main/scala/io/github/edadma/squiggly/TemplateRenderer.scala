@@ -4,19 +4,19 @@ import java.io.PrintStream
 import scala.collection.{MapView, mutable}
 import scala.language.postfixOps
 
-object Renderer {
+object TemplateRenderer {
 
-  val default = new Renderer()
+  val default = new TemplateRenderer()
 
 }
 
-class Renderer(protected[squiggly] val partials: PartialsLoader = _ => None,
-               protected[squiggly] val blocks: Blocks = new mutable.HashMap[String, TemplateAST],
-               protected[squiggly] val functions: Map[String, BuiltinFunction] = Builtin.functions) {
+class TemplateRenderer(protected[squiggly] val partials: PartialsLoader = _ => None,
+                       protected[squiggly] val blocks: Blocks = new mutable.HashMap[String, TemplateAST],
+                       protected[squiggly] val functions: Map[String, TemplateFunction] = TemplateBuiltin.functions) {
 
-  protected[squiggly] val methods: MapView[String, BuiltinFunction] =
+  protected[squiggly] val methods: MapView[String, TemplateFunction] =
     functions.view.filter {
-      case (_, BuiltinFunction(_, arity, _)) => arity == 1
+      case (_, TemplateFunction(_, arity, _)) => arity == 1
     }
 
   def render(globalData: Any, ast: TemplateAST, out: PrintStream = Console.out): Any = {

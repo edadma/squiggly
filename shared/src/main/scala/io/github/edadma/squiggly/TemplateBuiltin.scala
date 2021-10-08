@@ -6,9 +6,9 @@ import io.github.edadma.datetime.Datetime
 
 import scala.language.postfixOps
 
-object Builtin {
+object TemplateBuiltin {
 
-  val namespaces: Map[String, Map[String, BuiltinFunction]] =
+  val namespaces: Map[String, Map[String, TemplateFunction]] =
     Map(
       "images" -> Map(),
       "lang" -> Map(),
@@ -16,18 +16,18 @@ object Builtin {
       "path" -> Map(),
       "strings" -> Map()
     )
-  val functions: Map[String, BuiltinFunction] =
+  val functions: Map[String, TemplateFunction] =
     List(
 //      BuiltinFunction("anchorize", 1, {
 //        case (con, Seq(s: String)) =>
 //      }),
-      BuiltinFunction("append", 2, {
+      TemplateFunction("append", 2, {
         case (con, Seq(c: Seq[_], s: Seq[_]))                => s ++ c
         case (con, s: Seq[_]) if s.last.isInstanceOf[Seq[_]] => s.last.asInstanceOf[Seq[_]] ++ s.init
       }),
       // todo: https://gohugo.io/functions/base64/
       // todo: https://gohugo.io/functions/complement/
-      BuiltinFunction(
+      TemplateFunction(
         "contains",
         2, {
           case (con, Seq(elem: Any, s: Seq[_]))       => s contains elem
@@ -35,7 +35,7 @@ object Builtin {
           case (con, Seq(substr: String, s: String))  => s contains substr
         }
       ),
-      BuiltinFunction(
+      TemplateFunction(
         "default",
         2, {
           case (con, Seq(default: Any, input: Num))         => if (input != ZERO) input else default
@@ -44,20 +44,20 @@ object Builtin {
           case (con, Seq(_, input))                         => input
         }
       ),
-      BuiltinFunction("distinct", 1, { case (con, Seq(s: Seq[_])) => s.distinct }),
-      BuiltinFunction("drop", 2, {
+      TemplateFunction("distinct", 1, { case (con, Seq(s: Seq[_])) => s.distinct }),
+      TemplateFunction("drop", 2, {
         case (con, Seq(n: Num, s: Iterable[_])) => s drop n.toIntExact
         case (con, Seq(n: Num, s: String))      => s drop n.toIntExact
       }),
-      BuiltinFunction("dropRight", 2, {
+      TemplateFunction("dropRight", 2, {
         case (con, Seq(n: Num, s: Iterable[_])) => s dropRight n.toIntExact
         case (con, Seq(n: Num, s: String))      => s dropRight n.toIntExact
       }),
-      BuiltinFunction("fileExists", 1, { case (con, Seq(file: String)) => readableFile(file) }),
-      BuiltinFunction("filter", 2, {
+      TemplateFunction("fileExists", 1, { case (con, Seq(file: String)) => readableFile(file) }),
+      TemplateFunction("filter", 2, {
         case (con, Seq(NonStrictExpr(expr), s: Iterable[_])) => s filter (e => con.copy(data = e).beval(expr))
       }),
-      BuiltinFunction("filterNot", 2, {
+      TemplateFunction("filterNot", 2, {
         case (con, Seq(NonStrictExpr(expr), s: Iterable[_])) => s filterNot (e => con.copy(data = e).beval(expr))
       }),
       //BuiltinFunction("findRE", 2, { case (con, Seq(pattern: String, input: String)) => }), // todo: https://gohugo.io/functions/findre/
@@ -66,7 +66,7 @@ object Builtin {
       // todo: https://gohugo.io/functions/group/
       // todo: https://gohugo.io/functions/highlight/
       // todo: https://gohugo.io/functions/hmac/
-      BuiltinFunction("htmlEscape", 1, {
+      TemplateFunction("htmlEscape", 1, {
         case (con, Seq(s: String)) =>
           s replace ("&", "&amp;") replace ("<", "&lt;") replace (">", "&gt;") replace ("'", "&apos;") replace ("\"", "&quot;")
       }),
@@ -76,21 +76,21 @@ object Builtin {
       // todo: https://gohugo.io/functions/intersect/
       // todo: "join" https://gohugo.io/functions/delimit/
       // todo: https://gohugo.io/functions/jsonify/
-      BuiltinFunction("length", 1, {
+      TemplateFunction("length", 1, {
         case (con, Seq(s: String))      => s.length
         case (con, Seq(s: Iterable[_])) => s.size
       }),
-      BuiltinFunction("lower", 1, { case (con, Seq(s: String)) => s.toLowerCase }),
-      BuiltinFunction("map", 2, {
+      TemplateFunction("lower", 1, { case (con, Seq(s: String)) => s.toLowerCase }),
+      TemplateFunction("map", 2, {
         case (con, Seq(NonStrictExpr(expr), s: Iterable[_])) => s map (e => con.copy(data = e).eval(expr))
         case (con, Seq(s: String))                           => s // todo: map named function
       }),
       // todo: https://gohugo.io/functions/markdownify/
       // todo: https://gohugo.io/functions/md5/
       // todo: https://gohugo.io/functions/merge/
-      BuiltinFunction("now", 0, _ => Datetime.now().timestamp),
-      BuiltinFunction("number", 1, { case (con, Seq(s: String)) => BigDecimal(s) }),
-      BuiltinFunction(
+      TemplateFunction("now", 0, _ => Datetime.now().timestamp),
+      TemplateFunction("number", 1, { case (con, Seq(s: String)) => BigDecimal(s) }),
+      TemplateFunction(
         "slice",
         2, {
           case (con, Seq(from: Num, s: Iterable[_]))             => s slice (from.toIntExact, s.size)
@@ -101,7 +101,7 @@ object Builtin {
       ),
       // todo: https://gohugo.io/functions/path.base/
       // todo: https://gohugo.io/functions/pluralize/
-      BuiltinFunction("partial", 1, {
+      TemplateFunction("partial", 1, {
         case (con, Seq(path: String))            => partial(con, path, null)
         case (con, Seq(path: String, data: Any)) => partial(con, path, data)
       }),
@@ -113,30 +113,30 @@ object Builtin {
       // todo: https://gohugo.io/functions/shuffle/
       // todo: https://gohugo.io/functions/singularize/
       // todo: https://gohugo.io/functions/sort/
-      BuiltinFunction("split", 2, { case (con, Seq(delim: String, s: String)) => s split delim toSeq }),
-      BuiltinFunction("substring", 3, {
+      TemplateFunction("split", 2, { case (con, Seq(delim: String, s: String)) => s split delim toSeq }),
+      TemplateFunction("substring", 3, {
         case (con, Seq(start: BigDecimal, end: BigDecimal, s: String)) => s.substring(start.toIntExact, end.toIntExact)
       }),
-      BuiltinFunction("startsWith", 2, { case (con, Seq(prefix: String, s: String)) => s startsWith prefix }),
+      TemplateFunction("startsWith", 2, { case (con, Seq(prefix: String, s: String)) => s startsWith prefix }),
       // todo: https://gohugo.io/functions/strings.count/
-      BuiltinFunction("take", 2, {
+      TemplateFunction("take", 2, {
         case (con, Seq(n: Num, s: Iterable[_])) => s take n.toIntExact
         case (con, Seq(n: Num, s: String))      => s take n.toIntExact
       }),
       // todo: https://gohugo.io/functions/symdiff/
-      BuiltinFunction("takeRight", 2, {
+      TemplateFunction("takeRight", 2, {
         case (con, Seq(n: Num, s: Iterable[_])) => s takeRight n.toIntExact
         case (con, Seq(n: Num, s: String))      => s takeRight n.toIntExact
       }),
-      BuiltinFunction("time", 1, { case (con, Seq(s: String)) => Datetime.fromString(s) }),
+      TemplateFunction("time", 1, { case (con, Seq(s: String)) => Datetime.fromString(s) }),
       // todo: https://gohugo.io/functions/title/
-      BuiltinFunction("toString", 1, { case (con, Seq(a: Any)) => a.toString }),
-      BuiltinFunction("trim", 1, { case (con, Seq(s: String))  => s.trim }), // todo: https://gohugo.io/functions/trim/
+      TemplateFunction("toString", 1, { case (con, Seq(a: Any)) => a.toString }),
+      TemplateFunction("trim", 1, { case (con, Seq(s: String))  => s.trim }), // todo: https://gohugo.io/functions/trim/
       // todo: https://gohugo.io/functions/truncate/
       // todo: https://gohugo.io/functions/union/
-      BuiltinFunction("unix", 1, { case (con, Seq(d: Datetime)) => BigDecimal(d.epochMillis) }),
+      TemplateFunction("unix", 1, { case (con, Seq(d: Datetime)) => BigDecimal(d.epochMillis) }),
       // todo: https://gohugo.io/functions/transform.unmarshal/
-      BuiltinFunction("upper", 1, { case (con, Seq(s: String)) => s.toUpperCase }),
+      TemplateFunction("upper", 1, { case (con, Seq(s: String)) => s.toUpperCase }),
       // todo: https://gohugo.io/functions/urlize/
     ) map (f => (f.name, f)) toMap
 

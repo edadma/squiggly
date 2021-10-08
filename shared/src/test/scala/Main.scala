@@ -1,4 +1,4 @@
-import io.github.edadma.squiggly.{Parser, Renderer, platform}
+import io.github.edadma.squiggly.{TemplateParser, TemplateRenderer, platform}
 
 object Main extends App {
 
@@ -46,10 +46,10 @@ object Main extends App {
     """
     |{{ . }}
     |""".trim.stripMargin
-  val ast = Parser.default.parse(template)
+  val ast = TemplateParser.default.parse(template)
 
   pprint.pprintln(ast)
-  Renderer.default.render(data, ast)
+  TemplateRenderer.default.render(data, ast)
 
 }
 

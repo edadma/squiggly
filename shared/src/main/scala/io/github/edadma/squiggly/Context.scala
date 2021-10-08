@@ -5,7 +5,7 @@ import scala.annotation.tailrec
 import scala.collection.mutable
 import scala.language.postfixOps
 
-case class Context(renderer: Renderer, data: Any, vars: mutable.HashMap[String, Any], out: PrintStream) {
+case class Context(renderer: TemplateRenderer, data: Any, vars: mutable.HashMap[String, Any], out: PrintStream) {
 
   private var _global: Any = _
 
@@ -25,7 +25,7 @@ case class Context(renderer: Renderer, data: Any, vars: mutable.HashMap[String, 
       case Some(_) => pos.error("argument of 'undefined' may not be passed to a function")
       case None =>
         renderer.functions get name match {
-          case Some(BuiltinFunction(_, arity, function)) =>
+          case Some(TemplateFunction(_, arity, function)) =>
             if (args.length < arity)
               pos.error(s"too few arguments for function '$name': expected $arity, found ${args.length}")
             else if (!function.isDefinedAt((this, args)))

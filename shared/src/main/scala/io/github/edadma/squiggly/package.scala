@@ -6,7 +6,7 @@ package object squiggly {
 
   type Blocks = mutable.HashMap[String, TemplateAST]
 
-  case class BuiltinFunction(name: String, arity: Int, function: PartialFunction[(Context, Seq[Any]), Any])
+  case class TemplateFunction(name: String, arity: Int, function: PartialFunction[(Context, Seq[Any]), Any])
 
   type PartialsLoader = String => Option[TemplateAST]
 
