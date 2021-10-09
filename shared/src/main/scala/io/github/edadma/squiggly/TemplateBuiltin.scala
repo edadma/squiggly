@@ -64,7 +64,7 @@ object TemplateBuiltin {
       TemplateFunction(
         "findRE",
         2, {
-          case (con, Seq(pattern: String, input: String)) => findRE(pattern, input)
+          case (con, Seq(pattern: String, input: String)) => findRE(pattern, input) toList
           case (con, Seq(pattern: String, input: String, limit: Num)) =>
             findRE(pattern, input) take limit.toIntExact toList
         }
