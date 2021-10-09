@@ -138,8 +138,9 @@ object TemplateBuiltin {
       }),
       TemplateFunction("time", 1, { case (con, Seq(s: String)) => Datetime.fromString(s) }),
       // todo: https://gohugo.io/functions/title/
-      TemplateFunction("toString", 1, { case (con, Seq(a: Any)) => a.toString }),
-      TemplateFunction("trim", 1, { case (con, Seq(s: String))  => s.trim }), // todo: https://gohugo.io/functions/trim/
+      TemplateFunction("toSeq", 1, { case (con, Seq(s: Iterable[_])) => s.toSeq }),
+      TemplateFunction("toString", 1, { case (con, Seq(a: Any))      => a.toString }),
+      TemplateFunction("trim", 1, { case (con, Seq(s: String))       => s.trim }), // todo: https://gohugo.io/functions/trim/
       // todo: https://gohugo.io/functions/truncate/
       // todo: https://gohugo.io/functions/union/
       TemplateFunction("unix", 1, { case (con, Seq(d: Datetime)) => BigDecimal(d.epochMillis) }),
