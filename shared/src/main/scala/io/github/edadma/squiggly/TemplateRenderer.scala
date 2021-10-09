@@ -10,11 +10,12 @@ object TemplateRenderer {
 
 }
 
-class TemplateRenderer(protected[squiggly] val partials: TemplateLoader = _ => None,
-                       protected[squiggly] val blocks: Blocks = new mutable.HashMap[String, TemplateAST],
-                       protected[squiggly] val functions: Map[String, TemplateFunction] = TemplateBuiltin.functions) {
+class TemplateRenderer(val partials: TemplateLoader = _ => None,
+                       val blocks: Blocks = new mutable.HashMap[String, TemplateAST],
+                       val functions: Map[String, TemplateFunction] = TemplateBuiltin.functions,
+                       val data: Any = null) {
 
-  protected[squiggly] val methods: MapView[String, TemplateFunction] =
+  val methods: MapView[String, TemplateFunction] =
     functions.view.filter {
       case (_, TemplateFunction(_, arity, _)) => arity == 1
     }
