@@ -1,10 +1,11 @@
 package io.github.edadma.squiggly
 
 import io.github.edadma.cross_platform._
-
 import io.github.edadma.datetime.Datetime
 
+import scala.collection.mutable.ListBuffer
 import scala.language.postfixOps
+import scala.util.matching.Regex
 
 object TemplateBuiltin {
 
@@ -63,9 +64,9 @@ object TemplateBuiltin {
       TemplateFunction(
         "findRE",
         2, {
-          case (con, Seq(pattern: String, input: String)) => pattern.r findAllMatchIn input toList
+          case (con, Seq(pattern: String, input: String)) => findRE(pattern, input)
           case (con, Seq(pattern: String, input: String, limit: Num)) =>
-            pattern.r findAllMatchIn input take limit.toIntExact toList
+            findRE(pattern, input) take limit.toIntExact toList
         }
       ), // todo: https://gohugo.io/functions/findre/
       // todo: https://gohugo.io/functions/format/ https://gohugo.io/functions/dateformat/
@@ -148,6 +149,18 @@ object TemplateBuiltin {
       TemplateFunction("upper", 1, { case (con, Seq(s: String)) => s.toUpperCase }),
       // todo: https://gohugo.io/functions/urlize/
     ) map (f => (f.name, f)) toMap
+
+  private def findRE(re: String, s: String) =
+    re.r.findAllMatchIn(s) map { m =>
+      val res = new ListBuffer[String]
+
+      res += m.matched
+
+      for (i <- 1 to m.groupCount)
+        res += m.group(i)
+
+      res.toList
+    }
 
   private def partial(context: Context, path: String, data: Any): Any = {
     val partial = context.renderer.partials(path) getOrElse sys.error(s"partial '$path' count not be loaded")
