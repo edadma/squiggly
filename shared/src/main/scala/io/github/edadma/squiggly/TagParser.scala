@@ -11,8 +11,8 @@ import scala.language.implicitConversions
 class TagParser(val input: ParserInput,
                 startpos: CharReader,
                 startoffset: Int,
-                functions: Map[String, BuiltinFunction],
-                namespaces: Map[String, Map[String, BuiltinFunction]])
+                functions: Map[String, TemplateFunction],
+                namespaces: Map[String, Map[String, TemplateFunction]])
     extends Parser {
   val buf = new StringBuilder
 
@@ -148,7 +148,7 @@ class TagParser(val input: ParserInput,
 
   def map: Rule1[MapExpr] =
     rule(
-      "{" ~ zeroOrMore(ident ~ ":" ~ pos ~ expression ~> Tuple3[Ident, Position, ExprAST] _)
+      "{" ~ zeroOrMore(ident ~ ":" ~ pos ~ expression ~> Tuple3[TagParserIdent, Position, ExprAST] _)
         .separatedBy(",") ~ "}" ~> MapExpr)
 
   def seq: Rule1[SeqExpr] = rule("[" ~ zeroOrMore(expression).separatedBy(",") ~ "]" ~> SeqExpr)
@@ -215,13 +215,13 @@ class TagParser(val input: ParserInput,
 
   def doubleQuoteString: Rule1[String] = rule('"' ~ capture(zeroOrMore("\\\"" | noneOf("\"\n"))) ~ '"' ~ sp)
 
-  def identnsp: Rule1[Ident] =
+  def identnsp: Rule1[TagParserIdent] =
     rule {
       pos ~ !("if" | "true" | "false" | "null" | "elsif" | "switch" | "unless" | "define" | "block" | "match" | "case" | "no" ~ "output") ~ capture(
-        (CharPredicate.Alpha | '_') ~ zeroOrMore(CharPredicate.AlphaNum | '_')) ~> Ident
+        (CharPredicate.Alpha | '_') ~ zeroOrMore(CharPredicate.AlphaNum | '_')) ~> TagParserIdent
     }
 
-  def ident: Rule1[Ident] = rule(identnsp ~ sp)
+  def ident: Rule1[TagParserIdent] = rule(identnsp ~ sp)
 
   def pos: Rule1[Position] = rule(push(new Position(cursor)))
 
@@ -249,8 +249,8 @@ class TagParser(val input: ParserInput,
 
   def withTag: Rule1[WithAST] = rule(pos ~ "with" ~ expression ~> WithAST)
 
-  def forIndex: Rule1[(Ident, Option[Ident])] =
-    rule(ident ~ optional("," ~ ident) ~ "<-" ~> Tuple2[Ident, Option[Ident]] _)
+  def forIndex: Rule1[(TagParserIdent, Option[TagParserIdent])] =
+    rule(ident ~ optional("," ~ ident) ~ "<-" ~> Tuple2[TagParserIdent, Option[TagParserIdent]] _)
 
   def forTag: Rule1[ForAST] =
     rule("for" ~ optional(forIndex) ~ pos ~ expression ~> ForAST)

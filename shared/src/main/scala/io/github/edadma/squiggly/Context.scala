@@ -5,7 +5,7 @@ import scala.annotation.tailrec
 import scala.collection.mutable
 import scala.language.postfixOps
 
-case class Context(renderer: Renderer, data: Any, vars: mutable.HashMap[String, Any], out: PrintStream) {
+case class Context(renderer: TemplateRenderer, data: Any, vars: mutable.HashMap[String, Any], out: PrintStream) {
 
   private var _global: Any = _
 
@@ -25,7 +25,7 @@ case class Context(renderer: Renderer, data: Any, vars: mutable.HashMap[String, 
       case Some(_) => pos.error("argument of 'undefined' may not be passed to a function")
       case None =>
         renderer.functions get name match {
-          case Some(BuiltinFunction(_, arity, function)) =>
+          case Some(TemplateFunction(_, arity, function)) =>
             if (args.length < arity)
               pos.error(s"too few arguments for function '$name': expected $arity, found ${args.length}")
             else if (!function.isDefinedAt((this, args)))
@@ -75,7 +75,7 @@ case class Context(renderer: Renderer, data: Any, vars: mutable.HashMap[String, 
     expr match {
       case e: NonStrictExpr => e
       case SeqExpr(elems)   => elems map eval
-      case MapExpr(pairs)   => pairs map { case (Ident(_, k), pos, v) => (k, restrict(pos, eval(v))) } toMap
+      case MapExpr(pairs)   => pairs map { case (TagParserIdent(_, k), pos, v) => (k, restrict(pos, eval(v))) } toMap
       case ConditionalAST(cond, yes, no) =>
         if (beval(cond)) eval(yes)
         else if (no.isDefined) eval(no.get)
@@ -122,7 +122,7 @@ case class Context(renderer: Renderer, data: Any, vars: mutable.HashMap[String, 
       case StringExpr(pos, s) => unescape(pos, s)
       case NumberExpr(_, n)   => n
       case NullExpr(_)        => null
-      case VarExpr(_, user, Ident(pos, name)) =>
+      case VarExpr(_, user, TagParserIdent(pos, name)) =>
         if (user == "$") getVar(pos, name)
         else callFunction(pos, name, Nil)
       case ElementExpr(pos, globalvar, ids) =>
@@ -148,7 +148,7 @@ case class Context(renderer: Renderer, data: Any, vars: mutable.HashMap[String, 
         }
       case RightInfixExpr(lpos, left, "^", rpos, right) => neval(lpos, left) pow ieval(rpos, right)
       case PrefixExpr("-", pos, expr)                   => -neval(pos, expr)
-      case MethodExpr(expr, id: Ident)                  => lookup(id.pos, eval(expr), id) getOrElse ()
+      case MethodExpr(expr, id: TagParserIdent)         => lookup(id.pos, eval(expr), id) getOrElse ()
       case IndexExpr(expr, pos, index) =>
         eval(expr) match {
           case m: collection.Map[_, _] => m.asInstanceOf[collection.Map[Any, _]] getOrElse (eval(index), ())
@@ -168,11 +168,12 @@ case class Context(renderer: Renderer, data: Any, vars: mutable.HashMap[String, 
             }
           case v => pos.error(s"not indexable: $v")
         }
-      case ApplyExpr(Ident(pos, name), args)                 => callFunction(pos, name, args map eval)
-      case PipeExpr(left, ApplyExpr(Ident(pos, name), args)) => callFunction(pos, name, (args map eval) :+ eval(left))
+      case ApplyExpr(TagParserIdent(pos, name), args) => callFunction(pos, name, args map eval)
+      case PipeExpr(left, ApplyExpr(TagParserIdent(pos, name), args)) =>
+        callFunction(pos, name, (args map eval) :+ eval(left))
     }
 
-  private def lookup(pos: TagParser#Position, v: Any, id: Ident): Option[Any] = {
+  private def lookup(pos: TagParser#Position, v: Any, id: TagParserIdent): Option[Any] = {
     def tryMethod: Option[Any] =
       if (renderer.methods contains id.name)
         Some(callFunction(id.pos, id.name, Seq(v)))
@@ -192,7 +193,7 @@ case class Context(renderer: Renderer, data: Any, vars: mutable.HashMap[String, 
   }
 
   @tailrec
-  private def lookupSeq(pos: TagParser#Position, v: Any, ids: Seq[Ident]): Option[Any] =
+  private def lookupSeq(pos: TagParser#Position, v: Any, ids: Seq[TagParserIdent]): Option[Any] =
     ids.toList match {
       case Nil      => Some(v)
       case h :: Nil => lookup(pos, v, h)
