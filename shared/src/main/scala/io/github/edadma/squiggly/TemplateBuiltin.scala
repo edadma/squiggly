@@ -109,6 +109,7 @@ object TemplateBuiltin {
       // todo: https://gohugo.io/functions/readdir/
       // todo: https://gohugo.io/functions/replace/
       // todo: https://gohugo.io/functions/replaceRE/
+      TemplateFunction("reverse", 1, { case (con, Seq(s: Seq[_])) => s.reverse }),
       // todo: https://gohugo.io/functions/sha/
       // todo: https://gohugo.io/functions/shuffle/
       // todo: https://gohugo.io/functions/singularize/
