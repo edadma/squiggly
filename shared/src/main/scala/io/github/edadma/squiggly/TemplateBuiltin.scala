@@ -18,9 +18,9 @@ object TemplateBuiltin {
     )
   val functions: Map[String, TemplateFunction] =
     List(
-//      BuiltinFunction("anchorize", 1, {
-//        case (con, Seq(s: String)) =>
-//      }),
+      //      BuiltinFunction("anchorize", 1, {
+      //        case (con, Seq(s: String)) =>
+      //      }),
       TemplateFunction("append", 2, {
         case (con, Seq(c: Seq[_], s: Seq[_]))                => s ++ c
         case (con, s: Seq[_]) if s.last.isInstanceOf[Seq[_]] => s.last.asInstanceOf[Seq[_]] ++ s.init
@@ -60,7 +60,14 @@ object TemplateBuiltin {
       TemplateFunction("filterNot", 2, {
         case (con, Seq(NonStrictExpr(expr), s: Iterable[_])) => s filterNot (e => con.copy(data = e).beval(expr))
       }),
-      //BuiltinFunction("findRE", 2, { case (con, Seq(pattern: String, input: String)) => }), // todo: https://gohugo.io/functions/findre/
+      TemplateFunction(
+        "findRE",
+        2, {
+          case (con, Seq(pattern: String, input: String)) => pattern.r findAllMatchIn input toList
+          case (con, Seq(pattern: String, input: String, limit: Num)) =>
+            pattern.r findAllMatchIn input take limit.toIntExact toList
+        }
+      ), // todo: https://gohugo.io/functions/findre/
       // todo: https://gohugo.io/functions/format/ https://gohugo.io/functions/dateformat/
       // todo: https://gohugo.io/functions/getenv/
       // todo: https://gohugo.io/functions/group/
