@@ -10,7 +10,7 @@ object TemplateRenderer {
 
 }
 
-class TemplateRenderer(protected[squiggly] val partials: PartialsLoader = _ => None,
+class TemplateRenderer(protected[squiggly] val partials: TemplateLoader = _ => None,
                        protected[squiggly] val blocks: Blocks = new mutable.HashMap[String, TemplateAST],
                        protected[squiggly] val functions: Map[String, TemplateFunction] = TemplateBuiltin.functions) {
 

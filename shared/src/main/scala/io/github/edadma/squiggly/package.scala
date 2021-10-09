@@ -8,7 +8,7 @@ package object squiggly {
 
   case class TemplateFunction(name: String, arity: Int, function: PartialFunction[(Context, Seq[Any]), Any])
 
-  type PartialsLoader = String => Option[TemplateAST]
+  type TemplateLoader = String => Option[TemplateAST]
 
   def restrict(pos: TagParser#Position, v: Any): Any =
     v match {
