@@ -38,9 +38,8 @@ object TemplateBuiltin {
       TemplateFunction(
         "default",
         2, {
-          case (con, Seq(input: Num, default: Any))         => if (input != ZERO) input else default
-          case (con, Seq(input: String, default: Any))      => if (input.nonEmpty) input else default
-          case (con, Seq(input: Iterable[_], default: Any)) => if (input.nonEmpty) input else default
+          case (con, Seq(default: Any, () | "" | `ZERO`))   => default
+          case (con, Seq(default: Any, input: Iterable[_])) => if (input.nonEmpty) input else default
           case (con, Seq(_, input))                         => input
         }
       ),

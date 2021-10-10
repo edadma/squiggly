@@ -35,4 +35,32 @@ class FunctionTests extends AnyFreeSpec with Matchers with Testing {
         |""".trim.stripMargin
   }
 
+  "default 1" in {
+    test(null, """{{ default '' 'asdf' }}""") shouldBe """asdf"""
+  }
+
+  "default 2" in {
+    test(null, """{{ default .a 'asdf' }}""") shouldBe """asdf"""
+  }
+
+  "default 3" in {
+    test("{a: 'not the default'}", """{{ default .a 'asdf' }}""") shouldBe """not the default"""
+  }
+
+  "default 4" in {
+    test(null, """{{ .a | default 'asdf' }}""") shouldBe """asdf"""
+  }
+
+//  "default 5" in {
+//    test("{a: 'not the default'}", """{{ .a | default 'asdf' }}""") shouldBe """not the default"""
+//  }
+
+  "default 6" in {
+    test(null, """{{ default 'not the default' 'asdf' }}""") shouldBe """not the default"""
+  }
+
+  "default 7" in {
+    test(null, """{{ 'not the default' | default 'asdf' }}""") shouldBe """not the default"""
+  }
+
 }
