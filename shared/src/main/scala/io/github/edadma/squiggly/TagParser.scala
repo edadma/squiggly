@@ -5,7 +5,6 @@ import io.github.edadma.char_reader.CharReader
 import scala.util.{Failure, Success}
 import org.parboiled2._
 
-import scala.annotation.tailrec
 import scala.language.implicitConversions
 
 class TagParser(val input: ParserInput,
@@ -34,7 +33,12 @@ class TagParser(val input: ParserInput,
 
   implicit def wsStr(s: String): Rule0 = rule(str(s) ~ sp)
 
-  def kw(s: String): Rule1[String] = rule(quiet(capture(s) ~> ((s: String) => s.trim)))
+  def kwcapture(s: String): Rule1[String] =
+    rule(quiet(capture(str(s) ~ !CharPredicate.AlphaNum ~ sp) ~> ((s: String) => s.trim)))
+
+  def kw(s: String): Rule0 = rule(quiet(str(s) ~ !CharPredicate.AlphaNum ~ sp))
+
+  def sym(s: String): Rule1[String] = rule(quiet(capture(s) ~> ((s: String) => s.trim)))
 
   def tag: Rule1[TagParserAST] =
     rule {
@@ -78,14 +82,14 @@ class TagParser(val input: ParserInput,
 
   def not: Rule1[ExprAST] =
     rule {
-      kw("not") ~ pos ~ not ~> PrefixExpr |
+      kwcapture("not") ~ pos ~ not ~> PrefixExpr |
         comparitive
     }
 
   def comparitive: Rule1[ExprAST] =
     rule {
       pos ~ pipe ~ oneOrMore(
-        (kw("<=") | kw(">=") | kw("!=") | kw("<") | kw(">") | kw("=") | kw("div")) ~
+        (sym("<=") | sym(">=") | sym("!=") | sym("<") | sym(">") | sym("=") | kwcapture("div")) ~
           pos ~ pipe ~> Tuple3[String, Position, ExprAST] _) ~> CompareExpr |
         pipe
     }
@@ -105,25 +109,25 @@ class TagParser(val input: ParserInput,
   def additive: Rule1[ExprAST] =
     rule {
       pos ~ multiplicative ~ oneOrMore(
-        (kw("+") | kw("-")) ~ pos ~ multiplicative ~> Tuple3[String, Position, ExprAST] _) ~> LeftInfixExpr | multiplicative
+        (sym("+") | sym("-")) ~ pos ~ multiplicative ~> Tuple3[String, Position, ExprAST] _) ~> LeftInfixExpr | multiplicative
     }
 
   def multiplicative: Rule1[ExprAST] =
     rule {
       pos ~ negative ~ oneOrMore(
-        (kw("*") | kw("/") | kw("mod") | kw("\\")) ~
+        (sym("*") | sym("/") | kwcapture("mod") | sym("\\")) ~
           pos ~ negative ~> Tuple3[String, Position, ExprAST] _) ~> LeftInfixExpr | negative
     }
 
   def negative: Rule1[ExprAST] =
     rule {
-      kw("-") ~ pos ~ negative ~> PrefixExpr |
+      sym("-") ~ pos ~ negative ~> PrefixExpr |
         power
     }
 
   def power: Rule1[ExprAST] =
     rule {
-      pos ~ index ~ kw("^") ~ pos ~ power ~> RightInfixExpr |
+      pos ~ index ~ sym("^") ~ pos ~ power ~> RightInfixExpr |
         index
     }
 
@@ -158,7 +162,7 @@ class TagParser(val input: ParserInput,
   def nul: Rule1[NullExpr] = rule(pos ~ "null" ~> NullExpr)
 
   def boolean: Rule1[BooleanExpr] =
-    rule(pos ~ (kw("true") | kw("false")) ~> ((p: Position, b: String) => BooleanExpr(p, b == "true")))
+    rule(pos ~ (kwcapture("true") | kwcapture("false")) ~> ((p: Position, b: String) => BooleanExpr(p, b == "true")))
 
   def decimal: Rule1[BigDecimal] =
     rule {
@@ -253,7 +257,7 @@ class TagParser(val input: ParserInput,
     rule(ident ~ optional("," ~ ident) ~ "<-" ~> Tuple2[TagParserIdent, Option[TagParserIdent]] _)
 
   def forTag: Rule1[ForAST] =
-    rule("for" ~ optional(forIndex) ~ pos ~ expression ~> ForAST)
+    rule(kw("for") ~ optional(forIndex) ~ pos ~ expression ~> ForAST)
 
   def commentTag: Rule1[CommentAST] =
     rule("/*" ~ capture(zeroOrMore(!(sp ~ str("*/")) ~ ANY)) ~ sp ~ "*/" ~> CommentAST)

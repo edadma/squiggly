@@ -63,4 +63,24 @@ class FunctionTests extends AnyFreeSpec with Matchers with Testing {
     test(null, """{{ 'not the default' | default 'asdf' }}""") shouldBe """not the default"""
   }
 
+  "format 1" in {
+    test("2021-03-04", """{{ format ':date_full' . }}""") shouldBe "Thursday, March 4, 2021"
+  }
+
+  "format 2" in {
+    test("2021-03-04", """{{ . | format ':date_long' }}""") shouldBe "March 4, 2021"
+  }
+
+  "format 3" in {
+    test("2021-03-04", """{{ format ':date_medium' . }}""") shouldBe "Mar 4, 2021"
+  }
+
+  "format 4" in {
+    test("2021-03-04", """{{ format ':date_short' . }}""") shouldBe "3/4/21"
+  }
+
+  "format 5" in {
+    test("2021-03-04", """{{ format 'D MMM YY' . }}""") shouldBe "4 Mar 21"
+  }
+
 }
