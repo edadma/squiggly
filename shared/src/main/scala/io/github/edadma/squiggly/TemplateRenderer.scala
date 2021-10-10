@@ -66,10 +66,19 @@ class TemplateRenderer(val partials: TemplateLoader = _ => None,
             case TextToken(_, text) => pout print text
             case SpaceToken(_, s)   => pout print s
             case TagToken(_, tag: ExprAST, _, _) =>
+              def render(v: Any): String =
+                v match {
+                  case s: collection.Seq[_]    => s.mkString("[", ", ", "]")
+                  case m: collection.Map[_, _] => m map { case (k, v) => s"$k: ${render(v)}" } mkString ("[", ", ", "]")
+                  case s: String               => s""""$s""""
+                  case v                       => v.toString
+                }
+
               pout print
                 (context.eval(tag) match {
                   case null | () => ""
-                  case v         => v.toString
+                  case s: String => s
+                  case v         => render(v)
                 })
             case TagToken(_, AssignmentAST(TagParserIdent(_, name), expr), _, _) =>
               context.vars(name) = context.eval(expr)

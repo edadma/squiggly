@@ -1,13 +1,17 @@
 package io.github.edadma.squiggly
 
 import io.github.edadma.cross_platform._
-import io.github.edadma.datetime.Datetime
+import io.github.edadma.datetime.{DatetimeFormatter, Datetime}
 
 import scala.collection.mutable.ListBuffer
 import scala.language.postfixOps
-import scala.util.matching.Regex
 
 object TemplateBuiltin {
+
+  val DATE_FULL_FORMAT: DatetimeFormatter = DatetimeFormatter("WWWW, MMMM D, Y")
+  val DATE_LONG_FORMAT: DatetimeFormatter = DatetimeFormatter("MMMM D, Y")
+  val DATE_MEDIUM_FORMAT: DatetimeFormatter = DatetimeFormatter("MMM D, Y")
+  val DATE_SHORT_FORMAT: DatetimeFormatter = DatetimeFormatter("M/D/YY")
 
   val namespaces: Map[String, Map[String, TemplateFunction]] =
     Map(
@@ -39,8 +43,7 @@ object TemplateBuiltin {
       TemplateFunction(
         "default",
         2, {
-          case (con, Seq(default: Any, input: Num))         => if (input != ZERO) input else default
-          case (con, Seq(default: Any, input: String))      => if (input.nonEmpty) input else default
+          case (con, Seq(default: Any, () | "" | `ZERO`))   => default
           case (con, Seq(default: Any, input: Iterable[_])) => if (input.nonEmpty) input else default
           case (con, Seq(_, input))                         => input
         }
@@ -68,8 +71,17 @@ object TemplateBuiltin {
           case (con, Seq(pattern: String, input: String, limit: Num)) =>
             findRE(pattern, input) take limit.toIntExact toList
         }
-      ), // todo: https://gohugo.io/functions/findre/
-      // todo: https://gohugo.io/functions/format/ https://gohugo.io/functions/dateformat/
+      ),
+      TemplateFunction(
+        "format",
+        2, {
+          case (con, Seq(":date_full", datetime: Datetime))   => DATE_FULL_FORMAT.format(datetime)
+          case (con, Seq(":date_long", datetime: Datetime))   => DATE_LONG_FORMAT.format(datetime)
+          case (con, Seq(":date_medium", datetime: Datetime)) => DATE_MEDIUM_FORMAT.format(datetime)
+          case (con, Seq(":date_short", datetime: Datetime))  => DATE_SHORT_FORMAT.format(datetime)
+          case (con, Seq(format: String, datetime: Datetime)) => datetime format format
+        }
+      ),
       // todo: https://gohugo.io/functions/getenv/
       // todo: https://gohugo.io/functions/group/
       // todo: https://gohugo.io/functions/highlight/

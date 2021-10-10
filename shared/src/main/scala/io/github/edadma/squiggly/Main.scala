@@ -34,7 +34,7 @@ object Main extends App {
 
     OParser.sequence(
       programName("squiggly"),
-      head("Squiggly Template Engine", "v0.1.11"),
+      head("Squiggly Template Engine", "v0.1.12"),
       note(section("first section")),
       opt[Unit]('a', "ast")
         .optional()
