@@ -13,4 +13,8 @@ class PipeTests extends AnyFreeSpec with Matchers with Testing {
     test(null, """{{ 'asdf' | take 2 }}""") shouldBe """as"""
   }
 
+  "pipe 3" in {
+    test("'asdf'", """{{ . | take 2 }}""") shouldBe """as"""
+  }
+
 }
