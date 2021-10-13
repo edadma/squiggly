@@ -1,10 +1,12 @@
 package io.github.edadma.squiggly
 
+import java.math.{MathContext, RoundingMode}
 import io.github.edadma.cross_platform._
-import io.github.edadma.datetime.{DatetimeFormatter, Datetime}
+import io.github.edadma.datetime.{Datetime, DatetimeFormatter}
 
 import scala.collection.mutable.ListBuffer
 import scala.language.postfixOps
+import scala.util.Random
 
 object TemplateBuiltin {
 
@@ -23,6 +25,7 @@ object TemplateBuiltin {
     )
   val functions: Map[String, TemplateFunction] =
     List(
+      TemplateFunction("abs", 1, { case (con, Seq(n: BigDecimal)) => n.abs }),
       //      BuiltinFunction("anchorize", 1, {
       //        case (con, Seq(s: String)) =>
       //      }),
@@ -31,6 +34,14 @@ object TemplateBuiltin {
         case (con, s: Seq[_]) if s.last.isInstanceOf[Seq[_]] => s.last.asInstanceOf[Seq[_]] ++ s.init
       }),
       // todo: https://gohugo.io/functions/base64/
+      TemplateFunction("capitalize", 1, {
+        case (con, Seq(s: String)) =>
+          if (s.nonEmpty) s.head.toUpper +: s.tail.toLowerCase
+          else s
+      }),
+      TemplateFunction("ceil", 1, {
+        case (con, Seq(n: BigDecimal)) => n.round(new MathContext(n.mc.getPrecision, RoundingMode.CEILING))
+      }),
       // todo: https://gohugo.io/functions/complement/
       TemplateFunction(
         "contains",
@@ -94,7 +105,15 @@ object TemplateBuiltin {
       // todo: https://gohugo.io/functions/humanize/
       // todo: https://gohugo.io/functions/i18n/
       // todo: https://gohugo.io/functions/intersect/
-      // todo: "join" https://gohugo.io/functions/delimit/
+      TemplateFunction(
+        "join",
+        1, {
+          case (con, Seq(delim: String, s: Seq[_])) => s mkString delim
+          case (con, Seq(delim: String, last: String, s: Seq[_])) =>
+            if (s.length >= 2) s.init.mkString(delim) ++ last ++ s.last
+            else s.mkString
+        }
+      ),
       // todo: https://gohugo.io/functions/jsonify/
       TemplateFunction("length", 1, {
         case (con, Seq(s: String))      => s.length
@@ -106,8 +125,10 @@ object TemplateBuiltin {
         case (con, Seq(s: String))                           => s // todo: map named function
       }),
       // todo: https://gohugo.io/functions/markdownify/
+      TemplateFunction("max", 1, { case (con, Seq(a: BigDecimal, b: BigDecimal)) => a max b }),
       // todo: https://gohugo.io/functions/md5/
       // todo: https://gohugo.io/functions/merge/
+      TemplateFunction("min", 1, { case (con, Seq(a: BigDecimal, b: BigDecimal)) => a min b }),
       TemplateFunction("now", 0, _ => Datetime.now().timestamp),
       TemplateFunction("number", 1, { case (con, Seq(s: String)) => BigDecimal(s) }),
       TemplateFunction(
@@ -131,7 +152,7 @@ object TemplateBuiltin {
       // todo: https://gohugo.io/functions/replaceRE/
       TemplateFunction("reverse", 1, { case (con, Seq(s: Seq[_])) => s.reverse }),
       // todo: https://gohugo.io/functions/sha/
-      // todo: https://gohugo.io/functions/shuffle/
+      TemplateFunction("shuffle", 1, { case (con, Seq(s: Seq[_])) => Random.shuffle(s) }),
       // todo: https://gohugo.io/functions/singularize/
       // todo: https://gohugo.io/functions/sort/
       TemplateFunction("split", 2, { case (con, Seq(delim: String, s: String)) => s split delim toSeq }),
