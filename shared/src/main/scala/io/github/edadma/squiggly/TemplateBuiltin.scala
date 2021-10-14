@@ -171,8 +171,11 @@ object TemplateBuiltin {
           case (con, Seq(from: Num, until: Num, s: String))      => s slice (from.toIntExact, until.toIntExact)
         }
       ),
-      // todo: https://gohugo.io/functions/sort/
-      TemplateFunction("split", 2, { case (con, Seq(delim: String, s: String)) => s split delim toSeq }),
+//      TemplateFunction("sort", 1, {// todo: sortNatural (case-insensitive)
+//        case (con, Seq(s: Seq[_]))                      =>
+//        case (con, Seq(NonStrictExpr(expr), s: Seq[_])) =>
+//      }),
+      TemplateFunction("split", 2, { case (con, Seq(delim: String, s: String)) => s split Regex.quote(delim) toSeq }),
       TemplateFunction("substring", 3, {
         case (con, Seq(start: BigDecimal, end: BigDecimal, s: String)) => s.substring(start.toIntExact, end.toIntExact)
       }),
