@@ -49,7 +49,7 @@ object Main extends App {
   //    |""".trim.stripMargin
   val template =
     """
-    |{{ [3, 4] ++ [5, 6] ++ [7, 8] }}
+    |{{ "I strained to see the train through the rain" | removeFirst "rain" }}
     |""".trim.stripMargin
   val ast = TemplateParser.default.parse(template)
 

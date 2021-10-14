@@ -7,6 +7,7 @@ import io.github.edadma.datetime.{Datetime, DatetimeFormatter}
 import scala.collection.mutable.ListBuffer
 import scala.language.postfixOps
 import scala.util.Random
+import scala.util.matching.Regex
 
 object TemplateBuiltin {
 
@@ -29,10 +30,7 @@ object TemplateBuiltin {
       //      BuiltinFunction("anchorize", 1, {
       //        case (con, Seq(s: String)) =>
       //      }),
-      TemplateFunction("append", 2, {
-        case (con, Seq(c: Seq[_], s: Seq[_]))                => s ++ c
-        case (con, s: Seq[_]) if s.last.isInstanceOf[Seq[_]] => s.last.asInstanceOf[Seq[_]] ++ s.init
-      }),
+      TemplateFunction("append", 2, { case (con, Seq(e: Any, s: Seq[_])) => s :+ e }),
       // todo: https://gohugo.io/functions/base64/
       TemplateFunction("capitalize", 1, {
         case (con, Seq(s: String)) =>
@@ -84,6 +82,9 @@ object TemplateBuiltin {
             findRE(pattern, input) take limit.toIntExact toList
         }
       ),
+      TemplateFunction("floor", 1, {
+        case (con, Seq(n: BigDecimal)) => n.round(new MathContext(n.mc.getPrecision, RoundingMode.FLOOR))
+      }),
       TemplateFunction(
         "format",
         2, {
@@ -96,12 +97,14 @@ object TemplateBuiltin {
       ),
       // todo: https://gohugo.io/functions/getenv/
       // todo: https://gohugo.io/functions/group/
+      TemplateFunction("head", 1, { case (con, Seq(s: Seq[_])) => s.head }),
       // todo: https://gohugo.io/functions/highlight/
       // todo: https://gohugo.io/functions/hmac/
       TemplateFunction("htmlEscape", 1, {
         case (con, Seq(s: String)) =>
           s replace ("&", "&amp;") replace ("<", "&lt;") replace (">", "&gt;") replace ("'", "&apos;") replace ("\"", "&quot;")
       }),
+      // todo: https://shopify.github.io/liquid/filters/escape_once/
       // todo: htmlUnescape
       // todo: https://gohugo.io/functions/humanize/
       // todo: https://gohugo.io/functions/i18n/
@@ -116,22 +119,49 @@ object TemplateBuiltin {
         }
       ),
       // todo: https://gohugo.io/functions/jsonify/
+      TemplateFunction("last", 1, { case (con, Seq(s: Seq[_])) => s.last }),
       TemplateFunction("length", 1, {
         case (con, Seq(s: String))      => s.length
         case (con, Seq(s: Iterable[_])) => s.size
       }),
       TemplateFunction("lower", 1, { case (con, Seq(s: String)) => s.toLowerCase }),
-      TemplateFunction("map", 2, {
-        case (con, Seq(NonStrictExpr(expr), s: Iterable[_])) => s map (e => con.copy(data = e).eval(expr))
-        case (con, Seq(s: String))                           => s // todo: map named function
-      }),
+      TemplateFunction(
+        "map",
+        2, {
+          case (con, Seq(NonStrictExpr(expr), s: Iterable[_])) => s map (e => con.copy(data = e).eval(expr))
+          //case (con, Seq(s: String))                           => s // todo: map named function
+        }
+      ),
       // todo: https://gohugo.io/functions/markdownify/
       TemplateFunction("max", 1, { case (con, Seq(a: BigDecimal, b: BigDecimal)) => a max b }),
       // todo: https://gohugo.io/functions/md5/
       // todo: https://gohugo.io/functions/merge/
       TemplateFunction("min", 1, { case (con, Seq(a: BigDecimal, b: BigDecimal)) => a min b }),
       TemplateFunction("now", 0, _ => Datetime.now().timestamp),
-      TemplateFunction("number", 1, { case (con, Seq(s: String)) => BigDecimal(s) }),
+      TemplateFunction("newline_to_br", 1, { case (con, Seq(s: String)) => s.replace("\n", "<br />\n") }),
+      TemplateFunction("number", 1, { case (con, Seq(s: String))        => BigDecimal(s) }),
+      // todo: https://gohugo.io/functions/path.base/
+      // todo: https://gohugo.io/functions/pluralize/
+      TemplateFunction("partial", 1, {
+        case (con, Seq(path: String))            => partial(con, path, null)
+        case (con, Seq(path: String, data: Any)) => partial(con, path, data)
+      }),
+      TemplateFunction("prepend", 2, { case (con, Seq(e: Any, s: Seq[_])) => e +: s }),
+      // todo: https://gohugo.io/functions/querify/
+      // todo: https://gohugo.io/functions/readdir/
+      // todo: https://gohugo.io/functions/replace/
+      // todo: https://gohugo.io/functions/replaceRE/
+      TemplateFunction("reverse", 1, { case (con, Seq(s: Seq[_]))              => s.reverse }),
+      TemplateFunction("remove", 1, { case (con, Seq(item: String, s: String)) => s.replace(item, "") }),
+      TemplateFunction("removeFirst", 1, {
+        case (con, Seq(item: String, s: String)) => s.replaceFirst(Regex.quote(item), "")
+      }),
+      TemplateFunction("round", 1, {
+        case (con, Seq(n: BigDecimal)) => n.round(new MathContext(n.mc.getPrecision, RoundingMode.HALF_EVEN))
+      }),
+      // todo: https://gohugo.io/functions/sha/
+      TemplateFunction("shuffle", 1, { case (con, Seq(s: Seq[_])) => Random.shuffle(s) }),
+      // todo: https://gohugo.io/functions/singularize/
       TemplateFunction(
         "slice",
         2, {
@@ -141,20 +171,6 @@ object TemplateBuiltin {
           case (con, Seq(from: Num, until: Num, s: String))      => s slice (from.toIntExact, until.toIntExact)
         }
       ),
-      // todo: https://gohugo.io/functions/path.base/
-      // todo: https://gohugo.io/functions/pluralize/
-      TemplateFunction("partial", 1, {
-        case (con, Seq(path: String))            => partial(con, path, null)
-        case (con, Seq(path: String, data: Any)) => partial(con, path, data)
-      }),
-      // todo: https://gohugo.io/functions/querify/
-      // todo: https://gohugo.io/functions/readdir/
-      // todo: https://gohugo.io/functions/replace/
-      // todo: https://gohugo.io/functions/replaceRE/
-      TemplateFunction("reverse", 1, { case (con, Seq(s: Seq[_])) => s.reverse }),
-      // todo: https://gohugo.io/functions/sha/
-      TemplateFunction("shuffle", 1, { case (con, Seq(s: Seq[_])) => Random.shuffle(s) }),
-      // todo: https://gohugo.io/functions/singularize/
       // todo: https://gohugo.io/functions/sort/
       TemplateFunction("split", 2, { case (con, Seq(delim: String, s: String)) => s split delim toSeq }),
       TemplateFunction("substring", 3, {
@@ -176,6 +192,8 @@ object TemplateBuiltin {
       TemplateFunction("toSeq", 1, { case (con, Seq(s: Iterable[_])) => s.toSeq }),
       TemplateFunction("toString", 1, { case (con, Seq(a: Any))      => a.toString }),
       TemplateFunction("trim", 1, { case (con, Seq(s: String))       => s.trim }), // todo: https://gohugo.io/functions/trim/
+      TemplateFunction("ltrim", 1, { case (con, Seq(s: String))      => s dropWhile (_.isWhitespace) }), // todo: https://gohugo.io/functions/trim/
+      TemplateFunction("rtrim", 1, { case (con, Seq(s: String))      => s.reverse dropWhile (_.isWhitespace) reverse }), // todo: https://gohugo.io/functions/trim/
       // todo: https://gohugo.io/functions/truncate/
       // todo: https://gohugo.io/functions/union/
       TemplateFunction("unix", 1, { case (con, Seq(d: Datetime)) => BigDecimal(d.epochMillis) }),
