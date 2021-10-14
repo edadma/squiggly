@@ -42,6 +42,7 @@ object TemplateBuiltin {
       TemplateFunction("ceil", 1, {
         case (con, Seq(n: BigDecimal)) => n.round(new MathContext(n.mc.getPrecision, RoundingMode.CEILING))
       }),
+      TemplateFunction("compact", 1, { case (con, Seq(s: Seq[_])) => s.filterNot(e => e == () || e == null) }),
       // todo: https://gohugo.io/functions/complement/
       TemplateFunction(
         "contains",
@@ -110,7 +111,7 @@ object TemplateBuiltin {
         1, {
           case (con, Seq(delim: String, s: Seq[_])) => s mkString delim
           case (con, Seq(delim: String, last: String, s: Seq[_])) =>
-            if (s.length >= 2) s.init.mkString(delim) ++ last ++ s.last
+            if (s.length >= 2) s.init.mkString(delim) ++ last ++ s.last.toString
             else s.mkString
         }
       ),

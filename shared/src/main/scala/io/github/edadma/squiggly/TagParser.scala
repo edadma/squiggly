@@ -108,8 +108,10 @@ class TagParser(val input: ParserInput,
 
   def additive: Rule1[ExprAST] =
     rule {
-      pos ~ multiplicative ~ oneOrMore(
-        (sym("+") | sym("-")) ~ pos ~ multiplicative ~> Tuple3[String, Position, ExprAST] _) ~> LeftInfixExpr | multiplicative
+      pos ~ multiplicative ~ oneOrMore((sym("++") | sym("+") | sym("-")) ~ pos ~ multiplicative ~> Tuple3[
+        String,
+        Position,
+        ExprAST] _) ~> LeftInfixExpr | multiplicative
     }
 
   def multiplicative: Rule1[ExprAST] =

@@ -49,7 +49,7 @@ object Main extends App {
   //    |""".trim.stripMargin
   val template =
     """
-    |{{ 'not the default' | take 5 }}
+    |{{ [3, 4] ++ [5, 6] ++ [7, 8] }}
     |""".trim.stripMargin
   val ast = TemplateParser.default.parse(template)
 
