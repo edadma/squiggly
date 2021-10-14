@@ -216,7 +216,7 @@ object TemplateBuiltin {
                 case '%' =>
                   i += 1
 
-                  if (i > s.length - 3)
+                  if (i > s.length - 2)
                     sys.error(s"2 digit code expected at column $i: $s")
 
                   try {
@@ -238,14 +238,67 @@ object TemplateBuiltin {
             buf.toString
         }
       ),
-      // todo: https://shopify.github.io/liquid/filters/url_decode/
-      // todo: https://shopify.github.io/liquid/filters/url_encode/
-      //   https://en.wikipedia.org/wiki/Percent-encoding
+      TemplateFunction(
+        "urlDecode",
+        1, {
+          case (con, Seq(s: String)) =>
+            s flatMap {
+              case ' '  => "+"
+              case '!'  => "%21"
+              case '#'  => "%23"
+              case '$'  => "%24"
+              case '%'  => "%25"
+              case '&'  => "%26"
+              case '\'' => "%27"
+              case '('  => "%28"
+              case ')'  => "%29"
+              case '*'  => "%2A"
+              case '+'  => "%2B"
+              case ','  => "%2C"
+              case '/'  => "%2F"
+              case ':'  => "%3A"
+              case ';'  => "%3B"
+              case '='  => "%3D"
+              case '?'  => "%3F"
+              case '@'  => "%40"
+              case '['  => "%5B"
+              case ']'  => "%5D"
+              case c    => c.toString
+            }
+        }
+      ),
       // todo: https://gohugo.io/functions/union/
       TemplateFunction("unix", 1, { case (con, Seq(d: Datetime)) => BigDecimal(d.epochMillis) }),
       // todo: https://gohugo.io/functions/transform.unmarshal/
       TemplateFunction("upper", 1, { case (con, Seq(s: String)) => s.toUpperCase }),
-      // todo: https://gohugo.io/functions/urlize/
+      TemplateFunction(
+        "urlize",
+        1, {
+          case (con, Seq(s: String)) =>
+            val buf = new StringBuilder(s.trim)
+
+            if (buf.isEmpty) "-"
+            else {
+              var i = 0
+
+              while (i < buf.length) {
+                if (buf(i) == ' ') {
+                  if (i > 0 && buf(i - 1) == '-')
+                    buf.deleteCharAt(i)
+                  else {
+                    buf(i) = '-'
+                    i += 1
+                  }
+                } else if (buf(i).isLetterOrDigit)
+                  i += 1
+                else
+                  buf.deleteCharAt(i)
+              }
+
+              buf.toString
+            }
+        }
+      ),
     ) map (f => (f.name, f)) toMap
 
   private val WS_REGEX = "\\s+".r
