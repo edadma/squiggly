@@ -4,6 +4,7 @@ import java.math.{MathContext, RoundingMode}
 import io.github.edadma.cross_platform._
 import io.github.edadma.datetime.{Datetime, DatetimeFormatter}
 
+import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 import scala.language.postfixOps
 import scala.util.Random
@@ -108,7 +109,10 @@ object TemplateBuiltin {
       // todo: htmlUnescape
       // todo: https://gohugo.io/functions/humanize/
       // todo: https://gohugo.io/functions/i18n/
-      // todo: https://gohugo.io/functions/intersect/
+      TemplateFunction("intersect", 2, {
+        case (con, Seq(s1: Seq[_], s2: Seq[_])) =>
+          (s1 to mutable.LinkedHashSet) intersect (s2 to mutable.LinkedHashSet) toList
+      }),
       TemplateFunction(
         "join",
         1, {
@@ -185,7 +189,13 @@ object TemplateBuiltin {
         case (con, Seq(n: Num, s: Iterable[_])) => s take n.toIntExact
         case (con, Seq(n: Num, s: String))      => s take n.toIntExact
       }),
-      // todo: https://gohugo.io/functions/symdiff/
+      TemplateFunction("symdiff", 2, {
+        case (con, Seq(s1: Seq[_], s2: Seq[_])) =>
+          val c1 = s1 to mutable.LinkedHashSet
+          val c2 = s2 to mutable.LinkedHashSet
+
+          (c1 union c2) diff (c1 intersect c2) toList
+      }),
       TemplateFunction("takeRight", 2, {
         case (con, Seq(n: Num, s: Iterable[_])) => s takeRight n.toIntExact
         case (con, Seq(n: Num, s: String))      => s takeRight n.toIntExact
@@ -267,7 +277,10 @@ object TemplateBuiltin {
             }
         }
       ),
-      // todo: https://gohugo.io/functions/union/
+      TemplateFunction("union", 2, {
+        case (con, Seq(s1: Seq[_], s2: Seq[_])) =>
+          (s1 to mutable.LinkedHashSet) union (s2 to mutable.LinkedHashSet) toList
+      }),
       TemplateFunction("unix", 1, { case (con, Seq(d: Datetime)) => BigDecimal(d.epochMillis) }),
       // todo: https://gohugo.io/functions/transform.unmarshal/
       TemplateFunction("upper", 1, { case (con, Seq(s: String)) => s.toUpperCase }),
