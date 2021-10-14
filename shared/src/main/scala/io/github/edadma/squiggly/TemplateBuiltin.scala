@@ -171,10 +171,10 @@ object TemplateBuiltin {
           case (con, Seq(from: Num, until: Num, s: String))      => s slice (from.toIntExact, until.toIntExact)
         }
       ),
-//      TemplateFunction("sort", 1, {// todo: sortNatural (case-insensitive)
-//        case (con, Seq(s: Seq[_]))                      =>
-//        case (con, Seq(NonStrictExpr(expr), s: Seq[_])) =>
-//      }),
+      //      TemplateFunction("sort", 1, {// todo: sortNatural (case-insensitive)
+      //        case (con, Seq(s: Seq[_]))                      =>
+      //        case (con, Seq(NonStrictExpr(expr), s: Seq[_])) =>
+      //      }),
       TemplateFunction("split", 2, { case (con, Seq(delim: String, s: String)) => s split Regex.quote(delim) toSeq }),
       TemplateFunction("substring", 3, {
         case (con, Seq(start: BigDecimal, end: BigDecimal, s: String)) => s.substring(start.toIntExact, end.toIntExact)
@@ -204,7 +204,40 @@ object TemplateBuiltin {
       ),
       TemplateFunction("ltrim", 1, { case (con, Seq(s: String)) => s dropWhile (_.isWhitespace) }), // todo: https://gohugo.io/functions/trim/
       TemplateFunction("rtrim", 1, { case (con, Seq(s: String)) => s.reverse dropWhile (_.isWhitespace) reverse }), // todo: https://gohugo.io/functions/trim/
-      // todo: https://gohugo.io/functions/truncate/
+      TemplateFunction(
+        "urlDecode",
+        1, {
+          case (con, Seq(s: String)) =>
+            var i = 0
+            val buf = new StringBuilder
+
+            while (i < s.length) {
+              s(i) match {
+                case '%' =>
+                  i += 1
+
+                  if (i > s.length - 3)
+                    sys.error(s"2 digit code expected at column $i: $s")
+
+                  try {
+                    buf += Integer.parseInt(s.substring(i, i + 2), 16).toChar
+                  } catch {
+                    case e: NumberFormatException => sys.error(s"error decoding URL at column $i: $s")
+                  }
+
+                  i += 2
+                case '+' =>
+                  buf += ' '
+                  i += 1
+                case _ =>
+                  buf += s(i)
+                  i += 1
+              }
+            }
+
+            buf.toString
+        }
+      ),
       // todo: https://shopify.github.io/liquid/filters/url_decode/
       // todo: https://shopify.github.io/liquid/filters/url_encode/
       //   https://en.wikipedia.org/wiki/Percent-encoding
