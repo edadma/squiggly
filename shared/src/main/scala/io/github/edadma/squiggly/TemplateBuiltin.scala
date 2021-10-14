@@ -192,15 +192,34 @@ object TemplateBuiltin {
       TemplateFunction("toSeq", 1, { case (con, Seq(s: Iterable[_])) => s.toSeq }),
       TemplateFunction("toString", 1, { case (con, Seq(a: Any))      => a.toString }),
       TemplateFunction("trim", 1, { case (con, Seq(s: String))       => s.trim }), // todo: https://gohugo.io/functions/trim/
-      TemplateFunction("ltrim", 1, { case (con, Seq(s: String))      => s dropWhile (_.isWhitespace) }), // todo: https://gohugo.io/functions/trim/
-      TemplateFunction("rtrim", 1, { case (con, Seq(s: String))      => s.reverse dropWhile (_.isWhitespace) reverse }), // todo: https://gohugo.io/functions/trim/
+      TemplateFunction(
+        "truncate",
+        1, {
+          case (con, Seq(n: BigDecimal, s: String))                   => truncate(s, n.toIntExact, "...")
+          case (con, Seq(n: BigDecimal, s: String, ellipsis: String)) => truncate(s, n.toIntExact, ellipsis)
+        }
+      ),
+      TemplateFunction("ltrim", 1, { case (con, Seq(s: String)) => s dropWhile (_.isWhitespace) }), // todo: https://gohugo.io/functions/trim/
+      TemplateFunction("rtrim", 1, { case (con, Seq(s: String)) => s.reverse dropWhile (_.isWhitespace) reverse }), // todo: https://gohugo.io/functions/trim/
       // todo: https://gohugo.io/functions/truncate/
+      // todo: https://shopify.github.io/liquid/filters/url_decode/
+      // todo: https://shopify.github.io/liquid/filters/url_encode/
+      //   https://en.wikipedia.org/wiki/Percent-encoding
       // todo: https://gohugo.io/functions/union/
       TemplateFunction("unix", 1, { case (con, Seq(d: Datetime)) => BigDecimal(d.epochMillis) }),
       // todo: https://gohugo.io/functions/transform.unmarshal/
       TemplateFunction("upper", 1, { case (con, Seq(s: String)) => s.toUpperCase }),
       // todo: https://gohugo.io/functions/urlize/
     ) map (f => (f.name, f)) toMap
+
+  private val WS_REGEX = "\\s+".r
+
+  private def truncate(s: String, n: Int, ellipsis: String): String = {
+    val it = WS_REGEX.findAllMatchIn(s).drop(n - 1)
+
+    if (it.hasNext) s"${s.substring(0, it.next().start)}$ellipsis"
+    else s
+  }
 
   private def findRE(re: String, s: String) =
     re.r.findAllMatchIn(s) map { m =>
