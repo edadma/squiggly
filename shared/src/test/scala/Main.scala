@@ -63,5 +63,4 @@ object Main extends App {
 // todo: implement 'capture' https://shopify.github.io/liquid/tags/variable/
 // todo: implement 'unless' https://shopify.github.io/liquid/tags/control-flow/
 // todo: implement 'no output' https://shopify.github.io/liquid/tags/template/
-// todo: "filters": https://shopify.github.io/liquid/
 // todo: add boolean test for null and undefined
