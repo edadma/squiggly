@@ -37,8 +37,8 @@ object Main extends App {
   //      |  </body>
   //      |</html>
   //      |""".trim.stripMargin
-  //  val data = platform.yaml("")
-  val data = null
+  val data = platform.yaml("{a: 3, b: 4}")
+  //  val data = null
   //  val template =
   //    """
   //      |{{ define asdfx }}qwer {{ . }} zxcv{{ end }}{{ block asdf . + 2 }}default: {{ . }}{{ end }}
@@ -49,7 +49,7 @@ object Main extends App {
   //    |""".trim.stripMargin
   val template =
     """
-    |{{ '  ' | urlize }}
+    |{{ for v <- . }}{{ v }}, {{ end }}
     |""".trim.stripMargin
   val ast = TemplateParser.default.parse(template)
 

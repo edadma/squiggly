@@ -110,7 +110,7 @@ object TemplateBuiltin {
       // todo: https://gohugo.io/functions/humanize/
       // todo: https://gohugo.io/functions/i18n/
       TemplateFunction("intersect", 2, {
-        case (con, Seq(s1: Seq[_], s2: Seq[_])) =>
+        case (con, Seq(s1: Seq[Any], s2: Seq[Any])) =>
           (s1 to mutable.LinkedHashSet) intersect (s2 to mutable.LinkedHashSet) toList
       }),
       TemplateFunction(
@@ -189,13 +189,16 @@ object TemplateBuiltin {
         case (con, Seq(n: Num, s: Iterable[_])) => s take n.toIntExact
         case (con, Seq(n: Num, s: String))      => s take n.toIntExact
       }),
-      TemplateFunction("symdiff", 2, {
-        case (con, Seq(s1: Seq[_], s2: Seq[_])) =>
-          val c1 = s1 to mutable.LinkedHashSet
-          val c2 = s2 to mutable.LinkedHashSet
+      TemplateFunction(
+        "symdiff",
+        2, {
+          case (con, Seq(s1: Seq[Any], s2: Seq[Any])) =>
+            val c1 = s1 to mutable.LinkedHashSet
+            val c2 = s2 to mutable.LinkedHashSet
 
-          (c1 union c2) diff (c1 intersect c2) toList
-      }),
+            (c1 union c2) diff (c1 intersect c2) toList
+        }
+      ),
       TemplateFunction("takeRight", 2, {
         case (con, Seq(n: Num, s: Iterable[_])) => s takeRight n.toIntExact
         case (con, Seq(n: Num, s: String))      => s takeRight n.toIntExact
@@ -278,7 +281,7 @@ object TemplateBuiltin {
         }
       ),
       TemplateFunction("union", 2, {
-        case (con, Seq(s1: Seq[_], s2: Seq[_])) =>
+        case (con, Seq(s1: Seq[Any], s2: Seq[Any])) =>
           (s1 to mutable.LinkedHashSet) union (s2 to mutable.LinkedHashSet) toList
       }),
       TemplateFunction("unix", 1, { case (con, Seq(d: Datetime)) => BigDecimal(d.epochMillis) }),
