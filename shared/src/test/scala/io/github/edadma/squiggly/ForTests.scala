@@ -49,7 +49,27 @@ class ForTests extends AnyFreeSpec with Matchers with Testing {
         |{{ for . }}{{ . }}{{ end }}
         """.trim.stripMargin) shouldBe
       """
-        |(a,3)(b,4)(c,5)
+        |345
+        """.trim.stripMargin
+  }
+
+  "for 3a" in {
+    test("{a: 3, b: 4, c: 5}",
+         """
+        |{{ for v <- . }}{{ . }}{{ end }}
+        """.trim.stripMargin) shouldBe
+      """
+        |345
+        """.trim.stripMargin
+  }
+
+  "for 3b" in {
+    test("{a: 3, b: 4, c: 5}",
+         """
+        |{{ for k, v <- . }}<{{ k }}, {{ v }}>{{ end }}
+        """.trim.stripMargin) shouldBe
+      """
+        |<a, 3><b, 4><c, 5>
         """.trim.stripMargin
   }
 

@@ -37,8 +37,8 @@ object Main extends App {
   //      |  </body>
   //      |</html>
   //      |""".trim.stripMargin
-  //  val data = platform.yaml("")
-  val data = null
+  val data = platform.yaml("{a: 3, b: 4}")
+  //  val data = null
   //  val template =
   //    """
   //      |{{ define asdfx }}qwer {{ . }} zxcv{{ end }}{{ block asdf . + 2 }}default: {{ . }}{{ end }}
@@ -49,7 +49,7 @@ object Main extends App {
   //    |""".trim.stripMargin
   val template =
     """
-    |{{ 'not the default' | take 5 }}
+    |{{ for v <- . }}{{ v }}, {{ end }}
     |""".trim.stripMargin
   val ast = TemplateParser.default.parse(template)
 
@@ -63,5 +63,4 @@ object Main extends App {
 // todo: implement 'capture' https://shopify.github.io/liquid/tags/variable/
 // todo: implement 'unless' https://shopify.github.io/liquid/tags/control-flow/
 // todo: implement 'no output' https://shopify.github.io/liquid/tags/template/
-// todo: "filters": https://shopify.github.io/liquid/
 // todo: add boolean test for null and undefined

@@ -127,6 +127,14 @@ case class Context(renderer: TemplateRenderer, data: Any, vars: mutable.HashMap[
           case None        => ()
         }
       case PrefixExpr("not", _, expr) => !beval(expr)
+      case LeftInfixExpr(lpos, left, right) if right forall (_._1 == "++") =>
+        val l = eval(left)
+        val r = right map { case (_, _, e) => eval(e) }
+
+        if (r forall (_.isInstanceOf[String])) r.asInstanceOf[Seq[String]].foldLeft(l.toString)(_ ++ _)
+        else if (r forall (_.isInstanceOf[Seq[_]]))
+          r.asInstanceOf[Seq[Seq[Any]]].foldLeft(l.asInstanceOf[Seq[Any]])(_ ++ _)
+        else lpos.error("operands of '++' operator must all be either strings or sequences")
       case LeftInfixExpr(lpos, left, right) =>
         val l = neval(lpos, left)
         val r = right map { case (o, p, e) => (o, neval(p, e)) }

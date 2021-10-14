@@ -46,7 +46,7 @@ class TemplateRenderer(val partials: TemplateLoader = _ => None,
         case TemplateBlockAST(_, ForAST(index, pos, expr), body, els) =>
           context.eval(expr) match {
             case v if falsy(v) => els foreach (render(context, _))
-            case s: Iterable[Any] =>
+            case s: collection.Seq[_] =>
               s.zipWithIndex foreach {
                 case (e, i) =>
                   index match {
@@ -58,6 +58,19 @@ class TemplateRenderer(val partials: TemplateLoader = _ => None,
                   }
 
                   render(context.copy(data = e), body)
+              }
+            case s: collection.Map[_, _] =>
+              s foreach {
+                case (k, v) =>
+                  index match {
+                    case Some((TagParserIdent(_, key), Some(TagParserIdent(_, value)))) =>
+                      context.vars(key) = k
+                      context.vars(value) = v
+                    case Some((TagParserIdent(_, value), None)) => context.vars(value) = v
+                    case None                                   =>
+                  }
+
+                  render(context.copy(data = v), body)
               }
             case v => pos.error(s"'for' can only be applied to an iterable object: $v")
           }
