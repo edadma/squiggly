@@ -138,7 +138,6 @@ object TemplateBuiltin {
       ),
       // todo: https://gohugo.io/functions/markdownify/
       TemplateFunction("max", 1, { case (con, Seq(a: BigDecimal, b: BigDecimal)) => a max b }),
-      // todo: https://gohugo.io/functions/md5/
       // todo: https://gohugo.io/functions/merge/
       TemplateFunction("min", 1, { case (con, Seq(a: BigDecimal, b: BigDecimal)) => a min b }),
       TemplateFunction("now", 0, _ => Datetime.now().timestamp),
@@ -151,6 +150,9 @@ object TemplateBuiltin {
         case (con, Seq(path: String, data: Any)) => partial(con, path, data)
       }),
       TemplateFunction("prepend", 2, { case (con, Seq(e: Any, s: Seq[_])) => e +: s }),
+      TemplateFunction("querify", 1, {
+        case (con, Seq(m: collection.Map[_,_])) => m map {case (k, v) => s"$k=$v"} mkString "&"
+      }),
       // todo: https://gohugo.io/functions/querify/
       // todo: https://gohugo.io/functions/readdir/
       // todo: https://gohugo.io/functions/replace/
@@ -204,7 +206,7 @@ object TemplateBuiltin {
         case (con, Seq(n: Num, s: String))      => s takeRight n.toIntExact
       }),
       TemplateFunction("time", 1, { case (con, Seq(s: String)) => Datetime.fromString(s) }),
-      // todo: https://gohugo.io/functions/title/
+      // todo: https://gohugo.io/functions/title/ https://en.wikipedia.org/wiki/Title_case
       TemplateFunction("toSeq", 1, { case (con, Seq(s: Iterable[_])) => s.toSeq }),
       TemplateFunction("toString", 1, { case (con, Seq(a: Any))      => a.toString }),
       TemplateFunction("trim", 1, { case (con, Seq(s: String))       => s.trim }), // todo: https://gohugo.io/functions/trim/
