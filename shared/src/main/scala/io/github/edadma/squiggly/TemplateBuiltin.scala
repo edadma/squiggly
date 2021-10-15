@@ -42,6 +42,17 @@ object TemplateBuiltin {
         case (con, Seq(n: BigDecimal)) => n.round(new MathContext(n.mc.getPrecision, RoundingMode.CEILING))
       }),
       TemplateFunction("compact", 1, { case (con, Seq(s: Seq[_])) => s.filterNot(e => e == () || e == null) }),
+      TemplateFunction(
+        "complement",
+        1, {
+          case (con, cs: Seq[_]) =>
+            require(cs forall (_.isInstanceOf[Seq[Any]]))
+
+            val union = mutable.LinkedHashSet.concat[Any](cs.asInstanceOf[Seq[Seq[Any]]].init: _*)
+
+            cs.last.asInstanceOf[Seq[Any]] to mutable.LinkedHashSet diff union toList
+        }
+      ),
       // todo: https://gohugo.io/functions/complement/
       TemplateFunction(
         "contains",
@@ -151,13 +162,17 @@ object TemplateBuiltin {
       }),
       TemplateFunction("prepend", 2, { case (con, Seq(e: Any, s: Seq[_])) => e +: s }),
       TemplateFunction("querify", 1, {
-        case (con, Seq(m: collection.Map[_,_])) => m map {case (k, v) => s"$k=$v"} mkString "&"
+        case (con, Seq(m: collection.Map[_, _])) => m map { case (k, v) => s"$k=$v" } mkString "&"
       }),
       // todo: https://gohugo.io/functions/querify/
       // todo: https://gohugo.io/functions/readdir/
+      TemplateFunction("random", 1, { case (con, Seq(s: Seq[_])) => s(Random.nextInt(s.length)) }),
       // todo: https://gohugo.io/functions/replace/
       // todo: https://gohugo.io/functions/replaceRE/
-      TemplateFunction("reverse", 1, { case (con, Seq(s: Seq[_]))              => s.reverse }),
+      TemplateFunction("reverse", 1, {
+        case (con, Seq(s: Seq[_])) => s.reverse
+        case (con, Seq(s: String)) => s.reverse
+      }),
       TemplateFunction("remove", 1, { case (con, Seq(item: String, s: String)) => s.replace(item, "") }),
       TemplateFunction("removeFirst", 1, {
         case (con, Seq(item: String, s: String)) => s.replaceFirst(Regex.quote(item), "")
@@ -181,11 +196,12 @@ object TemplateBuiltin {
       //        case (con, Seq(s: Seq[_]))                      =>
       //        case (con, Seq(NonStrictExpr(expr), s: Seq[_])) =>
       //      }),
-      TemplateFunction("split", 2, { case (con, Seq(delim: String, s: String)) => s split Regex.quote(delim) toSeq }),
+      TemplateFunction("split", 2, { case (con, Seq(delim: String, s: String))       => s split Regex.quote(delim) toSeq }),
+      TemplateFunction("startsWith", 2, { case (con, Seq(prefix: String, s: String)) => s startsWith prefix }),
       TemplateFunction("substring", 3, {
         case (con, Seq(start: BigDecimal, end: BigDecimal, s: String)) => s.substring(start.toIntExact, end.toIntExact)
       }),
-      TemplateFunction("startsWith", 2, { case (con, Seq(prefix: String, s: String)) => s startsWith prefix }),
+      TemplateFunction("sum", 1, { case (con, Seq(s: Seq[_])) => s.asInstanceOf[Seq[BigDecimal]].sum }),
       // todo: https://gohugo.io/functions/strings.count/
       TemplateFunction("take", 2, {
         case (con, Seq(n: Num, s: Iterable[_])) => s take n.toIntExact
