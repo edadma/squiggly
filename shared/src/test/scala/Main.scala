@@ -49,7 +49,7 @@ object Main extends App {
   //    |""".trim.stripMargin
   val template =
     """
-    |{{ for v <- . }}{{ v }}, {{ end }}
+    |{{ random [3, 4, 1, 5, 7] }}
     |""".trim.stripMargin
   val ast = TemplateParser.default.parse(template)
 
