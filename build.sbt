@@ -5,7 +5,7 @@ lazy val squiggly = crossProject(JSPlatform, JVMPlatform, NativePlatform)
   .in(file("."))
   .settings(
     name := "squiggly",
-    version := "0.1.13",
+    version := "0.1.14",
     scalaVersion := "2.13.6",
     scalacOptions ++=
       Seq(
@@ -31,7 +31,7 @@ lazy val squiggly = crossProject(JSPlatform, JVMPlatform, NativePlatform)
     ),
     libraryDependencies ++= Seq(
       "com.github.scopt" %%% "scopt" % "4.0.1",
-      "com.lihaoyi" %%% "pprint" % "0.6.6",
+      "com.lihaoyi" %%% "pprint" % "0.6.6" % "test",
       "org.parboiled" %%% "parboiled" % "2.3.0",
     ),
     publishMavenStyle := true,

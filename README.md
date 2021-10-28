@@ -35,7 +35,7 @@ Include the following in your `build.sbt`:
 ```sbt
 resolvers += Resolver.githubPackages("edadma")
 
-libraryDependencies += "io.github.edadma" %%% "squiggly" % "0.1.13"
+libraryDependencies += "io.github.edadma" %%% "squiggly" % "0.1.14"
 
 ```
 
@@ -158,7 +158,7 @@ squiggly -h
 to get the following usage text:
 
 ```
-Squiggly v0.1.13
+Squiggly v0.1.14
 Usage: squiggly [options] [[<template>]]
 
   -a, --ast              pretty print AST
