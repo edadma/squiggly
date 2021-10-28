@@ -1,4 +1,5 @@
 import io.github.edadma.squiggly.{TemplateParser, TemplateRenderer, platform}
+import io.github.edadma.cross_platform._
 
 object Main extends App {
 
@@ -37,8 +38,8 @@ object Main extends App {
   //      |  </body>
   //      |</html>
   //      |""".trim.stripMargin
-  val data = platform.yaml("{a: 3, b: 4}")
-  //  val data = null
+  //  val data = platform.yaml("{a: 3, b: 4}")
+  val data = null
   //  val template =
   //    """
   //      |{{ define asdfx }}qwer {{ . }} zxcv{{ end }}{{ block asdf . + 2 }}default: {{ . }}{{ end }}
@@ -51,10 +52,11 @@ object Main extends App {
     """
     |{{ random [3, 4, 1, 5, 7] }}
     |""".trim.stripMargin
-  val ast = TemplateParser.default.parse(template)
+  //  val ast = TemplateParser.default.parse(template)
+  val ast = TemplateParser.default.parse(readFile("bulma.min.css"))
 
-  pprint.pprintln(ast)
-  TemplateRenderer.default.render(data, ast)
+//  pprint.pprintln(ast)
+//  TemplateRenderer.default.render(data, ast)
 
 }
 

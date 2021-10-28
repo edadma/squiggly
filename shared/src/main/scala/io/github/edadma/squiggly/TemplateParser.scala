@@ -179,7 +179,10 @@ class TemplateParser(startDelim: String = "{{",
       case None              => EOIToken(r) #:: LazyList.empty
     }
 
-  def token(r: CharReader, start: CharReader, buf: StringBuilder = new StringBuilder): Option[(Token, CharReader)] = {
+  @tailrec
+  final def token(r: CharReader,
+                  start: CharReader,
+                  buf: StringBuilder = new StringBuilder): Option[(Token, CharReader)] = {
     def text(r: CharReader): (Token, CharReader) =
       (if (buf.last.isWhitespace) SpaceToken(start, buf.toString) else TextToken(start, buf.toString), r)
 
