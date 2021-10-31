@@ -62,7 +62,7 @@ object TemplateBuiltin {
           case (con, Seq(substr: String, s: String))  => s contains substr
         }
       ),
-      TemplateFunction("context", 0, { case (con, _) => print(con) }),
+      TemplateFunction("context", 0, { case (con, _) => println(con) }),
       TemplateFunction(
         "default",
         2, {
@@ -162,8 +162,8 @@ object TemplateBuiltin {
         case (con, Seq(path: String, data: Any)) => partial(con, path, data)
       }),
       TemplateFunction("prepend", 2, { case (con, Seq(e: Any, s: Seq[_])) => e +: s }),
-      TemplateFunction("print", Int.MaxValue, { case (con, args)          => print(args mkString ", ") }),
-      TemplateFunction("println", Int.MaxValue, { case (con, args)        => println(args mkString ", ") }),
+      TemplateFunction("print", 0, { case (con, args)                     => print(args mkString ", ") }),
+      TemplateFunction("println", 0, { case (con, args)                   => println(args mkString ", ") }),
       TemplateFunction("querify", 1, {
         case (con, Seq(m: collection.Map[_, _])) => m map { case (k, v) => s"$k=$v" } mkString "&"
       }),
