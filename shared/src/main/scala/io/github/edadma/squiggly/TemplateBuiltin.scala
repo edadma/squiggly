@@ -206,6 +206,7 @@ object TemplateBuiltin {
       }),
       TemplateFunction("sum", 1, { case (con, Seq(s: Seq[_])) => s.asInstanceOf[Seq[BigDecimal]].sum }),
       // todo: https://gohugo.io/functions/strings.count/
+      TemplateFunction("tail", 1, { case (con, Seq(s: Seq[_])) => s.tail }),
       TemplateFunction("take", 2, {
         case (con, Seq(n: Num, s: Iterable[_])) => s take n.toIntExact
         case (con, Seq(n: Num, s: String))      => s take n.toIntExact
