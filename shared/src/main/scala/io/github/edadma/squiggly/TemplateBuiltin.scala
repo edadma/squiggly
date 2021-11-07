@@ -1,5 +1,7 @@
 package io.github.edadma.squiggly
 
+import io.github.edadma.commonmark
+
 import java.math.{MathContext, RoundingMode}
 import io.github.edadma.cross_platform._
 import io.github.edadma.datetime.{Datetime, DatetimeFormatter}
@@ -148,7 +150,12 @@ object TemplateBuiltin {
           //case (con, Seq(s: String))                           => s // todo: map named function
         }
       ),
-      // todo: https://gohugo.io/functions/markdownify/
+      TemplateFunction(
+        "markdownify",
+        1, {
+          case (con, Seq(s: String)) => commonmark.Util.html(markdownParser.parse(s), 2).trim
+        }
+      ),
       TemplateFunction("max", 1, { case (con, Seq(a: BigDecimal, b: BigDecimal)) => a max b }),
       // todo: https://gohugo.io/functions/merge/
       TemplateFunction("min", 1, { case (con, Seq(a: BigDecimal, b: BigDecimal)) => a min b }),
@@ -274,7 +281,7 @@ object TemplateBuiltin {
         }
       ),
       TemplateFunction(
-        "urlDecode",
+        "urlEncode",
         1, {
           case (con, Seq(s: String)) =>
             s flatMap {

@@ -64,8 +64,7 @@ class TagParser(val input: ParserInput,
 
   def conditional: Rule1[ExprAST] =
     rule {
-      ("if" ~ condition ~ "then" ~ conditional ~ optional("else" ~ conditional) ~> ConditionalAST) |
-        condition
+      ("if" ~ condition ~ "then" ~ conditional ~ optional("else" ~ conditional) ~> ConditionalAST) | condition
     }
 
   def condition: Rule1[ExprAST] = disjunctive

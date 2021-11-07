@@ -50,13 +50,13 @@ object Main extends App {
   //    |""".trim.stripMargin
   val template =
     """
-    |{{ random [3, 4, 1, 5, 7] }}
+    |{{ markdownify '*asdf*' }}
     |""".trim.stripMargin
-  //  val ast = TemplateParser.default.parse(template)
-  val ast = TemplateParser.default.parse(readFile("bulma.min.css"))
+  val ast = TemplateParser.default.parse(template)
+  //  val ast = TemplateParser.default.parse(readFile("bulma.min.css"))
 
-//  pprint.pprintln(ast)
-//  TemplateRenderer.default.render(data, ast)
+  //  pprint.pprintln(ast)
+  TemplateRenderer.default.render(data, ast)
 
 }
 

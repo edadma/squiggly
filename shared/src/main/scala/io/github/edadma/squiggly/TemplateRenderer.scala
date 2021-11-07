@@ -84,12 +84,12 @@ class TemplateRenderer(val partials: TemplateLoader = _ => None,
                   case s: collection.Seq[_]    => s.mkString("[", ", ", "]")
                   case m: collection.Map[_, _] => m map { case (k, v) => s"$k: ${render(v)}" } mkString ("[", ", ", "]")
                   case s: String               => s""""$s""""
+                  case null | ()               => ""
                   case v                       => v.toString
                 }
 
               pout print
                 (context.eval(tag) match {
-                  case null | () => ""
                   case s: String => s
                   case v         => render(v)
                 })

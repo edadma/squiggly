@@ -1,5 +1,7 @@
 package io.github.edadma
 
+import io.github.edadma.commonmark.CommonMarkParser
+
 import scala.collection.{immutable, mutable}
 
 package object squiggly {
@@ -109,5 +111,24 @@ package object squiggly {
   //  }
 
   class ReturnException extends RuntimeException
+
+  lazy val markdownParser = new CommonMarkParser
+
+  //  def render(v: Any): String = {
+  //    def render =
+  //      v match {
+  //        case s: collection.Seq[_] => s.mkString("[", ", ", "]")
+  //        case m: collection.Map[_, _] => m map { case (k, v) => s"$k: ${render(v)}" } mkString("[", ", ", "]")
+  //        case s: String => s""""$s""""
+  //        case null | () => ""
+  //        case v => v.toString
+  //      }
+  //
+  //    (context.eval(tag) match {
+  //      case s: String => s
+  //      case v => render(v)
+  //    }
+  //
+  //  }
 
 }
