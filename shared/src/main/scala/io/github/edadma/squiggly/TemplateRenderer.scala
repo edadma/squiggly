@@ -13,7 +13,7 @@ object TemplateRenderer {
 class TemplateRenderer(val partials: TemplateLoader = _ => None,
                        val blocks: Blocks = new mutable.HashMap[String, TemplateAST],
                        val functions: Map[String, TemplateFunction] = TemplateBuiltin.functions,
-                       val data: Any = null) {
+                       val data: Map[String, Any] = Map()) {
 
   val methods: MapView[String, TemplateFunction] =
     functions.view.filter {

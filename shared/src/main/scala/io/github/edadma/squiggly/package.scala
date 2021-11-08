@@ -114,6 +114,8 @@ package object squiggly {
 
   lazy val markdownParser = new CommonMarkParser
 
+  case class BaseURL(base: String, path: String)
+
   //  def render(v: Any): String = {
   //    def render =
   //      v match {

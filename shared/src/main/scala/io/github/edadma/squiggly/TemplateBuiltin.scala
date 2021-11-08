@@ -6,6 +6,7 @@ import java.math.{MathContext, RoundingMode}
 import io.github.edadma.cross_platform._
 import io.github.edadma.datetime.{Datetime, DatetimeFormatter}
 
+import java.nio.file.Paths
 import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 import scala.language.postfixOps
@@ -33,6 +34,12 @@ object TemplateBuiltin {
       //      BuiltinFunction("anchorize", 1, {
       //        case (con, Seq(s: String)) =>
       //      }),
+      TemplateFunction("absURL", 1, {
+        case (con, Seq(arg: String)) =>
+          val BaseURL(base, path) = con.renderer.data("baseURL").asInstanceOf[BaseURL]
+
+          s"$base${Paths.get(path) resolve arg}"
+      }),
       TemplateFunction("append", 2, { case (con, Seq(e: Any, s: Seq[_])) => s :+ e }),
       // todo: https://gohugo.io/functions/base64/
       TemplateFunction("capitalize", 1, {
@@ -177,6 +184,10 @@ object TemplateBuiltin {
       // todo: https://gohugo.io/functions/querify/
       // todo: https://gohugo.io/functions/readdir/
       TemplateFunction("random", 1, { case (con, Seq(s: Seq[_])) => s(Random.nextInt(s.length)) }),
+      TemplateFunction("relURL", 1, {
+        case (con, Seq(arg: String)) =>
+          Paths.get(con.renderer.data("baseURL").asInstanceOf[BaseURL].path) resolve arg toString
+      }),
       // todo: https://gohugo.io/functions/replace/
       // todo: https://gohugo.io/functions/replaceRE/
       TemplateFunction("reverse", 1, {
