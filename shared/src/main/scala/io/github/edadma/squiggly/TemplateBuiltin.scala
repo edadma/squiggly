@@ -160,7 +160,10 @@ object TemplateBuiltin {
       TemplateFunction(
         "markdownify",
         1, {
-          case (con, Seq(s: String)) => commonmark.Util.html(markdownParser.parse(s), 2).trim
+          case (con, Seq(s: String)) =>
+            commonmark.Util
+              .html(markdownParser.parse(s), 2, link = con.renderer.data("link").asInstanceOf[String => String])
+              .trim
         }
       ),
       TemplateFunction("max", 1, { case (con, Seq(a: BigDecimal, b: BigDecimal)) => a max b }),
