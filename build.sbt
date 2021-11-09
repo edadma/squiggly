@@ -28,7 +28,7 @@ lazy val squiggly = crossProject(JSPlatform, JVMPlatform, NativePlatform)
       "io.github.edadma" %%% "cross-platform" % "0.1.1",
       "io.github.edadma" %%% "char-reader" % "0.1.7",
       "io.github.edadma" %%% "datetime" % "0.1.11",
-      "io.github.edadma" %%% "commonmark" % "0.1.0-pre.7",
+      "io.github.edadma" %%% "commonmark" % "0.1.0-pre.8",
       "io.github.edadma" %%% "emoji" % "0.1.0",
     ),
     libraryDependencies ++= Seq(
