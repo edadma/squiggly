@@ -5,6 +5,7 @@ import io.github.edadma.commonmark
 import java.math.{MathContext, RoundingMode}
 import io.github.edadma.cross_platform._
 import io.github.edadma.datetime.{Datetime, DatetimeFormatter}
+import io.github.edadma.emoji.Emoji
 
 import java.nio.file.Paths
 import scala.collection.mutable
@@ -89,6 +90,7 @@ object TemplateBuiltin {
         case (con, Seq(n: Num, s: Iterable[_])) => s dropRight n.toIntExact
         case (con, Seq(n: Num, s: String))      => s dropRight n.toIntExact
       }),
+      TemplateFunction("emojify", 1, { case (con, Seq(s: String))       => Emoji(s) }),
       TemplateFunction("fileExists", 1, { case (con, Seq(file: String)) => readableFile(file) }),
       TemplateFunction("filter", 2, {
         case (con, Seq(NonStrictExpr(expr), s: Iterable[_])) => s filter (e => con.copy(data = e).beval(expr))
