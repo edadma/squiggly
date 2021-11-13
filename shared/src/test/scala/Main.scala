@@ -1,6 +1,8 @@
 import io.github.edadma.squiggly.{TemplateParser, TemplateRenderer, platform}
 import io.github.edadma.cross_platform._
 
+import scala.collection.immutable.VectorMap
+
 object Main extends App {
 
   //  case class Task(task: String, done: Boolean)
@@ -39,7 +41,7 @@ object Main extends App {
   //      |</html>
   //      |""".trim.stripMargin
   //  val data = platform.yaml("{a: 3, b: 4}")
-  val data = null
+  val data = VectorMap("a" -> 3, "b" -> 4)
   //  val template =
   //    """
   //      |{{ define asdfx }}qwer {{ . }} zxcv{{ end }}{{ block asdf . + 2 }}default: {{ . }}{{ end }}
@@ -50,7 +52,7 @@ object Main extends App {
   //    |""".trim.stripMargin
   val template =
     """
-    |{{ markdownify '*asdf*' }}
+    |{{ .['b'] }}
     |""".trim.stripMargin
   val ast = TemplateParser.default.parse(template)
   //  val ast = TemplateParser.default.parse(readFile("bulma.min.css"))
