@@ -48,13 +48,13 @@ class TagParser(val input: ParserInput,
           | blockTag
           | matchTag
           | caseTag
+          | commentTag
           | endTag
           | withTag
           | forTag
           | elseTag
           | assignmentTag
           | returnTag
-          | commentTag
           | expression
           | ifTag
       ) ~ EOI
@@ -222,7 +222,7 @@ class TagParser(val input: ParserInput,
 
   def identnsp: Rule1[TagParserIdent] =
     rule {
-      pos ~ !("if" | "true" | "false" | "null" | "elif" | "with" | "unless" | "define" | "block" | "match" | "case" | "no" ~ "output") ~ capture(
+      pos ~ !("if" | "true" | "false" | "null" | "elsif" | "with" | "unless" | "define" | "block" | "match" | "case" | "no" ~ "output") ~ capture(
         (CharPredicate.Alpha | '_') ~ zeroOrMore(CharPredicate.AlphaNum | '_')) ~> TagParserIdent
     }
 
@@ -242,7 +242,7 @@ class TagParser(val input: ParserInput,
 
   def ifTag: Rule1[IfAST] = rule(pos ~ "if" ~ condition ~> IfAST)
 
-  def elseIfTag: Rule1[ElseIfAST] = rule(pos ~ "elif" ~ condition ~> ElseIfAST)
+  def elseIfTag: Rule1[ElseIfAST] = rule(pos ~ "elsif" ~ condition ~> ElseIfAST)
 
   def elseTag: Rule1[ElseAST] = rule(pos ~ "else" ~> ElseAST)
 
@@ -261,7 +261,7 @@ class TagParser(val input: ParserInput,
     rule(kw("for") ~ optional(forIndex) ~ pos ~ expression ~> ForAST)
 
   def commentTag: Rule1[CommentAST] =
-    rule("/*" ~ capture(zeroOrMore(!(sp ~ str("*/")) ~ ANY)) ~ sp ~ "*/" ~> CommentAST)
+    rule("//" ~ sp ~ capture(zeroOrMore(!(sp ~ EOI) ~ ANY)) ~ sp ~> CommentAST)
 
   def parseTag: TagParserAST =
     tag.run() match {

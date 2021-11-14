@@ -103,11 +103,13 @@ class BasicTests extends AnyFreeSpec with Matchers with Testing {
   }
 
   "integer literals" in {
-    test("{a: -345, b: 0, c: 345}",
-         """
+    test(
+      "{a: -345, b: 0, c: 345}",
+      """
         |
-        |ints {{ .a }} {{ .b }} {{ .c }} {{ -345 }} {{ 0 }} {{ 345 }}
-        """.trim.stripMargin) shouldBe
+        |ints {{ .a }} {{ .b }} {{ .c }} {{ // this comment should be ignored }}{{ -345 }} {{ 0 }} {{ 345 }}
+        """.trim.stripMargin
+    ) shouldBe
       """
         |
         |ints -345 0 345 -345 0 345
