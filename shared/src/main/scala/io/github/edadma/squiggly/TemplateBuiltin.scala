@@ -136,6 +136,10 @@ object TemplateBuiltin {
         case (con, Seq(s1: Seq[Any], s2: Seq[Any])) =>
           (s1 to mutable.LinkedHashSet) intersect (s2 to mutable.LinkedHashSet) toList
       }),
+      TemplateFunction("isEmpty", 1, {
+        case (con, Seq(s: String))      => s.isEmpty
+        case (con, Seq(s: Iterable[_])) => s.isEmpty
+      }),
       TemplateFunction(
         "join",
         1, {
@@ -171,6 +175,10 @@ object TemplateBuiltin {
       TemplateFunction("max", 1, { case (con, Seq(a: BigDecimal, b: BigDecimal)) => a max b }),
       // todo: https://gohugo.io/functions/merge/
       TemplateFunction("min", 1, { case (con, Seq(a: BigDecimal, b: BigDecimal)) => a min b }),
+      TemplateFunction("nonEmpty", 1, {
+        case (con, Seq(s: String))      => s.nonEmpty
+        case (con, Seq(s: Iterable[_])) => s.nonEmpty
+      }),
       TemplateFunction("now", 0, _ => Datetime.now().timestamp),
       TemplateFunction("newline_to_br", 1, { case (con, Seq(s: String)) => s.replace("\n", "<br />\n") }),
       TemplateFunction("number", 1, { case (con, Seq(s: String))        => BigDecimal(s) }),
