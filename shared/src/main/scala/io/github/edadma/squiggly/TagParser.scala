@@ -222,7 +222,7 @@ class TagParser(val input: ParserInput,
 
   def identnsp: Rule1[TagParserIdent] =
     rule {
-      pos ~ !("if" | "true" | "false" | "null" | "elsif" | "with" | "unless" | "define" | "block" | "match" | "case" | "no" ~ "output") ~ capture(
+      pos ~ !("if" | "true" | "false" | "null" | "elsif" | "with" | "define" | "block" | "match" | "case" | "no" ~ "output") ~ capture(
         (CharPredicate.Alpha | '_') ~ zeroOrMore(CharPredicate.AlphaNum | '_')) ~> TagParserIdent
     }
 
