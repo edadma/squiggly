@@ -34,14 +34,13 @@ class TagParser(val input: ParserInput,
   val delimiters = "[](){}`'\""
   val delimiter: CharPredicate = CharPredicate(delimiters)
 
-  implicit def wsStr(s: String): Rule0 = {
+  implicit def wsStr(s: String): Rule0 =
     if (delimiters.exists(_.toString == s))
       rule(str(s) ~ sp)
     else if (s.forall(!_.isLetterOrDigit))
       rule(str(s) ~ !(CharPredicate.Visible -- CharPredicate.AlphaNum -- delimiter) ~ sp)
     else
       rule(str(s) ~ !CharPredicate.AlphaNum ~ sp)
-  }
 
   def kwcapture(s: String): Rule1[String] =
     rule(quiet(capture(str(s) ~ !CharPredicate.AlphaNum ~ sp) ~> ((s: String) => s.trim)))
