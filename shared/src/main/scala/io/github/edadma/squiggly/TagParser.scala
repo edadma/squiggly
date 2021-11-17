@@ -31,7 +31,7 @@ class TagParser(val input: ParserInput,
     override def toString: String = pos.toString
   }
 
-  val delimiters = "[](){}`'\""
+  val delimiters = "[](){}`'\","
   val delimiter: CharPredicate = CharPredicate(delimiters)
 
   implicit def wsStr(s: String): Rule0 =
