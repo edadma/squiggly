@@ -98,7 +98,7 @@ class MatchTests extends AnyFreeSpec with Matchers with Testing {
   "match 8" in {
     test("5",
          """
-          |[{{ match . }}{{ case 3 }}three{{ case4 }}four{{ end }}]
+          |[{{ match . }}{{ case 3 }}three{{ case 4 }}four{{ end }}]
           """.trim.stripMargin) shouldBe
       """
         |[]

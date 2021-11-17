@@ -31,12 +31,14 @@ class TagParser(val input: ParserInput,
     override def toString: String = pos.toString
   }
 
-  implicit def wsStr(s: String): Rule0 = rule(str(s) ~ sp)
+  implicit def wsStr(s: String): Rule0 =
+    if (s.forall(!_.isLetterOrDigit))
+      rule(str(s) ~ sp)
+    else
+      rule(str(s) ~ !CharPredicate.AlphaNum ~ sp)
 
   def kwcapture(s: String): Rule1[String] =
     rule(quiet(capture(str(s) ~ !CharPredicate.AlphaNum ~ sp) ~> ((s: String) => s.trim)))
-
-  def kw(s: String): Rule0 = rule(quiet(str(s) ~ !CharPredicate.AlphaNum ~ sp))
 
   def sym(s: String): Rule1[String] = rule(quiet(capture(s) ~> ((s: String) => s.trim)))
 
@@ -258,7 +260,7 @@ class TagParser(val input: ParserInput,
     rule(ident ~ optional("," ~ ident) ~ "<-" ~> Tuple2[TagParserIdent, Option[TagParserIdent]] _)
 
   def forTag: Rule1[ForAST] =
-    rule(kw("for") ~ optional(forIndex) ~ pos ~ expression ~> ForAST)
+    rule("for" ~ optional(forIndex) ~ pos ~ expression ~> ForAST)
 
   def commentTag: Rule1[CommentAST] =
     rule("//" ~ sp ~ capture(zeroOrMore(!(sp ~ EOI) ~ ANY)) ~ sp ~> CommentAST)
