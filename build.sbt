@@ -1,12 +1,12 @@
 ThisBuild / licenses += "ISC" -> url("https://opensource.org/licenses/ISC")
 ThisBuild / versionScheme := Some("semver-spec")
 
-lazy val squiggly = crossProject(JSPlatform, JVMPlatform, NativePlatform)
+lazy val squiggly = crossProject(/*JSPlatform,*/ JVMPlatform/*, NativePlatform*/)
   .in(file("."))
   .settings(
     name := "squiggly",
     version := "0.1.16-pre.21",
-    scalaVersion := "2.13.6",
+    scalaVersion := "2.13.8",
     scalacOptions ++=
       Seq(
         "-deprecation",
@@ -23,7 +23,7 @@ lazy val squiggly = crossProject(JSPlatform, JVMPlatform, NativePlatform)
     githubRepository := name.value,
     resolvers += Resolver.githubPackages("edadma"),
     mainClass := Some(s"${organization.value}.${name.value}.Main"),
-    libraryDependencies += "org.scalatest" %%% "scalatest" % "3.2.10" % "test",
+    libraryDependencies += "org.scalatest" %%% "scalatest" % "3.2.12" % "test",
     libraryDependencies ++= Seq(
       "io.github.edadma" %%% "cross-platform" % "0.1.1",
       "io.github.edadma" %%% "char-reader" % "0.1.7",
