@@ -1,7 +1,7 @@
 ThisBuild / licenses += "ISC" -> url("https://opensource.org/licenses/ISC")
 ThisBuild / versionScheme := Some("semver-spec")
 
-lazy val squiggly = crossProject(JSPlatform, JVMPlatform, NativePlatform)
+lazy val squiggly = crossProject( /*JSPlatform,*/ JVMPlatform /*, NativePlatform*/ )
   .in(file("."))
   .settings(
     name := "squiggly",
@@ -34,21 +34,21 @@ lazy val squiggly = crossProject(JSPlatform, JVMPlatform, NativePlatform)
     libraryDependencies ++= Seq(
       "com.github.scopt" %%% "scopt" % "4.0.1",
       "com.lihaoyi" %%% "pprint" % "0.7.3" % "test",
-      "org.parboiled" %%% "parboiled" % "2.3.0",
+      "org.parboiled" %%% "parboiled" % "2.4.0",
     ),
     publishMavenStyle := true,
     Test / publishArtifact := false,
     licenses += "ISC" -> url("https://opensource.org/licenses/ISC")
   )
   .jvmSettings(
-    libraryDependencies += "org.scala-js" %% "scalajs-stubs" % "1.0.0" % "provided",
+    libraryDependencies += "org.scala-js" %% "scalajs-stubs" % "1.1.0" % "provided",
     libraryDependencies += "io.github.edadma" %% "yaml" % "0.1.11"
   )
-  .nativeSettings(
+/*.nativeSettings(
     nativeLinkStubs := true,
     libraryDependencies += "io.github.edadma" %%% "libyaml" % "0.1.8"
-  )
-  .jsSettings(
+  )*/
+/*.jsSettings(
     jsEnv := new org.scalajs.jsenv.nodejs.NodeJSEnv(),
     //    Test / scalaJSUseMainModuleInitializer := true,
     //    Test / scalaJSUseTestModuleInitializer := false,
@@ -56,4 +56,4 @@ lazy val squiggly = crossProject(JSPlatform, JVMPlatform, NativePlatform)
     Test / scalaJSUseTestModuleInitializer := true,
     scalaJSUseMainModuleInitializer := true,
     libraryDependencies += "io.github.edadma" %%% "yaml" % "0.1.11"
-  )
+  )*/
