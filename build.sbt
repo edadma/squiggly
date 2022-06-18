@@ -5,8 +5,8 @@ lazy val squiggly = crossProject(JSPlatform, JVMPlatform, NativePlatform)
   .in(file("."))
   .settings(
     name := "squiggly",
-    version := "0.1.16-pre.21",
-    scalaVersion := "2.13.6",
+    version := "0.1.16-pre.22",
+    scalaVersion := "2.13.8",
     scalacOptions ++=
       Seq(
         "-deprecation",
@@ -23,17 +23,17 @@ lazy val squiggly = crossProject(JSPlatform, JVMPlatform, NativePlatform)
     githubRepository := name.value,
     resolvers += Resolver.githubPackages("edadma"),
     mainClass := Some(s"${organization.value}.${name.value}.Main"),
-    libraryDependencies += "org.scalatest" %%% "scalatest" % "3.2.10" % "test",
+    libraryDependencies += "org.scalatest" %%% "scalatest" % "3.2.12" % "test",
     libraryDependencies ++= Seq(
       "io.github.edadma" %%% "cross-platform" % "0.1.1",
       "io.github.edadma" %%% "char-reader" % "0.1.7",
       "io.github.edadma" %%% "datetime" % "0.1.11",
-      "io.github.edadma" %%% "commonmark" % "0.1.0-pre.19",
+      "io.github.edadma" %%% "commonmark" % "0.1.0-pre.20",
       "io.github.edadma" %%% "emoji" % "0.1.0",
     ),
     libraryDependencies ++= Seq(
       "com.github.scopt" %%% "scopt" % "4.0.1",
-      "com.lihaoyi" %%% "pprint" % "0.6.6" % "test",
+      "com.lihaoyi" %%% "pprint" % "0.7.3" % "test",
       "org.parboiled" %%% "parboiled" % "2.3.0",
     ),
     publishMavenStyle := true,
