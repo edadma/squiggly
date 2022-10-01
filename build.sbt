@@ -18,7 +18,7 @@ lazy val squiggly = crossProject( /*JSPlatform,*/ JVMPlatform /*, NativePlatform
         "-language:implicitConversions",
         "-language:existentials",
         "-language:dynamics",
-        "-Xasync"
+        "-Xasync",
       ),
     organization := "io.github.edadma",
     githubOwner := "edadma",
@@ -27,25 +27,25 @@ lazy val squiggly = crossProject( /*JSPlatform,*/ JVMPlatform /*, NativePlatform
     mainClass := Some(s"${organization.value}.${name.value}.Main"),
     libraryDependencies += "org.scalatest" %%% "scalatest" % "3.2.12" % "test",
     libraryDependencies ++= Seq(
-      "io.github.edadma" %%% "cross-platform" % "0.1.1",
-      "io.github.edadma" %%% "char-reader" % "0.1.7",
-      "io.github.edadma" %%% "datetime" % "0.1.11",
+      "io.github.edadma" %%% "cross-platform" % "0.1.5",
+      "io.github.edadma" %%% "char-reader" % "0.1.11",
+      "io.github.edadma" %%% "datetime" % "0.1.17",
 //      "io.github.edadma" %%% "commonmark" % "0.1.0-pre.20",
-      "io.github.edadma" %%% "emoji" % "0.1.0",
+      "io.github.edadma" %%% "emoji" % "0.1.1",
     ),
     libraryDependencies ++= Seq(
       "com.github.scopt" %%% "scopt" % "4.0.1",
       "com.lihaoyi" %%% "pprint" % "0.7.3" % "test",
-      "org.scala-lang.modules" %%% "scala-parser-combinators" % "2.1.1"
-      //"org.parboiled" %%% "parboiled" % "2.4.0",
+      "org.scala-lang.modules" %%% "scala-parser-combinators" % "2.1.1",
+      // "org.parboiled" %%% "parboiled" % "2.4.0",
     ),
     publishMavenStyle := true,
     Test / publishArtifact := false,
-    licenses += "ISC" -> url("https://opensource.org/licenses/ISC")
+    licenses += "ISC" -> url("https://opensource.org/licenses/ISC"),
   )
   .jvmSettings(
     libraryDependencies += "org.scala-js" %% "scalajs-stubs" % "1.1.0" % "provided",
-    libraryDependencies += "io.github.edadma" %% "yaml" % "0.1.11"
+    libraryDependencies += "io.github.edadma" %% "yaml" % "0.1.12",
   )
 /*.nativeSettings(
     nativeLinkStubs := true,

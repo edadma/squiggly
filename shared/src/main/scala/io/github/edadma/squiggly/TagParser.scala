@@ -7,10 +7,7 @@ import scala.util.parsing.input.CharSequenceReader
 
 object TagParser extends StandardTokenParsers with PackratParsers with ImplicitConversions:
 
-  import AST.*
-  import Expr.*
-
-  override val lexical = new FormulaLexer
+  override val lexical = new TagLexer
 
   def parseExpr(input: String): Expr =
     phrase(expression)(new lexical.Scanner(new PackratReader(new CharSequenceReader(input)))) match {
