@@ -36,7 +36,8 @@ lazy val squiggly = crossProject( /*JSPlatform,*/ JVMPlatform /*, NativePlatform
     libraryDependencies ++= Seq(
       "com.github.scopt" %%% "scopt" % "4.0.1",
       "com.lihaoyi" %%% "pprint" % "0.7.3" % "test",
-      "org.parboiled" %%% "parboiled" % "2.4.0",
+      "org.scala-lang.modules" %%% "scala-parser-combinators" % "2.1.1"
+      //"org.parboiled" %%% "parboiled" % "2.4.0",
     ),
     publishMavenStyle := true,
     Test / publishArtifact := false,
