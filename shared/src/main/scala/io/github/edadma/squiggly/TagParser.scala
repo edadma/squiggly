@@ -18,15 +18,15 @@ object TagParser extends StandardTokenParsers with PackratParsers with ImplicitC
     }
 
   lexical.reserved ++= ("""
-      |const
-      |def
-      |var
-      |mod
+      |if
+      |then
+      |else
+      |div
       |and
       |or
       |not
       |""".trim.stripMargin split "\\s+")
-  lexical.delimiters ++= ("+ - * / ^ % ( ) , < <= > >= ? : == != =" split ' ')
+  lexical.delimiters ++= ("+ - * / ^ % ( ) [ ] { } ` | . , < <= > >= == != =" split ' ')
 
   type P[+T] = PackratParser[T]
 
