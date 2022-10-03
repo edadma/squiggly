@@ -11,17 +11,21 @@ object TemplateParser {
 
 }
 
-class TemplateParser(startDelim: String = "{{",
-                     endDelim: String = "}}",
-                     functions: Map[String, TemplateFunction] = TemplateBuiltin.functions,
-                     namespaces: Map[String, Map[String, TemplateFunction]] = TemplateBuiltin.namespaces) {
+class TemplateParser(
+    startDelim: String = "{{",
+    endDelim: String = "}}",
+    functions: Map[String, TemplateFunction] = TemplateBuiltin.functions,
+    namespaces: Map[String, Map[String, TemplateFunction]] = TemplateBuiltin.namespaces,
+) {
 
   def parse(input: String): TemplateAST = {
-    def parse(ts: LazyList[Token],
-              parsingbody: Boolean,
-              allowelse: Boolean,
-              tokbuf: ListBuffer[Token] = new ListBuffer,
-              astbuf: ListBuffer[TemplateAST] = new ListBuffer): (TemplateAST, LazyList[Token]) = {
+    def parse(
+        ts: LazyList[Token],
+        parsingbody: Boolean,
+        allowelse: Boolean,
+        tokbuf: ListBuffer[Token] = new ListBuffer,
+        astbuf: ListBuffer[TemplateAST] = new ListBuffer,
+    ): (TemplateAST, LazyList[Token]) = {
       def endOfBlock: TemplateAST = {
         if (tokbuf.nonEmpty)
           astbuf += ContentAST(tokbuf.toList)
@@ -180,9 +184,11 @@ class TemplateParser(startDelim: String = "{{",
     }
 
   @tailrec
-  final def token(r: CharReader,
-                  start: CharReader,
-                  buf: StringBuilder = new StringBuilder): Option[(Token, CharReader)] = {
+  final def token(
+      r: CharReader,
+      start: CharReader,
+      buf: StringBuilder = new StringBuilder,
+  ): Option[(Token, CharReader)] = {
     def text(r: CharReader): (Token, CharReader) =
       (if (buf.last.isWhitespace) SpaceToken(start, buf.toString) else TextToken(start, buf.toString), r)
 

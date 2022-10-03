@@ -1,5 +1,7 @@
 package io.github.edadma.squiggly
 
+import io.github.edadma.char_reader.CharReader
+
 import scala.util.parsing.combinator.{ImplicitConversions, PackratParsers}
 import scala.util.parsing.combinator.lexical.StdLexical
 import scala.util.parsing.combinator.syntactical.StandardTokenParsers
@@ -9,16 +11,10 @@ object TagParser extends StandardTokenParsers with PackratParsers with ImplicitC
 
   override val lexical = new TagLexer
 
-  def parseExpr(input: String): Expr =
+  def parseTag(input: String, startpos: CharReader, startoffset: Int): Expr =
     phrase(expression)(new lexical.Scanner(new PackratReader(new CharSequenceReader(input)))) match {
       case Success(ast, _) => ast
       case e: NoSuccess    => sys.error(s"parse error: $e")
-    }
-
-  def parseFormulae(input: String): Seq[Decl] =
-    phrase(formulae)(new lexical.Scanner(new PackratReader(new CharSequenceReader(input)))) match {
-      case Success(decls, _) => decls
-      case e: NoSuccess      => sys.error(s"parse error: $e")
     }
 
   lexical.reserved ++= ("""
