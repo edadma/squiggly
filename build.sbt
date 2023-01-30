@@ -8,7 +8,7 @@ lazy val squiggly = crossProject( /*JSPlatform,*/ JVMPlatform /*, NativePlatform
   .settings(
     name := "squiggly",
     version := "0.1.16",
-    scalaVersion := "3.2.0",
+    scalaVersion := "3.2.2",
     scalacOptions ++=
       Seq(
         "-deprecation",
@@ -18,7 +18,6 @@ lazy val squiggly = crossProject( /*JSPlatform,*/ JVMPlatform /*, NativePlatform
         "-language:implicitConversions",
         "-language:existentials",
         "-language:dynamics",
-        "-Xasync",
       ),
     organization := "io.github.edadma",
     githubOwner := "edadma",
