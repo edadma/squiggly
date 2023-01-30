@@ -26,7 +26,7 @@ Curly braces or brackets are sometimes referred to as squiggly brackets, which i
 To use the library in your application, include the following in your `project/plugins.sbt`:
 
 ```sbt
-addSbtPlugin("com.codecommit" % "sbt-github-packages" % "0.5.2")
+addSbtPlugin("com.codecommit" % "sbt-github-packages" % "0.5.3")
 
 ```
 
@@ -58,7 +58,7 @@ chmod a+x path/to/squiggly
 then copy it to your `/usr/bin` folder
 
 ```shell
-sudo cp path/to/scamplate /usr/bin
+sudo cp path/to/squiggly /usr/bin
 ```
 
 ## Basic use
