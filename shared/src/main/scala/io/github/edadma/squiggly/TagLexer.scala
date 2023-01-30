@@ -5,7 +5,6 @@ import scala.util.parsing.combinator.lexical.StdLexical
 import scala.util.parsing.input.CharSequenceReader.EofCh
 
 class TagLexer extends StdLexical:
-
   private def digits = rep1(digit) ^^ (_.mkString)
 
   private def exponent = (elem('e') | 'E') ~ opt(elem('+') | '-') ~ digits ^^ {

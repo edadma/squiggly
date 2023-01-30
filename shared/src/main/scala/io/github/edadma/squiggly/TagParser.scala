@@ -8,7 +8,6 @@ import scala.util.parsing.combinator.syntactical.StandardTokenParsers
 import scala.util.parsing.input.CharSequenceReader
 
 object TagParser extends StandardTokenParsers with PackratParsers with ImplicitConversions:
-
   override val lexical = new TagLexer
 
   def parseTag(input: String, startpos: CharReader, startoffset: Int): Expr =
@@ -25,6 +24,19 @@ object TagParser extends StandardTokenParsers with PackratParsers with ImplicitC
       |and
       |or
       |not
+      |mod
+      |define
+      |block
+      |return
+      |elsif
+      |end
+      |match
+      |case
+      |with
+      |for
+      |true
+      |false
+      |null
       |""".trim.stripMargin split "\\s+")
   lexical.delimiters ++= ("+ - * / ^ % ( ) [ ] { } ` | . , < <= > >= == != =" split ' ')
 
