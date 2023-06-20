@@ -30,10 +30,9 @@ case class SeqExpr(elems: Seq[ExprAST]) extends ExprAST
 
 case class PrefixExpr(op: String, expr: ExprAST) extends ExprAST
 
-case class LeftInfixExpr(left: ExprAST, right: Seq[(String, ExprAST)]) extends ExprAST
+case class LeftInfixExpr(left: ExprAST, op: String, right: ExprAST) extends ExprAST
 
-case class RightInfixExpr(lpos: TagParser#Position, left: ExprAST, op: String, rpos: TagParser#Position, right: ExprAST)
-    extends ExprAST
+case class RightInfixExpr(left: ExprAST, op: String, right: ExprAST) extends ExprAST
 
 case class ApplyExpr(name: TagParserIdent, args: Seq[ExprAST]) extends ExprAST
 
@@ -43,8 +42,7 @@ case class OrExpr(left: ExprAST, right: ExprAST) extends ExprAST
 
 case class AndExpr(left: ExprAST, right: ExprAST) extends ExprAST
 
-case class CompareExpr(lpos: TagParser#Position, left: ExprAST, right: Seq[(String, TagParser#Position, ExprAST)])
-    extends ExprAST
+case class CompareExpr(left: ExprAST, right: Seq[(String, ExprAST)]) extends ExprAST
 
 case class MethodExpr(expr: ExprAST, method: TagParserIdent) extends ExprAST
 

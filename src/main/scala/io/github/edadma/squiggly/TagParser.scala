@@ -38,7 +38,7 @@ object TagParser extends StandardTokenParsers with PackratParsers with ImplicitC
       |false
       |null
       |""".trim.stripMargin split "\\s+")
-  lexical.delimiters ++= ("+ - * / ^ % ( ) [ ] { } ` | . , < <= > >= == != =" split ' ')
+  lexical.delimiters ++= ("+ - * / ^ % ( ) [ ] { } ` | . , < <= > >= != =" split ' ')
 
   type P[+T] = PackratParser[T]
 
@@ -57,17 +57,22 @@ object TagParser extends StandardTokenParsers with PackratParsers with ImplicitC
   )
 
   lazy val conjunctive: P[ExprAST] = positioned(
-    conjunctive ~ ("and" ~> relational) ^^ AndExpr.apply
+    conjunctive ~ ("and" ~> complement) ^^ AndExpr.apply
+      | complement,
+  )
+
+  lazy val complement: P[ExprAST] = positioned(
+    "not" ~ relational ^^ PrefixExpr.apply
       | relational,
   )
 
   lazy val relational: P[ExprAST] = positioned(
-    additive ~ ("<" | ">" | "<=" | ">=" | "==" | "!=") ~ additive ^^ Binary.apply
-      | additive,
+    pipe ~ rep1("<" | ">" | "<=" | ">=" | "=" | "!=") ~ pipe ^^ Tuple2.apply) ^^ CompareExpr.apply
+      | pipe,
   )
 
-  lazy val additive: P[Expr] = positioned(
-    additive ~ ("+" | "-") ~ multiplicative ^^ Binary.apply
+  lazy val additive: P[ExprAST] = positioned(
+    additive ~ ("+" | "-") ~ multiplicative ^^ LeftInfixExpr.apply
       | multiplicative,
   )
 
