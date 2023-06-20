@@ -67,14 +67,18 @@ object TagParser extends StandardTokenParsers with PackratParsers with ImplicitC
   )
 
   lazy val relational: P[ExprAST] = positioned(
-    pipe ~ rep1("<" | ">" | "<=" | ">=" | "=" | "!=" | "div") ~ pipe ^^ Tuple2.apply) ^^ CompareExpr.apply
-      | pipe,
+    pipe ~ rep1(("<" | ">" | "<=" | ">=" | "=" | "!=" | "div") ~ pipe ^^ Tuple2.apply) ^^ CompareExpr.apply
+      | pipe
   )
 
   lazy val pipe: P[ExprAST] = positioned(
     applicative ~ ("|" ~> (apply | ident ^^ (n => ApplyExpr(n, Nil)))) ^^ PipeExpr.apply
 
   lazy val applicative: P[ExprAST] = apply | additive
+
+
+  def apply: Rule1[ApplyExpr] =
+    rule(identnsp ~ test(cursorChar != '.' && cursorChar != '[') ~ sp ~ oneOrMore(additive) ~> ApplyExpr)
 
   lazy val additive: P[ExprAST] = positioned(
     additive ~ ("++" | "+" | "-") ~ multiplicative ^^ LeftInfixExpr.apply
@@ -103,7 +107,9 @@ object TagParser extends StandardTokenParsers with PackratParsers with ImplicitC
   )
 
   lazy val primary: P[Expr] = positioned(
-    ident ^^ Name.apply
+    "true" ^^^ BooleanExpr(true)
+      |"fasle" ^^^ BooleanExpr(false)
+    | ident ^^ Name.apply
       | numericLit ^^ NumericLit.apply
       | stringLit ^^ StringLit.apply
       | "(" ~> expression <~ ")",
