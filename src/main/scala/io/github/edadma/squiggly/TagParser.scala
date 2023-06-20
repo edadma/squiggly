@@ -67,9 +67,14 @@ object TagParser extends StandardTokenParsers with PackratParsers with ImplicitC
   )
 
   lazy val relational: P[ExprAST] = positioned(
-    pipe ~ rep1("<" | ">" | "<=" | ">=" | "=" | "!=") ~ pipe ^^ Tuple2.apply) ^^ CompareExpr.apply
+    pipe ~ rep1("<" | ">" | "<=" | ">=" | "=" | "!=" | "div") ~ pipe ^^ Tuple2.apply) ^^ CompareExpr.apply
       | pipe,
   )
+
+  lazy val pipe: P[ExprAST] = positioned(
+    applicative ~ ("|" ~> (apply | ident ^^ (n => ApplyExpr(n, Nil)))) ^^ PipeExpr.apply
+
+  lazy val applicative: P[ExprAST] = apply | additive
 
   lazy val additive: P[ExprAST] = positioned(
     additive ~ ("+" | "-") ~ multiplicative ^^ LeftInfixExpr.apply
