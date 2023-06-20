@@ -10,30 +10,27 @@ trait Positioned {
   val pos: TagParser#Position
 }
 
-trait ExprAST extends TagParserAST
+trait ExprAST extends TagParserAST with Positional
 
-trait SimpleExpr extends ExprAST with Positional
+case class StringExpr(s: String) extends ExprAST
 
-case class StringExpr(s: String) extends SimpleExpr
+case class NumberExpr(n: BigDecimal) extends ExprAST
 
-case class NumberExpr(n: BigDecimal) extends SimpleExpr
+case class BooleanExpr(b: Boolean) extends ExprAST
 
-case class BooleanExpr(b: Boolean) extends SimpleExpr
+case class NullExpr() extends ExprAST
 
-case class NullExpr(pos: TagParser#Position) extends SimpleExpr
+case class VarExpr(user: String, name: TagParserIdent) extends ExprAST
 
-case class VarExpr(user: String, name: TagParserIdent) extends SimpleExpr
+case class ElementExpr(global: String, ids: Seq[TagParserIdent]) extends ExprAST
 
-case class ElementExpr(global: String, ids: Seq[TagParserIdent]) extends SimpleExpr
-
-case class MapExpr(pairs: Seq[(TagParserIdent, TagParser#Position, ExprAST)]) extends ExprAST
+case class MapExpr(pairs: Seq[(TagParserIdent, ExprAST)]) extends ExprAST
 
 case class SeqExpr(elems: Seq[ExprAST]) extends ExprAST
 
 case class PrefixExpr(op: String, expr: ExprAST) extends ExprAST
 
-case class LeftInfixExpr(lpos: TagParser#Position, left: ExprAST, right: Seq[(String, TagParser#Position, ExprAST)])
-    extends ExprAST
+case class LeftInfixExpr(left: ExprAST, right: Seq[(String, ExprAST)]) extends ExprAST
 
 case class RightInfixExpr(lpos: TagParser#Position, left: ExprAST, op: String, rpos: TagParser#Position, right: ExprAST)
     extends ExprAST

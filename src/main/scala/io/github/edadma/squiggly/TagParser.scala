@@ -42,37 +42,26 @@ object TagParser extends StandardTokenParsers with PackratParsers with ImplicitC
 
   type P[+T] = PackratParser[T]
 
-  lazy val formulae: P[Seq[Decl]] = rep1(declaration)
-
-  lazy val declaration: P[Decl] = positioned(
-    "def" ~> ident ~ ("=" ~> expression) ^^ Formula.apply
-      | "const" ~> ident ~ "=" ~ expression ^^ {
-        case n ~ _ ~ NumericLit(v) => Val(n, v.toDouble)
-        case n ~ _ ~ StringLit(v)  => Val(n, v)
-        case n ~ _ ~ e             => Const(n, e, null)
-      }
-      | "def" ~> ident ~ ("(" ~> rep1sep(ident, ",") <~ ")") ~ ("=" ~> expression) ^^ Def.apply
-      | "var" ~> ident ~ opt("=" ~> expression) ^^ { case n ~ e => Var(n, e.orNull, null) },
-  )
-
   lazy val expression: P[Expr] = ternary
 
-  lazy val ternary: P[Expr] = positioned(
-    disjunctive ~ ("?" ~> disjunctive) ~ (":" ~> ternary) ^^ Ternary.apply
+  lazy val conditional: P[ExprAST] = positioned(
+    ("if" ~> condition <~ "then") ~ conditional ~ opt("else" ~> conditional) ^^ ConditionalAST.apply
       | disjunctive,
   )
 
-  lazy val disjunctive: P[Expr] = positioned(
-    disjunctive ~ "or" ~ conjunctive ^^ Binary.apply
+  lazy val condition: P[ExprAST] = disjunctive
+
+  lazy val disjunctive: P[ExprAST] = positioned(
+    disjunctive ~ ("or" ~> conjunctive) ^^ OrExpr.apply
       | conjunctive,
   )
 
-  lazy val conjunctive: P[Expr] = positioned(
-    conjunctive ~ "and" ~ relational ^^ Binary.apply
+  lazy val conjunctive: P[ExprAST] = positioned(
+    conjunctive ~ ("and" ~> relational) ^^ AndExpr.apply
       | relational,
   )
 
-  lazy val relational: P[Expr] = positioned(
+  lazy val relational: P[ExprAST] = positioned(
     additive ~ ("<" | ">" | "<=" | ">=" | "==" | "!=") ~ additive ^^ Binary.apply
       | additive,
   )
