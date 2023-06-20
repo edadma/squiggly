@@ -38,7 +38,7 @@ object TagParser extends StandardTokenParsers with PackratParsers with ImplicitC
       |false
       |null
       |""".trim.stripMargin split "\\s+")
-  lexical.delimiters ++= ("+ - * / ^ % ( ) [ ] { } ` | . , < <= > >= != =" split ' ')
+  lexical.delimiters ++= ("+ ++ - * / \\ ^ % ( ) [ ] { } ` | . , < <= > >= != =" split ' ')
 
   type P[+T] = PackratParser[T]
 
@@ -77,32 +77,28 @@ object TagParser extends StandardTokenParsers with PackratParsers with ImplicitC
   lazy val applicative: P[ExprAST] = apply | additive
 
   lazy val additive: P[ExprAST] = positioned(
-    additive ~ ("+" | "-") ~ multiplicative ^^ LeftInfixExpr.apply
+    additive ~ ("++" | "+" | "-") ~ multiplicative ^^ LeftInfixExpr.apply
       | multiplicative,
   )
 
   lazy val multiplicative: P[Expr] = positioned(
-    multiplicative ~ ("*" | "/" | "mod") ~ prefix ^^ Binary.apply
-      | prefix,
+    multiplicative ~ ("*" | "/" | "\\" | "mod") ~ negative ^^ LeftInfixExpr.apply
+      | negative,
   )
 
-  lazy val prefix: P[Expr] = positioned(
-    ("not" | "-") ~ prefix ^^ Unary.apply
+  lazy val negative: P[Expr] = positioned(
+    "-" ~ negative ^^ PrefixExpr.apply
       | exponentiation,
   )
 
   lazy val exponentiation: P[Expr] = positioned(
-    postfix ~ "^" ~ prefix ^^ Binary.apply
-      | postfix,
+    index ~ "^" ~ negative ^^ Binary.apply
+      | index,
   )
 
-  lazy val postfix: P[Expr] = positioned(
-    applicative <~ "%" ^^ (e => Unary("%", e))
-      | applicative,
-  )
-
-  lazy val applicative: P[Expr] = positioned(
-    ident ~ ("(" ~> repsep(expression, ",") <~ ")") ^^ Apply.apply
+  lazy val index: P[Expr] = positioned(
+    primary ~ "[" ~ expression ~ "]" ~> IndexExpr
+      | primary ~ "." ~ ident ~> MethodExpr
       | primary,
   )
 

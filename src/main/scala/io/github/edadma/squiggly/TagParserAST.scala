@@ -44,7 +44,7 @@ case class AndExpr(left: ExprAST, right: ExprAST) extends ExprAST
 
 case class CompareExpr(left: ExprAST, right: Seq[(String, ExprAST)]) extends ExprAST
 
-case class MethodExpr(expr: ExprAST, method: TagParserIdent) extends ExprAST
+case class MethodExpr(expr: ExprAST, method: String) extends ExprAST
 
 case class IndexExpr(expr: ExprAST, index: ExprAST) extends ExprAST
 
