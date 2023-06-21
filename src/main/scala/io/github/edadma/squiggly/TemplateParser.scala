@@ -78,16 +78,16 @@ class TemplateParser(
         case TagToken(pos, _: ElseAST, _, _) #:: t =>
           if (parsingbody && allowelse) (BlockWithElseAST(endOfBlock), t)
           else pos.error("unexpected 'else' tag")
-        case TagToken(pos, ElseIfAST(_, cond), _, _) #:: t =>
+        case TagToken(pos, ElseIfAST(cond), _, _) #:: t =>
           if (parsingbody && allowelse) (BlockWithElseIfAST(endOfBlock, cond), t)
           else pos.error("unexpected 'else if' tag")
-        case TagToken(pos, CaseAST(_, expr), _, _) #:: t =>
+        case TagToken(pos, CaseAST(expr), _, _) #:: t =>
           if (parsingbody && allowelse) (BlockWithCaseAST(endOfBlock, expr), t)
           else pos.error("unexpected 'case' tag")
         case TagToken(pos, _: EndAST, _, _) #:: t =>
           if (parsingbody) (endOfBlock, t)
           else pos.error("unexpected 'end' tag")
-        case TagToken(pos, IfAST(_, cond), _, _) #:: t =>
+        case TagToken(pos, IfAST(cond), _, _) #:: t =>
           if (tokbuf.nonEmpty) {
             astbuf += ContentAST(tokbuf.toList)
             tokbuf.clear()
@@ -127,7 +127,7 @@ class TemplateParser(
 
           astbuf += IfBlockAST(cond, next, elseifbuf.toSeq, els)
           parse(rest, parsingbody, allowelse, tokbuf, astbuf)
-        case TagToken(pos, MatchAST(_, cond), _, _) #:: t =>
+        case TagToken(pos, MatchAST(cond), _, _) #:: t =>
           if (tokbuf.nonEmpty) {
             astbuf += ContentAST(tokbuf.toList)
             tokbuf.clear()

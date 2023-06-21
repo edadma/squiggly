@@ -10,14 +10,16 @@ object TemplateRenderer {
 
 }
 
-class TemplateRenderer(val partials: TemplateLoader = _ => None,
-                       val blocks: Blocks = new mutable.HashMap[String, TemplateAST],
-                       val functions: Map[String, TemplateFunction] = TemplateBuiltin.functions,
-                       val data: Map[String, Any] = Map()) {
+class TemplateRenderer(
+    val partials: TemplateLoader = _ => None,
+    val blocks: Blocks = new mutable.HashMap[String, TemplateAST],
+    val functions: Map[String, TemplateFunction] = TemplateBuiltin.functions,
+    val data: Map[String, Any] = Map(),
+) {
 
   val methods: MapView[String, TemplateFunction] =
-    functions.view.filter {
-      case (_, TemplateFunction(_, arity, _)) => arity == 1
+    functions.view.filter { case (_, TemplateFunction(_, arity, _)) =>
+      arity == 1
     }
 
   def render(globalData: Any, ast: TemplateAST, out: OutputStream = Console.out): Any = {
@@ -38,7 +40,7 @@ class TemplateRenderer(val partials: TemplateLoader = _ => None,
         case DefineBlockAST(TagParserIdent(pos, name), body) => blocks(name) = body
         case BlockBlockAST(TagParserIdent(pos, name), body, expr) =>
           render(context.copy(data = restrict(pos, context.eval(expr))), blocks.getOrElse(name, body))
-        case TemplateBlockAST(tpos, WithAST(_, expr), body, els) =>
+        case TemplateBlockAST(tpos, WithAST(expr), body, els) =>
           context.eval(expr) match {
             case v if falsy(v) => els foreach (render(context, _))
             case v             => render(context.copy(data = v), body)
@@ -47,30 +49,28 @@ class TemplateRenderer(val partials: TemplateLoader = _ => None,
           context.eval(expr) match {
             case v if falsy(v) => els foreach (render(context, _))
             case s: collection.Seq[_] =>
-              s.zipWithIndex foreach {
-                case (e, i) =>
-                  index match {
-                    case Some((TagParserIdent(_, elem), Some(TagParserIdent(_, idx)))) =>
-                      context.vars(idx) = i
-                      context.vars(elem) = e
-                    case Some((TagParserIdent(_, elem), None)) => context.vars(elem) = e
-                    case None                                  =>
-                  }
+              s.zipWithIndex foreach { case (e, i) =>
+                index match {
+                  case Some((TagParserIdent(_, elem), Some(TagParserIdent(_, idx)))) =>
+                    context.vars(idx) = i
+                    context.vars(elem) = e
+                  case Some((TagParserIdent(_, elem), None)) => context.vars(elem) = e
+                  case None                                  =>
+                }
 
-                  render(context.copy(data = e), body)
+                render(context.copy(data = e), body)
               }
             case s: collection.Map[_, _] =>
-              s foreach {
-                case (k, v) =>
-                  index match {
-                    case Some((TagParserIdent(_, key), Some(TagParserIdent(_, value)))) =>
-                      context.vars(key) = k
-                      context.vars(value) = v
-                    case Some((TagParserIdent(_, value), None)) => context.vars(value) = v
-                    case None                                   =>
-                  }
+              s foreach { case (k, v) =>
+                index match {
+                  case Some((TagParserIdent(_, key), Some(TagParserIdent(_, value)))) =>
+                    context.vars(key) = k
+                    context.vars(value) = v
+                  case Some((TagParserIdent(_, value), None)) => context.vars(value) = v
+                  case None                                   =>
+                }
 
-                  render(context.copy(data = v), body)
+                render(context.copy(data = v), body)
               }
             case v => pos.error(s"'for' can only be applied to an iterable object: $v")
           }

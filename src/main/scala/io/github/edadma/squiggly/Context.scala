@@ -52,7 +52,7 @@ case class Context(renderer: TemplateRenderer, data: Any, vars: mutable.HashMap[
         }
     }
 
-  def neval(pos: TagParser#Position, expr: ExprAST): Num = num(pos, eval(expr))
+  def neval(expr: ExprAST): Num = num(pos, eval(expr))
 
   def ieval(pos: TagParser#Position, expr: ExprAST): Int =
     try {
@@ -139,21 +139,20 @@ case class Context(renderer: TemplateRenderer, data: Any, vars: mutable.HashMap[
         val l = neval(lpos, left)
         val r = right map { case (o, p, e) => (o, neval(p, e)) }
 
-        r.foldLeft(l) {
-          case (l, (o, r)) =>
-            o match {
-              case "+"   => l + r
-              case "-"   => l - r
-              case "*"   => l * r
-              case "/"   => l / r
-              case "mod" => l remainder r
-              case "\\"  => l quot r
-            }
+        r.foldLeft(l) { case (l, (o, r)) =>
+          o match {
+            case "+"   => l + r
+            case "-"   => l - r
+            case "*"   => l * r
+            case "/"   => l / r
+            case "mod" => l remainder r
+            case "\\"  => l quot r
+          }
         }
-      case RightInfixExpr(lpos, left, "^", rpos, right) => neval(lpos, left) pow ieval(rpos, right)
-      case PrefixExpr("-", pos, expr)                   => -neval(pos, expr)
-      case MethodExpr(expr, id: TagParserIdent)         => lookup(id.pos, eval(expr), id) getOrElse ()
-      case IndexExpr(expr, pos, index) =>
+      case RightInfixExpr(left, "^", right)     => neval(left) pow ieval(right)
+      case PrefixExpr("-", expr)                => -neval(expr)
+      case MethodExpr(expr, id: TagParserIdent) => lookup(id.pos, eval(expr), id) getOrElse ()
+      case IndexExpr(expr, index) =>
         eval(expr) match {
           case m: collection.Map[_, _] => m.asInstanceOf[collection.Map[Any, _]] getOrElse (eval(index), ())
           case s: collection.Seq[_] =>
@@ -163,7 +162,9 @@ case class Context(renderer: TemplateRenderer, data: Any, vars: mutable.HashMap[
               case n                  => s(n)
             }
           case p: Product =>
-            p.productElementNames zip p.productIterator find { case (k, _) => k == seval(pos, index) } map (_._2) getOrElse ()
+            p.productElementNames zip p.productIterator find { case (k, _) =>
+              k == seval(pos, index)
+            } map (_._2) getOrElse ()
           case s: String =>
             ieval(pos, index) match {
               case n if n < 0         => pos.error(s"negative array index: $n")
@@ -189,8 +190,8 @@ case class Context(renderer: TemplateRenderer, data: Any, vars: mutable.HashMap[
       case null                    => None
       case m: collection.Map[_, _] => m.asInstanceOf[collection.Map[String, Any]] get id.name orElse tryMethod
       case p: Product =>
-        p.productElementNames zip p.productIterator find {
-          case (k, _) => k == id.name
+        p.productElementNames zip p.productIterator find { case (k, _) =>
+          k == id.name
         } map (_._2) orElse tryMethod
       case _ => tryMethod orElse pos.error(s"not an object (i.e., Map or case class): $v")
     }
