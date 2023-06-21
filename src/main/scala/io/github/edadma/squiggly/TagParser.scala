@@ -40,7 +40,7 @@ object TagParser extends StandardTokenParsers with PackratParsers with ImplicitC
       |""".trim.stripMargin split "\\s+")
   lexical.delimiters ++= ("+ ++ - * / \\ ^ % ( ) [ ] { } ` | . , < <= > >= != =" split ' ')
 
-  type P[+T] = PackratParser[T]
+  private type P[+T] = PackratParser[T]
 
   lazy val identifier: P[Ident] = positioned(ident ^^ Ident.apply)
 
@@ -74,7 +74,8 @@ object TagParser extends StandardTokenParsers with PackratParsers with ImplicitC
   )
 
   lazy val pipe: P[ExprAST] = positioned(
-    applicative ~ ("|" ~> (apply | identifier ^^ (n => ApplyExpr(n, Nil)))) ^^ PipeExpr.apply,
+    applicative ~ ("|" ~> (apply | identifier ^^ (n => ApplyExpr(n, Nil)))) ^^ PipeExpr.apply
+      | applicative,
   )
 
   lazy val applicative: P[ExprAST] = apply | additive

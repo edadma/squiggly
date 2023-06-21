@@ -1,9 +1,11 @@
-import io.github.edadma.squiggly.{TemplateParser, TemplateRenderer, platform}
-import io.github.edadma.cross_platform._
+package io.github.edadma.squiggly
+
+//import io.github.edadma.cross_platform.*
+import io.github.edadma.squiggly.{TemplateParser, TemplateRenderer /*, platform*/}
 
 import scala.collection.immutable.VectorMap
 
-object Main extends App {
+object Main {
 
   //  case class Task(task: String, done: Boolean)
   //
