@@ -114,13 +114,12 @@ object TagParser extends StandardTokenParsers with PackratParsers with ImplicitC
   lazy val primary: P[ExprAST] = positioned(
     "true" ^^^ BooleanExpr(true)
       | "false" ^^^ BooleanExpr(false)
-      // | ident ^^ Name.apply
-      | opt("$") ~ "." ~ repsep(identifier, ".") ^^ {
-        case None ~ _ ~ ids    => ElementExpr("", ids)
-        case Some(_) ~ _ ~ ids => ElementExpr("$", ids)
-      }
+      | global ~ identifier ^^ VarExpr.apply
+      | global ~ ("." ~> repsep(identifier, ".")) ^^ ElementExpr.apply
       | decimal ^^ NumberExpr.apply
       | stringLit ^^ StringExpr.apply
       | "`" ~> expression <~ "`" ^^ NonStrictExpr.apply
       | "(" ~> expression <~ ")",
   )
+
+  lazy val global: P[String] = opt("$") ^^ (_ getOrElse "")
