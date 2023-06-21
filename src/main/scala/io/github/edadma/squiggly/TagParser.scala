@@ -101,8 +101,8 @@ object TagParser extends StandardTokenParsers with PackratParsers with ImplicitC
   )
 
   lazy val index: P[ExprAST] = positioned(
-    primary ~ "[" ~ expression ~ "]" ~> IndexExpr
-      | primary ~ "." ~ ident ~> MethodExpr
+    primary ~ ("[" ~> expression <~ "]") ~> IndexExpr.apply
+      | primary ~ ("." ~> ident) ~> MethodExpr.apply
       | primary,
   )
 
