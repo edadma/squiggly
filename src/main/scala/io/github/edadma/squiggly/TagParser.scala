@@ -116,6 +116,6 @@ object TagParser extends StandardTokenParsers with PackratParsers with ImplicitC
       | "false" ^^^ BooleanExpr(false)
       // | ident ^^ Name.apply
       | decimal ^^ NumberExpr.apply
-      // | stringLit ^^ StringLit.apply
+      | stringLit ^^ StringExpr.apply
       | "(" ~> expression <~ ")",
   )

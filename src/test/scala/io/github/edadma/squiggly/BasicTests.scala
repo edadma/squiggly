@@ -14,28 +14,34 @@ class BasicTests extends AnyFreeSpec with Matchers with Testing {
   }
 
   "just text 3" in {
-    test(null,
-         """
+    test(
+      null,
+      """
         |asdf
         |
-        """.trim.stripMargin) shouldBe "asdf\n"
+        """.trim.stripMargin,
+    ) shouldBe "asdf\n"
   }
 
   "just text 4" in {
-    test(null,
-         """
+    test(
+      null,
+      """
         |
         |asdf
         |
-        """.trim.stripMargin) shouldBe "\nasdf\n"
+        """.trim.stripMargin,
+    ) shouldBe "\nasdf\n"
   }
 
   "just text 5" in {
-    test(null,
-         """
+    test(
+      null,
+      """
         |
         |asdf
-        """.trim.stripMargin) shouldBe
+        """.trim.stripMargin,
+    ) shouldBe
       """
         |
         |asdf
@@ -43,11 +49,13 @@ class BasicTests extends AnyFreeSpec with Matchers with Testing {
   }
 
   "ws 1" in {
-    test("345",
-         """
+    test(
+      "345",
+      """
         |
         |asdf {{ . }} zxcv
-        """.trim.stripMargin) shouldBe
+        """.trim.stripMargin,
+    ) shouldBe
       """
         |
         |asdf 345 zxcv
@@ -55,11 +63,13 @@ class BasicTests extends AnyFreeSpec with Matchers with Testing {
   }
 
   "ws 2" in {
-    test("345",
-         """
+    test(
+      "345",
+      """
         |
         |asdf {{- . }} zxcv
-        """.trim.stripMargin) shouldBe
+        """.trim.stripMargin,
+    ) shouldBe
       """
         |
         |asdf345 zxcv
@@ -67,11 +77,13 @@ class BasicTests extends AnyFreeSpec with Matchers with Testing {
   }
 
   "ws 3" in {
-    test("345",
-         """
+    test(
+      "345",
+      """
         |
         |asdf {{ . -}} zxcv
-        """.trim.stripMargin) shouldBe
+        """.trim.stripMargin,
+    ) shouldBe
       """
         |
         |asdf 345zxcv
@@ -79,23 +91,39 @@ class BasicTests extends AnyFreeSpec with Matchers with Testing {
   }
 
   "ws 4" in {
-    test("345",
-         """
+    test(
+      "345",
+      """
         |
         |asdf {{- . -}} zxcv
-        """.trim.stripMargin) shouldBe
+        """.trim.stripMargin,
+    ) shouldBe
       """
         |
         |asdf345zxcv
         """.trim.stripMargin
   }
 
+  "string literals" in {
+    test(
+      null,
+      """
+        |strings {{ 'asdf' }}, {{ "asdf" }}, {{ 'as\tdf' }}, {{ 'as\u03B1df' }}, {{ 'as\'df' }}
+        """.trim.stripMargin,
+    ) shouldBe
+      s"""
+        |strings asdf, asdf, as\tdf, as\u03B1df, as\'df
+        """.trim.stripMargin
+  }
+
   "boolean literals" in {
-    test("{t: true, f: false}",
-         """
+    test(
+      "{t: true, f: false}",
+      """
         |
         |booleans {{ .t }}, {{ .f }}, {{ true }}, {{ false }}
-        """.trim.stripMargin) shouldBe
+        """.trim.stripMargin,
+    ) shouldBe
       """
         |
         |booleans true, false, true, false
@@ -108,7 +136,7 @@ class BasicTests extends AnyFreeSpec with Matchers with Testing {
       """
         |
         |ints {{ .a }} {{ .b }} {{ .c }} {{ // this comment should be ignored }}{{ -345 }} {{ 0 }} {{ 345 }}
-        """.trim.stripMargin
+        """.trim.stripMargin,
     ) shouldBe
       """
         |
@@ -117,11 +145,13 @@ class BasicTests extends AnyFreeSpec with Matchers with Testing {
   }
 
   "decimal literals" in {
-    test("{N: 6.02214076e23}",
-         """
+    test(
+      "{N: 6.02214076e23}",
+      """
         |
         |Avogadro number {{ .N }} {{ 6.02214076e23 }}
-        """.trim.stripMargin) shouldBe
+        """.trim.stripMargin,
+    ) shouldBe
       """
         |
         |Avogadro number 6.02214076E+23 6.02214076E+23
