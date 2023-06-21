@@ -38,7 +38,7 @@ object TagParser extends StandardTokenParsers with PackratParsers with ImplicitC
       |false
       |null
       |""".trim.stripMargin split "\\s+")
-  lexical.delimiters ++= ("+ ++ - * / \\ ^ % ( ) [ ] { } ` | . , < <= > >= != =" split ' ')
+  lexical.delimiters ++= ("+ ++ - * / \\ ^ % ( ) [ ] { } ` | . , < <= > >= != = $" split ' ')
 
   private type P[+T] = PackratParser[T]
 
@@ -115,6 +115,10 @@ object TagParser extends StandardTokenParsers with PackratParsers with ImplicitC
     "true" ^^^ BooleanExpr(true)
       | "false" ^^^ BooleanExpr(false)
       // | ident ^^ Name.apply
+      | opt("$") ~ "." ~ repsep(identifier, ".") ^^ {
+        case None ~ _ ~ ids    => ElementExpr("", ids)
+        case Some(_) ~ _ ~ ids => ElementExpr("$", ids)
+      }
       | decimal ^^ NumberExpr.apply
       | stringLit ^^ StringExpr.apply
       | "`" ~> expression <~ "`" ^^ NonStrictExpr.apply
