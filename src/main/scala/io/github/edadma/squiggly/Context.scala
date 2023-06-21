@@ -19,22 +19,22 @@ case class Context(renderer: TemplateRenderer, data: Any, vars: mutable.HashMap[
     require(_global != null)
     _global
   }
-
+  { id.name }
   // todo: arguments should have Position for error reporting
-  def callFunction(pos: Positional, name: String, args: Seq[Any]): Any =
-    renderer.functions get name match {
+  def callFunction(id: Ident, args: Seq[Any]): Any =
+    renderer.functions get id.name match {
       case Some(TemplateFunction(_, arity, function)) =>
         if (args.length < arity)
-          error(pos, s"too few arguments for function '$name': expected $arity, found ${args.length}")
+          error(pos, s"too few arguments for function '${id.name}': expected $arity, found ${args.length}")
         else if (!function.isDefinedAt((this, args)))
-          error(pos, s"cannot apply function '$name' to arguments ${args map (a => s"'$a'") mkString ", "}")
+          error(pos, s"cannot apply function '${id.name}' to arguments ${args map (a => s"'$a'") mkString ", "}")
         else function((this, args))
       case None =>
-        if (args.isEmpty) getVar(pos, name)
-        else error(pos, s"function found: $name")
+        if (args.isEmpty) getVar(id, id.name)
+        else error(pos, s"function found: ${id.name}")
     }
 
-  def getVar(pos: TagParser#Position, name: String): Any =
+  def getVar(pos: Positional, name: String): Any =
     vars get name match {
       case Some(value) => value
       case None        => error(pos, s"unknown variable: $name")
@@ -128,84 +128,81 @@ case class Context(renderer: TemplateRenderer, data: Any, vars: mutable.HashMap[
           case None        => ()
         }
       case PrefixExpr("not", expr) => !beval(expr)
-      case LeftInfixExpr(left, right) if right forall (_._1 == "++") =>
+      case LeftInfixExpr(left, "++", right) =>
         val l = eval(left)
-        val r = right map { case (_, _, e) => eval(e) }
+        val r = neval(right)
 
-        if (r forall (_.isInstanceOf[String])) r.asInstanceOf[Seq[String]].foldLeft(l.toString)(_ ++ _)
-        else if (r forall (_.isInstanceOf[Seq[_]]))
-          r.asInstanceOf[Seq[Seq[Any]]].foldLeft(l.asInstanceOf[Seq[Any]])(_ ++ _)
-        else lpos.error("operands of '++' operator must all be either strings or sequences")
-      case LeftInfixExpr(left, right) =>
-        val l = neval(lpos, left)
-        val r = right map { case (o, p, e) => (o, neval(p, e)) }
+        r match
+          case s: String   => l.toString ++ s
+          case seq: Seq[_] => l.asInstanceOf[Seq[Any]] ++ seq
+          case _           => error(left, "operands of '++' operator must all be either strings or sequences")
+      case LeftInfixExpr(left, o, right) =>
+        val l = neval(left)
+        val r = neval(right)
 
-        r.foldLeft(l) { case (l, (o, r)) =>
-          o match {
-            case "+"   => l + r
-            case "-"   => l - r
-            case "*"   => l * r
-            case "/"   => l / r
-            case "mod" => l remainder r
-            case "\\"  => l quot r
-          }
+        o match {
+          case "+"   => l + r
+          case "-"   => l - r
+          case "*"   => l * r
+          case "/"   => l / r
+          case "mod" => l remainder r
+          case "\\"  => l quot r
         }
-      case RightInfixExpr(left, "^", right)     => neval(left) pow ieval(right)
-      case PrefixExpr("-", expr)                => -neval(expr)
-      case MethodExpr(expr, id: TagParserIdent) => lookup(id.pos, eval(expr), id) getOrElse ()
+      case RightInfixExpr(left, "^", right) => neval(left) pow ieval(right)
+      case PrefixExpr("-", expr)            => -neval(expr)
+      case MethodExpr(expr, id: Ident)      => lookup(eval(expr), id) getOrElse ()
       case IndexExpr(expr, index) =>
         eval(expr) match {
           case m: collection.Map[_, _] => m.asInstanceOf[collection.Map[Any, _]] getOrElse (eval(index), ())
           case s: collection.Seq[_] =>
-            ieval(pos, index) match {
-              case n if n < 0         => pos.error(s"negative array index: $n")
-              case n if n >= s.length => pos.error(s"array index out of bounds: $n")
+            ieval(index) match {
+              case n if n < 0         => error(index, s"negative array index: $n")
+              case n if n >= s.length => error(index, s"array index out of bounds: $n")
               case n                  => s(n)
             }
           case p: Product =>
             p.productElementNames zip p.productIterator find { case (k, _) =>
-              k == seval(pos, index)
+              k == seval(index)
             } map (_._2) getOrElse ()
           case s: String =>
-            ieval(pos, index) match {
-              case n if n < 0         => pos.error(s"negative array index: $n")
-              case n if n >= s.length => pos.error(s"array index out of bounds: $n")
+            ieval(index) match {
+              case n if n < 0         => error(index, s"negative array index: $n")
+              case n if n >= s.length => error(index, s"array index out of bounds: $n")
               case n                  => s(n).toString
             }
-          case v => pos.error(s"not indexable: $v")
+          case v => error(index, s"not indexable: $v")
         }
-      case ApplyExpr(pos @ Ident(name), args) => callFunction(pos, name, args map eval)
-      case PipeExpr(left, ApplyExpr(pos @ Ident(name), args)) =>
-        callFunction(pos, name, (args map eval) :+ eval(left))
+      case ApplyExpr(name, args) => callFunction(name, args map eval)
+      case PipeExpr(left, ApplyExpr(name, args)) =>
+        callFunction(name, (args map eval) :+ eval(left))
     }
-
   private def lookup(v: Any, id: Ident): Option[Any] = {
     def tryMethod: Option[Any] =
       if (renderer.methods contains id.name)
-        Some(callFunction(id.pos, id.name, Seq(v)))
+        Some(callFunction(id, id.name, Seq(v)))
       else
         None
 
     v match {
-      case ()                      => error(pos, s"attempt to lookup property '${id.name}' of undefined")
+      case ()                      => error(id, s"attempt to lookup property '${id.name}' of undefined")
       case null                    => None
       case m: collection.Map[_, _] => m.asInstanceOf[collection.Map[String, Any]] get id.name orElse tryMethod
       case p: Product =>
         p.productElementNames zip p.productIterator find { case (k, _) =>
           k == id.name
         } map (_._2) orElse tryMethod
-      case _ => tryMethod orElse pos.error(s"not an object (i.e., Map or case class): $v")
+      case _ => tryMethod orElse error(id, s"not an object (i.e., Map or case class): $v")
     }
   }
 
   @tailrec
-  private def lookupSeq(pos: TagParser#Position, v: Any, ids: Seq[TagParserIdent]): Option[Any] =
+  private def lookupSeq(v: Any, ids: Seq[Ident]): Option[Any] =
     ids.toList match {
       case Nil      => Some(v)
-      case h :: Nil => lookup(pos, v, h)
+      case h :: Nil => lookup(v, h)
       case h :: t =>
-        lookup(pos, v, h) match {
-          case Some(value) => lookupSeq(pos, value, t)
+        lookup(v, h) match {
+          case Some(value) => lookupSeq(value, t)
           case None        => None
         }
     }

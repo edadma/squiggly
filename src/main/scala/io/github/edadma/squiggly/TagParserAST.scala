@@ -30,7 +30,7 @@ case class LeftInfixExpr(left: ExprAST, op: String, right: ExprAST) extends Expr
 
 case class RightInfixExpr(left: ExprAST, op: String, right: ExprAST) extends ExprAST
 
-case class ApplyExpr(name: String, args: Seq[ExprAST]) extends ExprAST
+case class ApplyExpr(id: Ident, args: Seq[ExprAST]) extends ExprAST
 
 case class ConditionalAST(cond: ExprAST, yes: ExprAST, no: Option[ExprAST]) extends ExprAST
 
