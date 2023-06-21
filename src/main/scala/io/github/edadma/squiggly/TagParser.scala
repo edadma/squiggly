@@ -80,8 +80,7 @@ object TagParser extends StandardTokenParsers with PackratParsers with ImplicitC
 
   lazy val applicative: P[ExprAST] = apply | additive
 
-  lazy val apply: P[ApplyExpr] =
-    identifier ~ rep1(additive) ^^ ApplyExpr.apply
+  lazy val apply: P[ApplyExpr] = identifier ~ rep1(additive) ^^ ApplyExpr.apply
 
   lazy val additive: P[ExprAST] = positioned(
     additive ~ ("++" | "+" | "-") ~ multiplicative ^^ LeftInfixExpr.apply
@@ -120,6 +119,7 @@ object TagParser extends StandardTokenParsers with PackratParsers with ImplicitC
       | decimal ^^ NumberExpr.apply
       | stringLit ^^ StringExpr.apply
       | "{" ~> repsep(identifier ~ (":" ~> expression) ^^ Tuple2.apply, ",") <~ "}" ^^ MapExpr.apply
+      | "[" ~> repsep(expression, ",") <~ "]" ^^ SeqExpr.apply
       | "`" ~> expression <~ "`" ^^ NonStrictExpr.apply
       | "(" ~> expression <~ ")",
   )

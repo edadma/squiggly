@@ -41,6 +41,18 @@ class LiteralsTests extends AnyFreeSpec with Matchers with Testing {
         """.trim.stripMargin
   }
 
+  "sequence literals" in {
+    test(
+      null,
+      """
+        |sequences {{ [] }} {{ [ 123 ] }} {{ [3, 4] }} {{ [123][0] }}
+        """.trim.stripMargin,
+    ) shouldBe
+      """
+        |sequences [] [123] [3, 4] 123
+        """.trim.stripMargin
+  }
+
   "boolean literals" in {
     test(
       "{t: true, f: false}",
