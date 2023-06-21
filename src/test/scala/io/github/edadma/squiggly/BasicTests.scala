@@ -108,7 +108,7 @@ class BasicTests extends AnyFreeSpec with Matchers with Testing {
     test(
       null,
       """
-        |comments {{ 3 /*+ 4*/ + 5 // asdf }}
+        |comments {{ // ignored }}{{ 3 /*+ 4*/ + 5 // asdf }}
         """.trim.stripMargin,
     ) shouldBe
       """
