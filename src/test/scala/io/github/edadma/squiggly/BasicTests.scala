@@ -104,16 +104,16 @@ class BasicTests extends AnyFreeSpec with Matchers with Testing {
         """.trim.stripMargin
   }
 
-//  "comments" in {
-//    test(
-//      null,
-//      """
-//        |comments {{ // this comment should be ignored }} work
-//        """.trim.stripMargin,
-//    ) shouldBe
-//      """
-//        |comments work
-//        """.trim.stripMargin
-//  }
+  "comments" in {
+    test(
+      null,
+      """
+        |comments {{ 3 /*+ 4*/ + 5 // asdf }}
+        """.trim.stripMargin,
+    ) shouldBe
+      """
+        |comments 8
+        """.trim.stripMargin
+  }
 
 }
