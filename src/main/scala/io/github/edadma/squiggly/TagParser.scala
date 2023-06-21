@@ -44,7 +44,7 @@ object TagParser extends StandardTokenParsers with PackratParsers with ImplicitC
   type P[+T] = PackratParser[T]
 
   lazy val tag: P[TagParserAST] =
-    forTag | elseTag | endTag | ifTag | elsifTag | withTag | matchTag | caseTag | expression
+    forTag | elseTag | endTag | ifTag | elsifTag | withTag | matchTag | caseTag | assignmentTag | expression
 
   lazy val identifier: P[Ident] = positioned(ident ^^ Ident.apply)
 
@@ -146,3 +146,5 @@ object TagParser extends StandardTokenParsers with PackratParsers with ImplicitC
   lazy val matchTag: P[MatchAST] = "match" ~> expression ^^ MatchAST.apply
 
   lazy val caseTag: P[CaseAST] = "case" ~> expression ^^ CaseAST.apply
+
+  lazy val assignmentTag: P[AssignmentAST] = ident ~ (":=" ~> expression) ^^ AssignmentAST.apply
