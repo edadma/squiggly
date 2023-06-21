@@ -45,6 +45,10 @@ class ArithmeticTests extends AnyFreeSpec with Matchers with Testing {
     test(null, "{{ 2 ^ 3 ^ 3 }}") shouldBe "134217728"
   }
 
+  "arithmetic 10a" in {
+    test(null, "{{ 2 ^ -2 }}") shouldBe "0.25"
+  }
+
   "arithmetic 11" in {
     test(null, "{{ 3 - 4 }}") shouldBe "-1"
   }
