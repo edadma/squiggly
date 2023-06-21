@@ -39,11 +39,11 @@ object TagParser extends StandardTokenParsers with PackratParsers with ImplicitC
       |false
       |null
       |""".trim.stripMargin split "\\s+")
-  lexical.delimiters ++= ("+ ++ - * / \\ ^ % ( ) [ ] { } ` | . , < <= > >= != = $ : <-" split ' ')
+  lexical.delimiters ++= ("+ ++ - * / \\ ^ % ( ) [ ] { } ` | . , < <= > >= != = $ : <- :=" split ' ')
 
   type P[+T] = PackratParser[T]
 
-  lazy val tag: P[TagParserAST] = forTag | elseTag | endTag | expression
+  lazy val tag: P[TagParserAST] = forTag | elseTag | endTag | ifTag | elsifTag | expression
 
   lazy val identifier: P[Ident] = positioned(ident ^^ Ident.apply)
 
@@ -135,3 +135,7 @@ object TagParser extends StandardTokenParsers with PackratParsers with ImplicitC
   lazy val endTag: P[EndAST] = "end" ^^^ EndAST()
 
   lazy val elseTag: P[ElseAST] = "else" ^^^ ElseAST()
+
+  lazy val ifTag: P[IfAST] = "if" ~> condition ^^ IfAST.apply
+
+  lazy val elsifTag: P[ElseIfAST] = "elsif" ~> condition ^^ ElseIfAST.apply
