@@ -43,7 +43,7 @@ class TemplateRenderer(val partials: TemplateLoader = _ => None,
             case v if falsy(v) => els foreach (render(context, _))
             case v             => render(context.copy(data = v), body)
           }
-        case TemplateBlockAST(_, ForAST(index, pos, expr), body, els) =>
+        case TemplateBlockAST(_, ForAST(index, expr), body, els) =>
           context.eval(expr) match {
             case v if falsy(v) => els foreach (render(context, _))
             case s: collection.Seq[_] =>

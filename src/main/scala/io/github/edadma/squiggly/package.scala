@@ -1,6 +1,6 @@
 package io.github.edadma
 
-import io.github.edadma.commonmark.CommonMarkParser
+//import io.github.edadma.commonmark.CommonMarkParser
 
 import scala.collection.{immutable, mutable}
 
@@ -24,7 +24,7 @@ package object squiggly {
     def yaml(s: String): Any
   }
 
-  lazy val platform: Platform = squiggly.platformSpecific
+  // lazy val platform: Platform = squiggly.platformSpecific
 
   private[squiggly] val ZERO = BigDecimal(0)
 
@@ -60,7 +60,7 @@ package object squiggly {
       'e' -> 14,
       'E' -> 14,
       'f' -> 15,
-      'F' -> 15
+      'F' -> 15,
     ) foreach { case (k, v) => a(k) = v }
 
     a to immutable.ArraySeq
@@ -112,7 +112,7 @@ package object squiggly {
 
   class ReturnException extends RuntimeException
 
-  lazy val markdownParser = new CommonMarkParser
+//  lazy val markdownParser = new CommonMarkParser
 
   case class BaseURL(base: String, path: String)
 
