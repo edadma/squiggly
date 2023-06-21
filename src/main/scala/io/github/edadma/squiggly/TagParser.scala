@@ -10,7 +10,7 @@ import scala.util.parsing.input.CharSequenceReader
 object TagParser extends StandardTokenParsers with PackratParsers with ImplicitConversions:
   override val lexical = new TagLexer
 
-  def parseTag(input: String, startpos: CharReader, startoffset: Int): ExprAST =
+  def parse(input: String, startpos: CharReader, startoffset: Int): ExprAST =
     phrase(expression)(new lexical.Scanner(new PackratReader(new CharSequenceReader(input)))) match {
       case Success(ast, _) => ast
       case e: NoSuccess    => sys.error(s"parse error: $e")
@@ -41,6 +41,8 @@ object TagParser extends StandardTokenParsers with PackratParsers with ImplicitC
   lexical.delimiters ++= ("+ ++ - * / \\ ^ % ( ) [ ] { } ` | . , < <= > >= != =" split ' ')
 
   type P[+T] = PackratParser[T]
+
+  lazy val identifier: P[Ident] = positioned(ident ^^ Ident.apply)
 
   lazy val expression: P[ExprAST] = conditional
 
@@ -102,7 +104,7 @@ object TagParser extends StandardTokenParsers with PackratParsers with ImplicitC
 
   lazy val index: P[ExprAST] = positioned(
     primary ~ ("[" ~> expression <~ "]") ^^ IndexExpr.apply
-      | primary ~ ("." ~> ident) ^^ MethodExpr.apply
+      | primary ~ ("." ~> identifier) ^^ MethodExpr.apply
       | primary,
   )
 

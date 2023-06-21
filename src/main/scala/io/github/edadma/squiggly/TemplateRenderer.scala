@@ -35,10 +35,10 @@ class TemplateRenderer(
 
     def render(context: Context, ast: TemplateAST): Unit = {
       ast match {
-        case EmptyBlockAST                                   =>
-        case SequenceAST(seq)                                => seq foreach (render(context, _))
-        case DefineBlockAST(TagParserIdent(pos, name), body) => blocks(name) = body
-        case BlockBlockAST(TagParserIdent(pos, name), body, expr) =>
+        case EmptyBlockAST                     =>
+        case SequenceAST(seq)                  => seq foreach (render(context, _))
+        case DefineBlockAST(Ident(name), body) => blocks(name) = body
+        case BlockBlockAST(pos @ Ident(name), body, expr) =>
           render(context.copy(data = restrict(pos, context.eval(expr))), blocks.getOrElse(name, body))
         case TemplateBlockAST(tpos, WithAST(expr), body, els) =>
           context.eval(expr) match {
@@ -51,11 +51,11 @@ class TemplateRenderer(
             case s: collection.Seq[_] =>
               s.zipWithIndex foreach { case (e, i) =>
                 index match {
-                  case Some((TagParserIdent(_, elem), Some(TagParserIdent(_, idx)))) =>
+                  case Some((Ident(elem), Some(Ident(idx)))) =>
                     context.vars(idx) = i
                     context.vars(elem) = e
-                  case Some((TagParserIdent(_, elem), None)) => context.vars(elem) = e
-                  case None                                  =>
+                  case Some((Ident(elem), None)) => context.vars(elem) = e
+                  case None                      =>
                 }
 
                 render(context.copy(data = e), body)
@@ -63,16 +63,16 @@ class TemplateRenderer(
             case s: collection.Map[_, _] =>
               s foreach { case (k, v) =>
                 index match {
-                  case Some((TagParserIdent(_, key), Some(TagParserIdent(_, value)))) =>
+                  case Some((Ident(key), Some(Ident(value)))) =>
                     context.vars(key) = k
                     context.vars(value) = v
-                  case Some((TagParserIdent(_, value), None)) => context.vars(value) = v
-                  case None                                   =>
+                  case Some((Ident(value), None)) => context.vars(value) = v
+                  case None                       =>
                 }
 
                 render(context.copy(data = v), body)
               }
-            case v => pos.error(s"'for' can only be applied to an iterable object: $v")
+            case v => error(expr, s"'for' can only be applied to an iterable object: $v")
           }
         case ContentAST(toks) =>
           toks foreach {
@@ -93,7 +93,7 @@ class TemplateRenderer(
                   case s: String => s
                   case v         => render(v)
                 })
-            case TagToken(_, AssignmentAST(TagParserIdent(_, name), expr), _, _) =>
+            case TagToken(_, AssignmentAST(Ident(name), expr), _, _) =>
               context.vars(name) = context.eval(expr)
             case TagToken(_, ReturnAST(expr), _, _) =>
               returnValue = expr map context.eval getOrElse ()

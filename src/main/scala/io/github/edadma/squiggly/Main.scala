@@ -3,16 +3,18 @@ package io.github.edadma.squiggly
 import java.io.File
 import scopt.OParser
 import io.github.edadma.cross_platform._
-import platform._
+//import platform._
 import pprint.pprintln
 
 object Main extends App {
 
-  case class Config(dataFile: Option[String] = None,
-                    dataString: Option[String] = None,
-                    templateFile: Option[String] = None,
-                    templateString: Option[String] = None,
-                    ast: Boolean = false)
+  case class Config(
+      dataFile: Option[String] = None,
+      dataString: Option[String] = None,
+      templateFile: Option[String] = None,
+      templateString: Option[String] = None,
+      ast: Boolean = false,
+  )
 
   val builder = OParser.builder[Config]
   val parser = {
@@ -74,7 +76,7 @@ object Main extends App {
       arg[Option[String]]("[<template>]")
         .optional()
         .action((t, c) => c.copy(templateString = t))
-        .text(s"template string")
+        .text(s"template string"),
     )
   }
 
@@ -99,8 +101,7 @@ object Main extends App {
 
     val ast = new TemplateParser().parse(template)
 
-    if (c.ast)
-      pprintln(ast)
+    if (c.ast) pprintln(ast)
     else {
       TemplateRenderer.default.render(data, ast)
       println()

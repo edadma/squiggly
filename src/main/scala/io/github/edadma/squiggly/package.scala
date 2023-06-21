@@ -3,6 +3,7 @@ package io.github.edadma
 //import io.github.edadma.commonmark.CommonMarkParser
 
 import scala.collection.{immutable, mutable}
+import scala.util.parsing.input.Positional
 
 package object squiggly {
 
@@ -12,9 +13,9 @@ package object squiggly {
 
   type TemplateLoader = String => Option[TemplateAST]
 
-  def restrict(pos: TagParser#Position, v: Any): Any =
+  def restrict(pos: Positional, v: Any): Any =
     v match {
-      case () => pos.error("attempting to bind a value of 'undefined'")
+      case () => error(pos, "attempting to bind a value of 'undefined'")
       case _  => v
     }
 

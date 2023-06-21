@@ -4,6 +4,7 @@ import java.io.PrintStream
 import scala.annotation.tailrec
 import scala.collection.mutable
 import scala.language.postfixOps
+import scala.util.parsing.input.Positional
 
 case class Context(renderer: TemplateRenderer, data: Any, vars: mutable.HashMap[String, Any], out: PrintStream) {
 
@@ -20,23 +21,23 @@ case class Context(renderer: TemplateRenderer, data: Any, vars: mutable.HashMap[
   }
 
   // todo: arguments should have Position for error reporting
-  def callFunction(pos: TagParser#Position, name: String, args: Seq[Any]): Any =
+  def callFunction(pos: Positional, name: String, args: Seq[Any]): Any =
     renderer.functions get name match {
       case Some(TemplateFunction(_, arity, function)) =>
         if (args.length < arity)
-          pos.error(s"too few arguments for function '$name': expected $arity, found ${args.length}")
+          error(pos, s"too few arguments for function '$name': expected $arity, found ${args.length}")
         else if (!function.isDefinedAt((this, args)))
-          pos.error(s"cannot apply function '$name' to arguments ${args map (a => s"'$a'") mkString ", "}")
+          error(pos, s"cannot apply function '$name' to arguments ${args map (a => s"'$a'") mkString ", "}")
         else function((this, args))
       case None =>
         if (args.isEmpty) getVar(pos, name)
-        else pos.error(s"function found: $name")
+        else error(pos, s"function found: $name")
     }
 
   def getVar(pos: TagParser#Position, name: String): Any =
     vars get name match {
       case Some(value) => value
-      case None        => pos.error(s"unknown variable: $name")
+      case None        => error(pos, s"unknown variable: $name")
     }
 
   def beval(expr: ExprAST): Boolean = !falsy(eval(expr))
@@ -48,23 +49,23 @@ case class Context(renderer: TemplateRenderer, data: Any, vars: mutable.HashMap[
         try {
           BigDecimal(s)
         } catch {
-          case _: NumberFormatException => pos.error(s"not a number: $s")
+          case _: NumberFormatException => error(pos, s"not a number: $s")
         }
     }
 
   def neval(expr: ExprAST): Num = num(pos, eval(expr))
 
-  def ieval(pos: TagParser#Position, expr: ExprAST): Int =
+  def ieval(expr: ExprAST): Int =
     try {
-      neval(pos, expr).toIntExact
+      neval(expr).toIntExact
     } catch {
-      case _: ArithmeticException => pos.error("must be an exact \"small\" integer")
+      case _: ArithmeticException => error(expr, "must be an exact \"small\" integer")
     }
 
-  def seval(pos: TagParser#Position, expr: ExprAST): String =
+  def seval(expr: ExprAST): String =
     eval(expr) match {
       case s: String => s
-      case v         => pos.error(s"field name was expected: $v")
+      case v         => error(expr, s"field name was expected: $v")
     }
 
   def eval(expr: ExprAST): Any =
@@ -173,12 +174,12 @@ case class Context(renderer: TemplateRenderer, data: Any, vars: mutable.HashMap[
             }
           case v => pos.error(s"not indexable: $v")
         }
-      case ApplyExpr(TagParserIdent(pos, name), args) => callFunction(pos, name, args map eval)
-      case PipeExpr(left, ApplyExpr(TagParserIdent(pos, name), args)) =>
+      case ApplyExpr(pos @ Ident(name), args) => callFunction(pos, name, args map eval)
+      case PipeExpr(left, ApplyExpr(pos @ Ident(name), args)) =>
         callFunction(pos, name, (args map eval) :+ eval(left))
     }
 
-  private def lookup(pos: TagParser#Position, v: Any, id: TagParserIdent): Option[Any] = {
+  private def lookup(v: Any, id: Ident): Option[Any] = {
     def tryMethod: Option[Any] =
       if (renderer.methods contains id.name)
         Some(callFunction(id.pos, id.name, Seq(v)))
@@ -186,7 +187,7 @@ case class Context(renderer: TemplateRenderer, data: Any, vars: mutable.HashMap[
         None
 
     v match {
-      case ()                      => pos.error(s"attempt to lookup property '${id.name}' of undefined")
+      case ()                      => error(pos, s"attempt to lookup property '${id.name}' of undefined")
       case null                    => None
       case m: collection.Map[_, _] => m.asInstanceOf[collection.Map[String, Any]] get id.name orElse tryMethod
       case p: Product =>

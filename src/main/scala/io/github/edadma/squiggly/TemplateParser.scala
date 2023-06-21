@@ -50,8 +50,8 @@ class TemplateParser(
 
           astbuf +=
             (tag match {
-              case BlockAST(pos, name, expr) => BlockBlockAST(name, body, expr)
-              case DefineAST(pos, name)      => DefineBlockAST(name, body)
+              case BlockAST(name, expr) => BlockBlockAST(name, body, expr)
+              case DefineAST(name)      => DefineBlockAST(name, body)
             })
           parse(rest, parsingbody, allowelse, tokbuf, astbuf)
         case TagToken(pos, tag: SimpleBlockAST, _, _) #:: t =>
@@ -203,8 +203,7 @@ class TemplateParser(
             val tag1 = if (trimLeft) tag drop 2 else tag
             val trimRight = tag1.length >= 2 && tag1.endsWith("-") && tag1(tag1.length - 2).isWhitespace
             val tag2 = if (trimRight) tag1 dropRight 2 else tag1
-            val tagParser = new TagParser(tag2, r, startDelim.length, functions, namespaces)
-            val ast = tagParser.parseTag
+            val ast = TagParser.parse(tag2, r, startDelim.length /*, functions, namespaces*/ )
 
             Some(TagToken(r, ast, trimLeft, trimRight), rest)
           } else Some(text(r))

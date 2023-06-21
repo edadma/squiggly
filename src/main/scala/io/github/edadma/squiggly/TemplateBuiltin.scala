@@ -213,15 +213,15 @@ object TemplateBuiltin {
         // case (con, Seq(s: String))                           => s // todo: map named function
         },
       ),
-      TemplateFunction(
-        "markdownify",
-        1,
-        { case (con, Seq(s: String)) =>
-          commonmark.Util
-            .html(markdownParser.parse(s), 2, link = con.renderer.data("link").asInstanceOf[String => String])
-            .trim
-        },
-      ),
+//      TemplateFunction(
+//        "markdownify",
+//        1,
+//        { case (con, Seq(s: String)) =>
+//          commonmark.Util
+//            .html(markdownParser.parse(s), 2, link = con.renderer.data("link").asInstanceOf[String => String])
+//            .trim
+//        },
+//      ),
       TemplateFunction("max", 1, { case (con, Seq(a: BigDecimal, b: BigDecimal)) => a max b }),
       // todo: https://gohugo.io/functions/merge/
       TemplateFunction("min", 1, { case (con, Seq(a: BigDecimal, b: BigDecimal)) => a min b }),

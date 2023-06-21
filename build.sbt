@@ -35,7 +35,7 @@ lazy val squiggly = project
     ),
     libraryDependencies ++= Seq(
       "com.github.scopt" %% "scopt" % "4.0.1",
-      "com.lihaoyi" %% "pprint" % "0.7.3" % "test",
+      "com.lihaoyi" %% "pprint" % "0.7.3" /*% "test"*/,
       "org.scala-lang.modules" %% "scala-parser-combinators" % "2.1.1",
     ),
     publishMavenStyle := true,
@@ -47,7 +47,7 @@ lazy val squiggly = project
     libraryDependencies += "org.scala-js" %% "scalajs-stubs" % "1.1.0" % "provided",
     libraryDependencies += "io.github.edadma" %% "yaml" % "0.1.12",
   )
-*/
+ */
 /*.nativeSettings(
     nativeLinkStubs := true,
     libraryDependencies += "io.github.edadma" %%% "libyaml" % "0.1.8"
