@@ -114,11 +114,11 @@ case class Context(renderer: TemplateRenderer, data: Any, vars: mutable.HashMap[
             res
         }
 
-      case BooleanExpr(_, b)  => b
-      case StringExpr(pos, s) => unescape(pos, s)
-      case NumberExpr(_, n)   => n
-      case NullExpr(_)        => null
-      case VarExpr(_, user, TagParserIdent(pos, name)) =>
+      case BooleanExpr(b) => b
+      case StringExpr(s)  => unescape(pos, s)
+      case NumberExpr(n)  => n
+      case NullExpr       => null
+      case VarExpr(user, TagParserIdent(pos, name)) =>
         if (user == "$") getVar(pos, name)
         else callFunction(pos, name, Nil)
       case ElementExpr(pos, globalvar, ids) =>
@@ -126,8 +126,8 @@ case class Context(renderer: TemplateRenderer, data: Any, vars: mutable.HashMap[
           case Some(value) => value
           case None        => ()
         }
-      case PrefixExpr("not", _, expr) => !beval(expr)
-      case LeftInfixExpr(lpos, left, right) if right forall (_._1 == "++") =>
+      case PrefixExpr("not", expr) => !beval(expr)
+      case LeftInfixExpr(left, right) if right forall (_._1 == "++") =>
         val l = eval(left)
         val r = right map { case (_, _, e) => eval(e) }
 
@@ -135,7 +135,7 @@ case class Context(renderer: TemplateRenderer, data: Any, vars: mutable.HashMap[
         else if (r forall (_.isInstanceOf[Seq[_]]))
           r.asInstanceOf[Seq[Seq[Any]]].foldLeft(l.asInstanceOf[Seq[Any]])(_ ++ _)
         else lpos.error("operands of '++' operator must all be either strings or sequences")
-      case LeftInfixExpr(lpos, left, right) =>
+      case LeftInfixExpr(left, right) =>
         val l = neval(lpos, left)
         val r = right map { case (o, p, e) => (o, neval(p, e)) }
 
