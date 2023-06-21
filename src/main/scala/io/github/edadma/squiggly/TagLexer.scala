@@ -17,6 +17,8 @@ class TagLexer extends StdLexical:
     case Some(e) => e
   }
 
+  override def whitespaceChar: Parser[Elem] = guard(not(' ' ~ '.')) ~> super.whitespaceChar
+
   override def token: Parser[Token] =
     identChar ~ rep(identChar | digit) ^^ { case first ~ rest => processIdent(first :: rest mkString "") }
       | opt(digits) ~ '.' ~ digits ~ optExponent ^^ {
