@@ -25,31 +25,31 @@ case class Context(renderer: TemplateRenderer, data: Any, vars: mutable.HashMap[
     renderer.functions get id.name match {
       case Some(TemplateFunction(_, arity, function)) =>
         if (args.length < arity)
-          error(pos, s"too few arguments for function '${id.name}': expected $arity, found ${args.length}")
+          problem(pos, s"too few arguments for function '${id.name}': expected $arity, found ${args.length}")
         else if (!function.isDefinedAt((this, args)))
-          error(pos, s"cannot apply function '${id.name}' to arguments ${args map (a => s"'$a'") mkString ", "}")
+          problem(pos, s"cannot apply function '${id.name}' to arguments ${args map (a => s"'$a'") mkString ", "}")
         else function((this, args))
       case None =>
         if (args.isEmpty) getVar(id, id.name)
-        else error(pos, s"function found: ${id.name}")
+        else problem(pos, s"function found: ${id.name}")
     }
 
   def getVar(pos: Positional, name: String): Any =
     vars get name match {
       case Some(value) => value
-      case None        => error(pos, s"unknown variable: $name")
+      case None        => problem(pos, s"unknown variable: $name")
     }
 
   def beval(expr: ExprAST): Boolean = !falsy(eval(expr))
 
-  def num(pos: TagParser#Position, v: Any): Num =
+  def num(pos: Positional, v: Any): Num =
     v match {
       case n: Num => n
       case s: String =>
         try {
           BigDecimal(s)
         } catch {
-          case _: NumberFormatException => error(pos, s"not a number: $s")
+          case _: NumberFormatException => problem(pos, s"not a number: $s")
         }
     }
 
@@ -59,34 +59,34 @@ case class Context(renderer: TemplateRenderer, data: Any, vars: mutable.HashMap[
     try {
       neval(expr).toIntExact
     } catch {
-      case _: ArithmeticException => error(expr, "must be an exact \"small\" integer")
+      case _: ArithmeticException => problem(expr, "must be an exact \"small\" integer")
     }
 
   def seval(expr: ExprAST): String =
     eval(expr) match {
       case s: String => s
-      case v         => error(expr, s"field name was expected: $v")
+      case v         => problem(expr, s"field name was expected: $v")
     }
 
   def eval(expr: ExprAST): Any =
     expr match {
       case e: NonStrictExpr => e
       case SeqExpr(elems)   => elems map eval
-      case MapExpr(pairs)   => pairs map { case (TagParserIdent(_, k), pos, v) => (k, restrict(pos, eval(v))) } toMap
+      case MapExpr(pairs)   => pairs map { case (pos @ Ident(k), v) => (k, restrict(pos, eval(v))) } toMap
       case ConditionalAST(cond, yes, no) =>
         if (beval(cond)) eval(yes)
         else if (no.isDefined) eval(no.get)
         else ""
       case OrExpr(left, right)  => beval(left) || beval(right)
       case AndExpr(left, right) => beval(left) && beval(right)
-      case CompareExpr(lpos, left, right) =>
+      case CompareExpr(left, right) =>
         var l = eval(left)
-        var lp = lpos
+        var lp = left
 
         right forall {
-          case ("=", _, expr)  => l == eval(expr)
-          case ("!=", _, expr) => l != eval(expr)
-          case (op, rpos, expr) =>
+          case ("=", expr)  => l == eval(expr)
+          case ("!=", expr) => l != eval(expr)
+          case (op, expr) =>
             val r = eval(expr)
             val res =
               (l, r) match {
@@ -99,7 +99,7 @@ case class Context(renderer: TemplateRenderer, data: Any, vars: mutable.HashMap[
                   }
                 case _ =>
                   val ln = num(lp, l)
-                  val rn = num(rpos, r)
+                  val rn = num(expr, r)
 
                   op match {
                     case "<"   => ln < rn
@@ -114,16 +114,15 @@ case class Context(renderer: TemplateRenderer, data: Any, vars: mutable.HashMap[
             lp = rpos
             res
         }
-
-      case BooleanExpr(b) => b
-      case StringExpr(s)  => unescape(pos, s)
-      case NumberExpr(n)  => n
-      case NullExpr       => null
-      case VarExpr(user, TagParserIdent(pos, name)) =>
-        if (user == "$") getVar(pos, name)
-        else callFunction(pos, name, Nil)
-      case ElementExpr(pos, globalvar, ids) =>
-        lookupSeq(pos, if (globalvar == "$") global else data, ids) match {
+      case BooleanExpr(b)      => b
+      case pos @ StringExpr(s) => unescape(pos, s)
+      case NumberExpr(n)       => n
+      case NullExpr()          => null
+      case VarExpr(user, id) =>
+        if (user == "$") getVar(id.pos, id.name)
+        else callFunction(id, Nil)
+      case ElementExpr(globalvar, ids) =>
+        lookupSeq(if (globalvar == "$") global else data, ids) match {
           case Some(value) => value
           case None        => ()
         }
@@ -135,7 +134,7 @@ case class Context(renderer: TemplateRenderer, data: Any, vars: mutable.HashMap[
         r match
           case s: String   => l.toString ++ s
           case seq: Seq[_] => l.asInstanceOf[Seq[Any]] ++ seq
-          case _           => error(left, "operands of '++' operator must all be either strings or sequences")
+          case _           => problem(left, "operands of '++' operator must all be either strings or sequences")
       case LeftInfixExpr(left, o, right) =>
         val l = neval(left)
         val r = neval(right)
@@ -156,8 +155,8 @@ case class Context(renderer: TemplateRenderer, data: Any, vars: mutable.HashMap[
           case m: collection.Map[_, _] => m.asInstanceOf[collection.Map[Any, _]] getOrElse (eval(index), ())
           case s: collection.Seq[_] =>
             ieval(index) match {
-              case n if n < 0         => error(index, s"negative array index: $n")
-              case n if n >= s.length => error(index, s"array index out of bounds: $n")
+              case n if n < 0         => problem(index, s"negative array index: $n")
+              case n if n >= s.length => problem(index, s"array index out of bounds: $n")
               case n                  => s(n)
             }
           case p: Product =>
@@ -166,11 +165,11 @@ case class Context(renderer: TemplateRenderer, data: Any, vars: mutable.HashMap[
             } map (_._2) getOrElse ()
           case s: String =>
             ieval(index) match {
-              case n if n < 0         => error(index, s"negative array index: $n")
-              case n if n >= s.length => error(index, s"array index out of bounds: $n")
+              case n if n < 0         => problem(index, s"negative array index: $n")
+              case n if n >= s.length => problem(index, s"array index out of bounds: $n")
               case n                  => s(n).toString
             }
-          case v => error(index, s"not indexable: $v")
+          case v => problem(index, s"not indexable: $v")
         }
       case ApplyExpr(name, args) => callFunction(name, args map eval)
       case PipeExpr(left, ApplyExpr(name, args)) =>
@@ -179,19 +178,19 @@ case class Context(renderer: TemplateRenderer, data: Any, vars: mutable.HashMap[
   private def lookup(v: Any, id: Ident): Option[Any] = {
     def tryMethod: Option[Any] =
       if (renderer.methods contains id.name)
-        Some(callFunction(id, id.name, Seq(v)))
+        Some(callFunction(id, Seq(v)))
       else
         None
 
     v match {
-      case ()                      => error(id, s"attempt to lookup property '${id.name}' of undefined")
+      case ()                      => problem(id, s"attempt to lookup property '${id.name}' of undefined")
       case null                    => None
       case m: collection.Map[_, _] => m.asInstanceOf[collection.Map[String, Any]] get id.name orElse tryMethod
       case p: Product =>
         p.productElementNames zip p.productIterator find { case (k, _) =>
           k == id.name
         } map (_._2) orElse tryMethod
-      case _ => tryMethod orElse error(id, s"not an object (i.e., Map or case class): $v")
+      case _ => tryMethod orElse problem(id, s"not an object (i.e., Map or case class): $v")
     }
   }
 

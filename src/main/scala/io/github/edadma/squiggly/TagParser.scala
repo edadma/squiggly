@@ -74,7 +74,7 @@ object TagParser extends StandardTokenParsers with PackratParsers with ImplicitC
   )
 
   lazy val pipe: P[ExprAST] = positioned(
-    applicative ~ ("|" ~> (apply | ident ^^ (n => ApplyExpr(n, Nil)))) ^^ PipeExpr.apply,
+    applicative ~ ("|" ~> (apply | identifier ^^ (n => ApplyExpr(n, Nil)))) ^^ PipeExpr.apply,
   )
 
   lazy val applicative: P[ExprAST] = apply | additive

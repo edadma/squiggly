@@ -15,7 +15,7 @@ package object squiggly {
 
   def restrict(pos: Positional, v: Any): Any =
     v match {
-      case () => error(pos, "attempting to bind a value of 'undefined'")
+      case () => problem(pos, "attempting to bind a value of 'undefined'")
       case _  => v
     }
 
@@ -69,7 +69,7 @@ package object squiggly {
 
   def hex(c: Char): Int = if (c < 128) HEX(c) else 0
 
-  def unescape(pos: TagParser#Position, s: String): String = {
+  def unescape(pos: Positional, s: String): String = {
     val buf = new StringBuilder
     val it = s.iterator
     var idx = -1
@@ -78,7 +78,7 @@ package object squiggly {
       if (it.hasNext) {
         idx += 1
         it.next()
-      } else pos.shift(idx).error("unexpected end of string")
+      } else problem(pos, "unexpected end of string")
 
     while (it.hasNext) {
       ch match {
@@ -95,7 +95,7 @@ package object squiggly {
               case 'r'  => '\r'
               case 't'  => '\t'
               case 'u'  => (hex(ch) << 12 | hex(ch) << 8 | hex(ch) << 4 | hex(ch)).toChar
-              case c    => pos.shift(idx + 1).error(s"non-escapable character: '$c' (${c.toInt})")
+              case c    => problem(pos, s"non-escapable character: '$c' (${c.toInt})") // .shift(idx + 1)
             })
         case c => buf += c
       }

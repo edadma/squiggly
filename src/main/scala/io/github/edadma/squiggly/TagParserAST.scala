@@ -16,7 +16,7 @@ case class BooleanExpr(b: Boolean) extends ExprAST
 
 case class NullExpr() extends ExprAST
 
-case class VarExpr(user: String, name: String) extends ExprAST
+case class VarExpr(user: String, name: Ident) extends ExprAST
 
 case class ElementExpr(global: String, ids: Seq[Ident]) extends ExprAST
 
