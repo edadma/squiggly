@@ -19,19 +19,19 @@ case class Context(renderer: TemplateRenderer, data: Any, vars: mutable.HashMap[
     require(_global != null)
     _global
   }
-  { id.name }
+
   // todo: arguments should have Position for error reporting
   def callFunction(id: Ident, args: Seq[Any]): Any =
     renderer.functions get id.name match {
       case Some(TemplateFunction(_, arity, function)) =>
         if (args.length < arity)
-          problem(pos, s"too few arguments for function '${id.name}': expected $arity, found ${args.length}")
+          problem(id, s"too few arguments for function '${id.name}': expected $arity, found ${args.length}")
         else if (!function.isDefinedAt((this, args)))
-          problem(pos, s"cannot apply function '${id.name}' to arguments ${args map (a => s"'$a'") mkString ", "}")
+          problem(id, s"cannot apply function '${id.name}' to arguments ${args map (a => s"'$a'") mkString ", "}")
         else function((this, args))
       case None =>
         if (args.isEmpty) getVar(id, id.name)
-        else problem(pos, s"function found: ${id.name}")
+        else problem(id, s"function found: ${id.name}")
     }
 
   def getVar(pos: Positional, name: String): Any =
@@ -53,7 +53,7 @@ case class Context(renderer: TemplateRenderer, data: Any, vars: mutable.HashMap[
         }
     }
 
-  def neval(expr: ExprAST): Num = num(pos, eval(expr))
+  def neval(expr: ExprAST): Num = num(expr, eval(expr))
 
   def ieval(expr: ExprAST): Int =
     try {
@@ -111,7 +111,7 @@ case class Context(renderer: TemplateRenderer, data: Any, vars: mutable.HashMap[
               }
 
             l = r
-            lp = rpos
+            lp = expr
             res
         }
       case BooleanExpr(b)      => b
@@ -119,7 +119,7 @@ case class Context(renderer: TemplateRenderer, data: Any, vars: mutable.HashMap[
       case NumberExpr(n)       => n
       case NullExpr()          => null
       case VarExpr(user, id) =>
-        if (user == "$") getVar(id.pos, id.name)
+        if (user == "$") getVar(id, id.name)
         else callFunction(id, Nil)
       case ElementExpr(globalvar, ids) =>
         lookupSeq(if (globalvar == "$") global else data, ids) match {
@@ -129,7 +129,7 @@ case class Context(renderer: TemplateRenderer, data: Any, vars: mutable.HashMap[
       case PrefixExpr("not", expr) => !beval(expr)
       case LeftInfixExpr(left, "++", right) =>
         val l = eval(left)
-        val r = neval(right)
+        val r = eval(right)
 
         r match
           case s: String   => l.toString ++ s

@@ -76,6 +76,6 @@ case class WithAST(expr: ExprAST) extends SimpleBlockAST
 
 case class ForAST(index: Option[(Ident, Option[Ident])], expr: ExprAST) extends SimpleBlockAST
 
-case class DefineAST(name: String) extends BasicBlockAST
+case class DefineAST(name: Ident) extends BasicBlockAST
 
-case class BlockAST(name: String, expr: ExprAST) extends BasicBlockAST
+case class BlockAST(name: Ident, expr: ExprAST) extends BasicBlockAST

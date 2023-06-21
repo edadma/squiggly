@@ -93,8 +93,7 @@ class TemplateRenderer(
                   case s: String => s
                   case v         => render(v)
                 })
-            case TagToken(_, AssignmentAST(Ident(name), expr), _, _) =>
-              context.vars(name) = context.eval(expr)
+            case TagToken(_, AssignmentAST(name, expr), _, _) => context.vars(name) = context.eval(expr)
             case TagToken(_, ReturnAST(expr), _, _) =>
               returnValue = expr map context.eval getOrElse ()
               throw new ReturnException
