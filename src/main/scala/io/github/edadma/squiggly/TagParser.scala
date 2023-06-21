@@ -68,49 +68,51 @@ object TagParser extends StandardTokenParsers with PackratParsers with ImplicitC
 
   lazy val relational: P[ExprAST] = positioned(
     pipe ~ rep1(("<" | ">" | "<=" | ">=" | "=" | "!=" | "div") ~ pipe ^^ Tuple2.apply) ^^ CompareExpr.apply
-      | pipe
+      | pipe,
   )
 
   lazy val pipe: P[ExprAST] = positioned(
-    applicative ~ ("|" ~> (apply | ident ^^ (n => ApplyExpr(n, Nil)))) ^^ PipeExpr.apply
+    applicative ~ ("|" ~> (apply | ident ^^ (n => ApplyExpr(n, Nil)))) ^^ PipeExpr.apply,
+  )
 
   lazy val applicative: P[ExprAST] = apply | additive
 
-
-  def apply: Rule1[ApplyExpr] =
-    rule(identnsp ~ test(cursorChar != '.' && cursorChar != '[') ~ sp ~ oneOrMore(additive) ~> ApplyExpr)
+  lazy val apply: P[ApplyExpr] =
+    ident ~ rep1(additive) ^^ ApplyExpr.apply
 
   lazy val additive: P[ExprAST] = positioned(
     additive ~ ("++" | "+" | "-") ~ multiplicative ^^ LeftInfixExpr.apply
       | multiplicative,
   )
 
-  lazy val multiplicative: P[Expr] = positioned(
+  lazy val multiplicative: P[ExprAST] = positioned(
     multiplicative ~ ("*" | "/" | "\\" | "mod") ~ negative ^^ LeftInfixExpr.apply
       | negative,
   )
 
-  lazy val negative: P[Expr] = positioned(
+  lazy val negative: P[ExprAST] = positioned(
     "-" ~ negative ^^ PrefixExpr.apply
       | exponentiation,
   )
 
-  lazy val exponentiation: P[Expr] = positioned(
-    index ~ "^" ~ negative ^^ Binary.apply
+  lazy val exponentiation: P[ExprAST] = positioned(
+    index ~ "^" ~ negative ^^ RightInfixExpr.apply
       | index,
   )
 
-  lazy val index: P[Expr] = positioned(
+  lazy val index: P[ExprAST] = positioned(
     primary ~ "[" ~ expression ~ "]" ~> IndexExpr
       | primary ~ "." ~ ident ~> MethodExpr
       | primary,
   )
 
-  lazy val primary: P[Expr] = positioned(
+  lazy val decimal: P[BigDecimal] = numericLit ^^ BigDecimal.apply
+
+  lazy val primary: P[ExprAST] = positioned(
     "true" ^^^ BooleanExpr(true)
-      |"fasle" ^^^ BooleanExpr(false)
-    | ident ^^ Name.apply
-      | numericLit ^^ NumericLit.apply
-      | stringLit ^^ StringLit.apply
+      | "false" ^^^ BooleanExpr(false)
+      // | ident ^^ Name.apply
+      | decimal ^^ NumberExpr.apply
+      // | stringLit ^^ StringLit.apply
       | "(" ~> expression <~ ")",
   )
