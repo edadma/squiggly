@@ -82,7 +82,7 @@ class TemplateRenderer(
               def render(v: Any): String =
                 v match {
                   case s: collection.Seq[_]    => s.mkString("[", ", ", "]")
-                  case m: collection.Map[_, _] => m map { case (k, v) => s"$k: ${render(v)}" } mkString ("[", ", ", "]")
+                  case m: collection.Map[_, _] => m map { case (k, v) => s"$k: ${render(v)}" } mkString ("{", ", ", "}")
                   case s: String               => s""""$s""""
                   case null | ()               => ""
                   case v                       => v.toString

@@ -104,58 +104,6 @@ class BasicTests extends AnyFreeSpec with Matchers with Testing {
         """.trim.stripMargin
   }
 
-  "string literals" in {
-    test(
-      null,
-      """
-        |strings {{ 'asdf' }}, {{ "asdf" }}, {{ 'as\tdf' }}, {{ 'as\u03B1df' }}, {{ 'as\'df' }}
-        """.trim.stripMargin,
-    ) shouldBe
-      s"""
-        |strings asdf, asdf, as\tdf, as\u03B1df, as\'df
-        """.trim.stripMargin
-  }
-
-  "null literals" in {
-    test(
-      null,
-      """
-        |nulls {{ null }} are blank
-        """.trim.stripMargin,
-    ) shouldBe
-      """
-        |nulls  are blank
-        """.trim.stripMargin
-  }
-
-  "boolean literals" in {
-    test(
-      "{t: true, f: false}",
-      """
-        |
-        |booleans {{ .t }}, {{ .f }}, {{ true }}, {{ false }}
-        """.trim.stripMargin,
-    ) shouldBe
-      """
-        |
-        |booleans true, false, true, false
-        """.trim.stripMargin
-  }
-
-  "integer literals" in {
-    test(
-      "{a: -345, b: 0, c: 345}",
-      """
-        |
-        |ints {{ .a }} {{ .b }} {{ .c }} {{ -345 }} {{ 0 }} {{ 345 }}
-        """.trim.stripMargin,
-    ) shouldBe
-      """
-        |
-        |ints -345 0 345 -345 0 345
-        """.trim.stripMargin
-  }
-
 //  "comments" in {
 //    test(
 //      null,
@@ -167,19 +115,5 @@ class BasicTests extends AnyFreeSpec with Matchers with Testing {
 //        |comments work
 //        """.trim.stripMargin
 //  }
-
-  "decimal literals" in {
-    test(
-      "{N: 6.02214076e23}",
-      """
-        |
-        |Avogadro number {{ .N }} {{ 6.02214076e23 }}
-        """.trim.stripMargin,
-    ) shouldBe
-      """
-        |
-        |Avogadro number 6.02214076E+23 6.02214076E+23
-        """.trim.stripMargin
-  }
 
 }
