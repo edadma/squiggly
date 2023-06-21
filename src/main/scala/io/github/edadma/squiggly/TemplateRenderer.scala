@@ -3,6 +3,7 @@ package io.github.edadma.squiggly
 import java.io.{OutputStream, PrintStream}
 import scala.collection.{MapView, mutable}
 import scala.language.postfixOps
+import pprint.pprintln
 
 object TemplateRenderer {
 
@@ -72,7 +73,7 @@ class TemplateRenderer(
 
                 render(context.copy(data = v), body)
               }
-            case v => error(expr, s"'for' can only be applied to an iterable object: $v")
+            case v => problem(expr, s"'for' can only be applied to an iterable object: $v")
           }
         case ContentAST(toks) =>
           toks foreach {

@@ -5,7 +5,7 @@ import io.github.edadma.squiggly.{TemplateParser, TemplateRenderer /*, platform*
 
 import scala.collection.immutable.VectorMap
 
-object Main {
+@main def run1: Unit =
 
   //  case class Task(task: String, done: Boolean)
   //
@@ -54,15 +54,13 @@ object Main {
   //    |""".trim.stripMargin
   val template =
     """
-    |{{ .['b'] }}
+    |{{ for 3 }}{{ . }}{{ end }}
     |""".trim.stripMargin
   val ast = TemplateParser.default.parse(template)
   //  val ast = TemplateParser.default.parse(readFile("bulma.min.css"))
 
   //  pprint.pprintln(ast)
   TemplateRenderer.default.render(data, ast)
-
-}
 
 // todo: tags should be allowed to occupy multiple lines
 // todo: implement break/continue https://shopify.github.io/liquid/tags/control-flow/
