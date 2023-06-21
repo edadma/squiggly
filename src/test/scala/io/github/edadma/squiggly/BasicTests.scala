@@ -116,6 +116,18 @@ class BasicTests extends AnyFreeSpec with Matchers with Testing {
         """.trim.stripMargin
   }
 
+  "null literals" in {
+    test(
+      null,
+      """
+        |nulls {{ null }} are blank
+        """.trim.stripMargin,
+    ) shouldBe
+      """
+        |nulls  are blank
+        """.trim.stripMargin
+  }
+
   "boolean literals" in {
     test(
       "{t: true, f: false}",
