@@ -54,17 +54,10 @@ import scala.collection.immutable.VectorMap
   //    |""".trim.stripMargin
   val template =
     """
-    |{{- .b }}
+    |asdf {{ xnow }}
     |""".trim.stripMargin
   val ast = TemplateParser.default.parse(template)
   //  val ast = TemplateParser.default.parse(readFile("bulma.min.css"))
 
   //  pprint.pprintln(ast)
   TemplateRenderer.default.render(data, ast)
-
-// todo: tags should be allowed to occupy multiple lines
-// todo: implement break/continue https://shopify.github.io/liquid/tags/control-flow/
-// todo: implement 'capture' https://shopify.github.io/liquid/tags/variable/
-// todo: implement 'unless' https://shopify.github.io/liquid/tags/control-flow/
-// todo: implement 'no output' https://shopify.github.io/liquid/tags/template/
-// todo: add boolean test for null and undefined

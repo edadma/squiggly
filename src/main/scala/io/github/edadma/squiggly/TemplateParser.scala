@@ -197,8 +197,6 @@ class TemplateParser(
         case None => r.error("unclosed tag")
         case Some(Some((tag, rest))) =>
           if (buf.isEmpty) {
-            if (tag contains '\n') r.error("a tag may not occupy more than one line")
-
             val trimLeft = tag.length >= 2 && tag.startsWith("-") && tag(1).isWhitespace
             val tag1 = if (trimLeft) tag drop 2 else tag
             val trimRight = tag1.length >= 2 && tag1.endsWith("-") && tag1(tag1.length - 2).isWhitespace

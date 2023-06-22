@@ -1,5 +1,7 @@
 package io.github.edadma.squiggly
 
+import io.github.edadma.char_reader.CharReader
+
 import java.io.PrintStream
 import scala.annotation.tailrec
 import scala.collection.mutable
@@ -35,10 +37,9 @@ case class Context(renderer: TemplateRenderer, data: Any, vars: mutable.HashMap[
     }
 
   def getVar(pos: Positional, name: String): Any =
-    vars get name match {
+    vars get name match
       case Some(value) => value
       case None        => problem(pos, s"unknown variable: $name")
-    }
 
   def beval(expr: ExprAST): Boolean = !falsy(eval(expr))
 
