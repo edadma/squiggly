@@ -6,7 +6,7 @@ import io.github.edadma.cross_platform._
 //import platform._
 import pprint.pprintln
 
-object Main extends App {
+@main def run(args: String*): Unit =
 
   case class Config(
       dataFile: Option[String] = None,
@@ -17,7 +17,7 @@ object Main extends App {
   )
 
   val builder = OParser.builder[Config]
-  val parser = {
+  val parser =
     import builder._
 
     // todo: add -t templatename=file,...
@@ -36,8 +36,7 @@ object Main extends App {
 
     OParser.sequence(
       programName("squiggly"),
-      head("Squiggly Template Engine", "v0.1.15"),
-      note(section("first section")),
+      head("Squiggly Template Engine", "v0.1.16"),
       opt[Unit]('a', "ast")
         .optional()
         .action((_, c) => c.copy(ast = true))
@@ -47,7 +46,6 @@ object Main extends App {
         .optional()
         .action((d, c) => c.copy(dataString = d))
         .text("YAML document"),
-      note(section("asdf")),
       opt[Option[String]]('f', "template")
         .valueName("<file>")
         .optional()
@@ -59,7 +57,6 @@ object Main extends App {
           else failure("file must exist and be a readable file")
         }
         .text("template file"),
-      note(section("asdf dfgh")),
       help('h', "help").text("prints this usage text"),
       version('v', "version").text("prints the version"),
       opt[Option[String]]('y', "yaml")
@@ -78,15 +75,13 @@ object Main extends App {
         .action((t, c) => c.copy(templateString = t))
         .text(s"template string"),
     )
-  }
 
-  OParser.parse(parser, args, Config()) match {
+  OParser.parse(parser, args, Config()) match
     case Some(Config(_, _, None, None, _)) => println(OParser.usage(parser))
     case Some(conf)                        => app(conf)
     case _                                 =>
-  }
 
-  def app(c: Config): Unit = {
+  def app(c: Config): Unit =
     val data: Any =
       if (c.dataFile.isDefined) yaml(readFile(c.dataFile.get))
       else if (c.dataString.isDefined) yaml(c.dataString.get)
@@ -101,11 +96,7 @@ object Main extends App {
 
     val ast = new TemplateParser().parse(template)
 
-    if (c.ast) pprintln(ast)
-    else {
+    if c.ast then pprintln(ast)
+    else
       TemplateRenderer.default.render(data, ast)
       println()
-    }
-  }
-
-}

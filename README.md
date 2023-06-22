@@ -1,4 +1,4 @@
-<img align="right" src="logos/squiggly1-200.png" alt="squiggly logo">
+<img style="float: right" src="logos/squiggly1-200.png" alt="squiggly logo">
 
 squiggly
 ========
@@ -35,7 +35,7 @@ Include the following in your `build.sbt`:
 ```sbt
 resolvers += Resolver.githubPackages("edadma")
 
-libraryDependencies += "io.github.edadma" %%% "squiggly" % "0.1.15"
+libraryDependencies += "io.github.edadma" %%% "squiggly" % "0.1.16"
 
 ```
 
@@ -158,7 +158,7 @@ squiggly -h
 to get the following usage text:
 
 ```
-Squiggly v0.1.15
+Squiggly v0.1.16
 Usage: squiggly [options] [[<template>]]
 
   -a, --ast              pretty print AST

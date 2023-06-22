@@ -54,7 +54,7 @@ import scala.collection.immutable.VectorMap
   //    |""".trim.stripMargin
   val template =
     """
-    |asdf {{ xnow }}
+    |asdf {{ unix now }}
     |""".trim.stripMargin
   val ast = TemplateParser.default.parse(template)
   //  val ast = TemplateParser.default.parse(readFile("bulma.min.css"))
