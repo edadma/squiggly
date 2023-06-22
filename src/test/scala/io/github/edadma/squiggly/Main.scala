@@ -5,7 +5,7 @@ import io.github.edadma.squiggly.{TemplateParser, TemplateRenderer /*, platform*
 
 import scala.collection.immutable.VectorMap
 
-def run1: Unit =
+@main def run1(): Unit =
 
   //  case class Task(task: String, done: Boolean)
   //
@@ -54,7 +54,7 @@ def run1: Unit =
   //    |""".trim.stripMargin
   val template =
     """
-    |{{ default 'asdf' (.a) }}
+    |{{- .b }}
     |""".trim.stripMargin
   val ast = TemplateParser.default.parse(template)
   //  val ast = TemplateParser.default.parse(readFile("bulma.min.css"))
