@@ -69,6 +69,12 @@ lazy val squiggly = crossProject(JSPlatform, JVMPlatform, NativePlatform)
   )
   .nativeSettings(
     libraryDependencies += "org.scala-js" %% "scalajs-stubs" % "1.1.0" % "provided",
+    // scala-java-time provides java.time on Scala Native; the en-US CLDR
+    // locale data (separate jar from the scala-java-locales API) is what
+    // makes DateTimeFormatter resolve month/day names — without it, MMM /
+    // MMMM / EEEE render as numeric stubs ("M03" instead of "Mar").
+    libraryDependencies += "io.github.cquiroz" %%% "scala-java-time"          % "2.6.0",
+    libraryDependencies += "io.github.cquiroz" %%% "locales-minimal-en_us-db" % "1.5.4",
   )
   .jsSettings(
     jsEnv := new org.scalajs.jsenv.nodejs.NodeJSEnv(),
@@ -77,6 +83,8 @@ lazy val squiggly = crossProject(JSPlatform, JVMPlatform, NativePlatform)
     Test / scalaJSUseMainModuleInitializer := false,
     Test / scalaJSUseTestModuleInitializer := true,
     scalaJSUseMainModuleInitializer        := true,
+    libraryDependencies += "io.github.cquiroz" %%% "scala-java-time"          % "2.6.0",
+    libraryDependencies += "io.github.cquiroz" %%% "locales-minimal-en_us-db" % "1.5.4",
   )
 
 lazy val root = project

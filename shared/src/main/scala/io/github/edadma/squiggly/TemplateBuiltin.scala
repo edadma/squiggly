@@ -1,6 +1,9 @@
 package io.github.edadma.squiggly
 
 import java.math.{MathContext, RoundingMode}
+import java.time.{Instant, LocalDate, OffsetDateTime, ZoneOffset}
+import java.time.format.{DateTimeFormatter, DateTimeParseException}
+import java.util.Locale
 import io.github.edadma.cross_platform._
 
 import scala.collection.mutable
@@ -9,15 +12,67 @@ import scala.language.postfixOps
 import scala.util.Random
 import scala.util.matching.Regex
 
-// TODO: the following builtins were dropped during the parboiled→combinator
-// rewrite because they pulled in JVM-only or unmaintained dependencies:
-//   - now/time/unix/format and the DATE_*_FORMAT constants  (Datetime/DatetimeFormatter)
-//   - emojify                                                (io.github.edadma.emoji)
-//   - absURL/relURL                                          (java.nio.file.Paths — JVM only)
-//   - markdownify                                            (commonmark)
-// Reintroduce on java.time / a cross-platform path joiner / `markdown` when needed.
+// TODO: the following builtins remain stubbed out:
+//   - emojify     (io.github.edadma.emoji — not yet cross-built for Scala 3)
+//   - absURL/relURL (need a cross-platform path joiner; java.nio.file.Paths is JVM-only)
+//   - markdownify (will use the local `markdown` library once we wire it up)
+// Date / time builtins (now / time / unix / format) live below on java.time;
+// `scala-java-time` 2.6.0 supplies that on JS and Native.
 
 object TemplateBuiltin {
+
+  // Date formatting locale. Pinned to en-US explicitly because the default
+  // locale on Scala Native (and on Scala.js without configuration) is ROOT,
+  // which renders MMM/MMMM/EEEE as numeric stubs ("M03" instead of "Mar")
+  // because CLDR data isn't available for the empty locale tag.
+  private val DATE_LOCALE = Locale.US
+
+  // Named date formats used by `format ':date_*' <date>`. Patterns are
+  // explicit (rather than DateTimeFormatter.ofLocalizedDate(FormatStyle.FULL))
+  // so output is identical across JVM, JS, and Native regardless of the
+  // ambient locale.
+  private val DATE_FULL_FORMAT   = DateTimeFormatter.ofPattern("EEEE, MMMM d, uuuu", DATE_LOCALE)
+  private val DATE_LONG_FORMAT   = DateTimeFormatter.ofPattern("MMMM d, uuuu",       DATE_LOCALE)
+  private val DATE_MEDIUM_FORMAT = DateTimeFormatter.ofPattern("MMM d, uuuu",        DATE_LOCALE)
+  private val DATE_SHORT_FORMAT  = DateTimeFormatter.ofPattern("M/d/uu",             DATE_LOCALE)
+
+  /** Parse a string as one of: OffsetDateTime ("...Z" / "...+HH:MM" — preferred),
+    * Instant, or LocalDate. Throws if none of those match.
+    */
+  private def parseDateTime(s: String): Any =
+    try OffsetDateTime.parse(s)
+    catch
+      case _: DateTimeParseException =>
+        try Instant.parse(s)
+        catch
+          case _: DateTimeParseException =>
+            try LocalDate.parse(s)
+            catch case _: DateTimeParseException => sys.error(s"not a date/time: $s")
+
+  /** Convert any supported date/time-ish value to epoch milliseconds. */
+  private def epochMillis(v: Any): Long = v match
+    case d: OffsetDateTime => d.toInstant.toEpochMilli
+    case i: Instant        => i.toEpochMilli
+    case d: LocalDate      => d.atStartOfDay(ZoneOffset.UTC).toInstant.toEpochMilli
+    case s: String         => epochMillis(parseDateTime(s))
+    case other             => sys.error(s"not a date/time: $other")
+
+  /** Format any supported date/time-ish value with the given pattern. */
+  private def formatDate(pattern: String, v: Any): String =
+    val fmt = DateTimeFormatter.ofPattern(pattern, DATE_LOCALE)
+    v match
+      case d: OffsetDateTime => fmt.format(d)
+      case i: Instant        => fmt.format(i.atOffset(ZoneOffset.UTC))
+      case d: LocalDate      => fmt.format(d)
+      case s: String         => formatDate(pattern, parseDateTime(s))
+      case other             => sys.error(s"not a date/time: $other")
+
+  private def formatNamed(fmt: DateTimeFormatter, v: Any): String = v match
+    case d: OffsetDateTime => fmt.format(d)
+    case i: Instant        => fmt.format(i.atOffset(ZoneOffset.UTC))
+    case d: LocalDate      => fmt.format(d)
+    case s: String         => formatNamed(fmt, parseDateTime(s))
+    case other             => sys.error(s"not a date/time: $other")
 
   val namespaces: Map[String, Map[String, TemplateFunction]] =
     Map(
@@ -132,7 +187,17 @@ object TemplateBuiltin {
           n.round(new MathContext(n.mc.getPrecision, RoundingMode.FLOOR))
         },
       ),
-      // TODO: format — date formatting; reintroduce on java.time.format.DateTimeFormatter.
+      TemplateFunction(
+        "format",
+        2,
+        {
+          case (con, Seq(":date_full",   v: Any)) => formatNamed(DATE_FULL_FORMAT,   v)
+          case (con, Seq(":date_long",   v: Any)) => formatNamed(DATE_LONG_FORMAT,   v)
+          case (con, Seq(":date_medium", v: Any)) => formatNamed(DATE_MEDIUM_FORMAT, v)
+          case (con, Seq(":date_short",  v: Any)) => formatNamed(DATE_SHORT_FORMAT,  v)
+          case (con, Seq(pattern: String, v: Any)) => formatDate(pattern, v)
+        },
+      ),
       // todo: https://gohugo.io/functions/getenv/
       // todo: https://gohugo.io/functions/group/
       TemplateFunction("head", 1, { case (con, Seq(s: Seq[_])) => s.head }),
@@ -213,7 +278,7 @@ object TemplateBuiltin {
           case (con, Seq(s: Iterable[_])) => s.nonEmpty
         },
       ),
-      // TODO: now — was `Datetime.now().timestamp`; reintroduce on java.time.
+      TemplateFunction("now", 0, _ => OffsetDateTime.now()),
       TemplateFunction("newline_to_br", 1, { case (con, Seq(s: String)) => s.replace("\n", "<br />\n") }),
       TemplateFunction("number", 1, { case (con, Seq(s: String)) => BigDecimal(s) }),
       // todo: https://gohugo.io/functions/path.base/
@@ -320,7 +385,7 @@ object TemplateBuiltin {
           case (con, Seq(n: Num, s: String))      => s takeRight n.toIntExact
         },
       ),
-      // TODO: time — was `Datetime.fromString(s)`; reintroduce on java.time parsing.
+      TemplateFunction("time", 1, { case (con, Seq(s: String)) => parseDateTime(s) }),
       // todo: https://gohugo.io/functions/title/ https://en.wikipedia.org/wiki/Title_case
       TemplateFunction("toSeq", 1, { case (con, Seq(s: Iterable[_])) => s.toSeq }),
       TemplateFunction("toString", 1, { case (con, Seq(a: Any)) => a.toString }),
@@ -413,7 +478,7 @@ object TemplateBuiltin {
           (s1 to mutable.LinkedHashSet) union (s2 to mutable.LinkedHashSet) toList
         },
       ),
-      // TODO: unix — was `BigDecimal(d.epochMillis)`; reintroduce on java.time.
+      TemplateFunction("unix", 1, { case (con, Seq(v: Any)) => BigDecimal(epochMillis(v)) }),
       // todo: https://gohugo.io/functions/transform.unmarshal/
       TemplateFunction("upper", 1, { case (con, Seq(s: String)) => s.toUpperCase }),
       TemplateFunction(

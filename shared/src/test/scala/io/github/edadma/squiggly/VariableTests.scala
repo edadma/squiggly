@@ -62,11 +62,11 @@ class VariableTests extends AnyFreeSpec with Matchers with Testing {
         """.trim.stripMargin
   }
 
-  // TODO: vars 6/9 depend on automatic timestamp parsing AND the `unix`
-  // builtin function. Both were dropped during the parboiled→combinator
-  // rewrite (no Datetime library, no unix builtin). Reintroduce as part of
-  // the date-support follow-up (java.time-based now/time/unix/format).
-  "vars 6" ignore {
+  // JSON has no native timestamp type, so the bare-string flavour of these
+  // tests is now a String going in. The renderer's `.unix` accessor reaches
+  // through `tryMethod` to the `unix` builtin (arity 1), which auto-parses
+  // ISO strings via java.time.
+  "vars 6" in {
     testJson(
       "\"2021-10-04T21:16:20.239Z\"",
       """
@@ -102,8 +102,7 @@ class VariableTests extends AnyFreeSpec with Matchers with Testing {
         """.trim.stripMargin
   }
 
-  // TODO: vars 9 — uses the `unix` builtin via `date.unix`. See vars 6.
-  "vars 9" ignore {
+  "vars 9" in {
     testJson(
       """{"date": "2021-10-04T21:16:20.239Z"}""",
       """

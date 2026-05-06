@@ -63,26 +63,30 @@ class FunctionTests extends AnyFreeSpec with Matchers with Testing {
     test(null, """{{ 'not the default' | default 'asdf' }}""") shouldBe """not the default"""
   }
 
-  // TODO: format 1–5 depend on the `format` builtin (date formatting). It was
-  // dropped along with the Datetime library; reintroduce on java.time.
-  "format 1" ignore {
+  // The `format` builtin auto-parses ISO date strings; the named formats
+  // (`:date_full` / `:date_long` / `:date_medium` / `:date_short`) and
+  // arbitrary java.time DateTimeFormatter patterns are both supported.
+  "format 1" in {
     testJson("\"2021-03-04\"", """{{ format ':date_full' . }}""") shouldBe "Thursday, March 4, 2021"
   }
 
-  "format 2" ignore {
+  "format 2" in {
     testJson("\"2021-03-04\"", """{{ . | format ':date_long' }}""") shouldBe "March 4, 2021"
   }
 
-  "format 3" ignore {
+  "format 3" in {
     testJson("\"2021-03-04\"", """{{ format ':date_medium' . }}""") shouldBe "Mar 4, 2021"
   }
 
-  "format 4" ignore {
+  "format 4" in {
     testJson("\"2021-03-04\"", """{{ format ':date_short' . }}""") shouldBe "3/4/21"
   }
 
-  "format 5" ignore {
-    testJson("\"2021-03-04\"", """{{ format 'D MMM YY' . }}""") shouldBe "4 Mar 21"
+  // Format string is a java.time `DateTimeFormatter` pattern. The original
+  // YAML-era test used "D MMM YY" (Hugo-style codes); the equivalent
+  // java.time pattern is "d MMM uu".
+  "format 5" in {
+    testJson("\"2021-03-04\"", """{{ format 'd MMM uu' . }}""") shouldBe "4 Mar 21"
   }
 
 }
