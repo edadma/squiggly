@@ -1,14 +1,46 @@
-ThisBuild / licenses += "ISC" -> url("https://opensource.org/licenses/ISC")
-ThisBuild / versionScheme := Some("semver-spec")
+import xerial.sbt.Sonatype.sonatypeCentralHost
 
-publish / skip := true
+ThisBuild / licenses               := Seq("ISC" -> url("https://opensource.org/licenses/ISC"))
+ThisBuild / versionScheme          := Some("semver-spec")
+ThisBuild / evictionErrorLevel     := Level.Warn
+ThisBuild / scalaVersion           := "3.8.3"
+ThisBuild / organization           := "io.github.edadma"
+ThisBuild / organizationName       := "edadma"
+ThisBuild / organizationHomepage   := Some(url("https://github.com/edadma"))
+ThisBuild / version                := "0.2.0"
+ThisBuild / description            := "A Scala 3 string templating engine inspired by Hugo and Liquid"
+ThisBuild / sonatypeCredentialHost := sonatypeCentralHost
 
-lazy val squiggly = project
+ThisBuild / publishConfiguration := publishConfiguration.value.withOverwrite(true).withChecksums(Vector.empty)
+ThisBuild / resolvers += Resolver.mavenLocal
+ThisBuild / resolvers += Resolver.sonatypeCentralSnapshots
+ThisBuild / resolvers += Resolver.sonatypeCentralRepo("releases")
+
+ThisBuild / sonatypeProfileName := "io.github.edadma"
+
+ThisBuild / scmInfo := Some(
+  ScmInfo(
+    url("https://github.com/edadma/squiggly"),
+    "scm:git@github.com:edadma/squiggly.git",
+  ),
+)
+ThisBuild / developers := List(
+  Developer(
+    id = "edadma",
+    name = "Edward A. Maxedon, Sr.",
+    email = "edadma@gmail.com",
+    url = url("https://github.com/edadma"),
+  ),
+)
+
+ThisBuild / homepage := Some(url("https://github.com/edadma/squiggly"))
+
+ThisBuild / publishTo := sonatypePublishToBundle.value
+
+lazy val squiggly = crossProject(JSPlatform, JVMPlatform, NativePlatform)
   .in(file("."))
   .settings(
     name := "squiggly",
-    version := "0.1.16",
-    scalaVersion := "3.3.0",
     scalacOptions ++=
       Seq(
         "-deprecation",
@@ -19,45 +51,39 @@ lazy val squiggly = project
         "-language:existentials",
         "-language:dynamics",
       ),
-    organization := "io.github.edadma",
-    githubOwner := "edadma",
-    githubRepository := name.value,
-    resolvers += Resolver.githubPackages("edadma"),
-    mainClass := Some(s"${organization.value}.${name.value}.Main"),
-    libraryDependencies += "org.scalatest" %% "scalatest" % "3.2.12" % "test",
     libraryDependencies ++= Seq(
-//      "io.github.edadma" %%% "cross-platform" % "0.1.5",
-      "io.github.edadma" %% "char-reader" % "0.1.11",
-      "io.github.edadma" %% "datetime" % "0.1.17",
-//      "io.github.edadma" %%% "commonmark" % "0.1.0-pre.20",
-      "io.github.edadma" %% "emoji" % "0.1.1",
-      "io.github.edadma" %% "yaml" % "0.1.12",
+      "org.scalatest"          %%% "scalatest"                % "3.2.19" % "test",
+      "com.github.scopt"       %%% "scopt"                    % "4.1.0",
+      "com.lihaoyi"            %%% "pprint"                   % "0.9.0"  % "test",
+      "org.scala-lang.modules" %%% "scala-parser-combinators" % "2.4.0",
+      "io.github.edadma"       %%% "char_reader"              % "0.1.25",
+      "io.github.edadma"       %%% "cross_platform"           % "0.1.5",
+      "dev.zio"                %%% "zio-json"                 % "0.7.42",
     ),
-    libraryDependencies ++= Seq(
-      "com.github.scopt" %% "scopt" % "4.0.1",
-      "com.lihaoyi" %% "pprint" % "0.7.3" /*% "test"*/,
-      "org.scala-lang.modules" %% "scala-parser-combinators" % "2.1.1",
-    ),
-    publishMavenStyle := true,
+    publishMavenStyle      := true,
     Test / publishArtifact := false,
-    licenses += "ISC" -> url("https://opensource.org/licenses/ISC"),
   )
-/*
   .jvmSettings(
     libraryDependencies += "org.scala-js" %% "scalajs-stubs" % "1.1.0" % "provided",
-    libraryDependencies += "io.github.edadma" %% "yaml" % "0.1.12",
+    Compile / mainClass := Some("io.github.edadma.squiggly.run"),
   )
- */
-/*.nativeSettings(
-    nativeLinkStubs := true,
-    libraryDependencies += "io.github.edadma" %%% "libyaml" % "0.1.8"
-  )*/
-/*.jsSettings(
+  .nativeSettings(
+    libraryDependencies += "org.scala-js" %% "scalajs-stubs" % "1.1.0" % "provided",
+  )
+  .jsSettings(
     jsEnv := new org.scalajs.jsenv.nodejs.NodeJSEnv(),
-    //    Test / scalaJSUseMainModuleInitializer := true,
-    //    Test / scalaJSUseTestModuleInitializer := false,
+    scalaJSLinkerConfig ~= { _.withModuleKind(ModuleKind.ESModule) },
+    scalaJSLinkerConfig ~= { _.withSourceMap(false) },
     Test / scalaJSUseMainModuleInitializer := false,
     Test / scalaJSUseTestModuleInitializer := true,
-    scalaJSUseMainModuleInitializer := true,
-    libraryDependencies += "io.github.edadma" %%% "yaml" % "0.1.11"
-  )*/
+    scalaJSUseMainModuleInitializer        := true,
+  )
+
+lazy val root = project
+  .in(file("."))
+  .aggregate(squiggly.jvm, squiggly.js, squiggly.native)
+  .settings(
+    name                := "squiggly",
+    publish / skip      := true,
+    publishLocal / skip := true,
+  )
