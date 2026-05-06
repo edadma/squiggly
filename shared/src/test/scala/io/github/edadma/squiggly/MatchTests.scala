@@ -6,7 +6,7 @@ import org.scalatest.matchers.should.Matchers
 class MatchTests extends AnyFreeSpec with Matchers with Testing {
 
   "match 1" in {
-    test("3",
+    testJson("3",
          """
           |[{{ match . }}{{ case 3 }}three{{ end }}]
           """.trim.stripMargin) shouldBe
@@ -56,7 +56,7 @@ class MatchTests extends AnyFreeSpec with Matchers with Testing {
   }
 
   "match 5a" in {
-    test("4",
+    testJson("4",
          """
           |[{{ match . }}{{ case 3 }}three{{ case 4 }}four{{ else }}none{{ end }}]
           """.trim.stripMargin) shouldBe
@@ -66,7 +66,7 @@ class MatchTests extends AnyFreeSpec with Matchers with Testing {
   }
 
   "match 5b" in {
-    test("5",
+    testJson("5",
          """
           |[{{ match . }}{{ case 3 }}three{{ case 4 }}four{{ else }}none{{ end }}]
           """.trim.stripMargin) shouldBe
@@ -76,7 +76,7 @@ class MatchTests extends AnyFreeSpec with Matchers with Testing {
   }
 
   "match 6" in {
-    test("3",
+    testJson("3",
          """
           |[{{ match . }}{{ case 3 }}three{{ case 4 }}four{{ end }}]
           """.trim.stripMargin) shouldBe
@@ -86,7 +86,7 @@ class MatchTests extends AnyFreeSpec with Matchers with Testing {
   }
 
   "match 7" in {
-    test("4",
+    testJson("4",
          """
           |[{{ match . }}{{ case 3 }}three{{ case 4 }}four{{ end }}]
           """.trim.stripMargin) shouldBe
@@ -96,7 +96,7 @@ class MatchTests extends AnyFreeSpec with Matchers with Testing {
   }
 
   "match 8" in {
-    test("5",
+    testJson("5",
          """
           |[{{ match . }}{{ case 3 }}three{{ case 4 }}four{{ end }}]
           """.trim.stripMargin) shouldBe
@@ -106,7 +106,7 @@ class MatchTests extends AnyFreeSpec with Matchers with Testing {
   }
 
   "match 9" in {
-    test("3",
+    testJson("3",
          """
           |[{{ match . }}{{ case 3 }}three{{ case 4 }}four{{ case 5 }}five{{ else }}none{{ end }}]
           """.trim.stripMargin) shouldBe
@@ -116,7 +116,7 @@ class MatchTests extends AnyFreeSpec with Matchers with Testing {
   }
 
   "match 10" in {
-    test("4",
+    testJson("4",
          """
           |[{{ match . }}{{ case 3 }}three{{ case 4 }}four{{ case 5 }}five{{ else }}none{{ end }}]
           """.trim.stripMargin) shouldBe
@@ -126,7 +126,7 @@ class MatchTests extends AnyFreeSpec with Matchers with Testing {
   }
 
   "match 11" in {
-    test("5",
+    testJson("5",
          """
           |[{{ match . }}{{ case 3 }}three{{ case 4 }}four{{ case 5 }}five{{ else }}none{{ end }}]
           """.trim.stripMargin) shouldBe
@@ -136,7 +136,7 @@ class MatchTests extends AnyFreeSpec with Matchers with Testing {
   }
 
   "match 12" in {
-    test("6",
+    testJson("6",
          """
           |[{{ match . }}{{ case 3 }}three{{ case 4 }}four{{ case 5 }}five{{ else }}none{{ end }}]
           """.trim.stripMargin) shouldBe
@@ -146,7 +146,7 @@ class MatchTests extends AnyFreeSpec with Matchers with Testing {
   }
 
   "match 13" in {
-    test("3",
+    testJson("3",
          """
           |[{{ match . }}{{ case 3 }}three{{ case 4 }}four{{ case 5 }}five{{ end }}]
           """.trim.stripMargin) shouldBe
@@ -156,7 +156,7 @@ class MatchTests extends AnyFreeSpec with Matchers with Testing {
   }
 
   "match 14" in {
-    test("4",
+    testJson("4",
          """
           |[{{ match . }}{{ case 3 }}three{{ case 4 }}four{{ case 5 }}five{{ end }}]
           """.trim.stripMargin) shouldBe
@@ -166,7 +166,7 @@ class MatchTests extends AnyFreeSpec with Matchers with Testing {
   }
 
   "match 15" in {
-    test("5",
+    testJson("5",
          """
           |[{{match . }}{{ case 3 }}three{{ case 4 }}four{{ case 5 }}five{{ end }}]
           """.trim.stripMargin) shouldBe
@@ -176,7 +176,7 @@ class MatchTests extends AnyFreeSpec with Matchers with Testing {
   }
 
   "match 16" in {
-    test("6",
+    testJson("6",
          """
           |[{{ match . }}{{ case 3 }}three{{ case 4 }}four{{ case 5 }}five{{ end }}]
           """.trim.stripMargin) shouldBe

@@ -54,8 +54,8 @@ class LiteralsTests extends AnyFreeSpec with Matchers with Testing {
   }
 
   "boolean literals" in {
-    test(
-      "{t: true, f: false}",
+    testJson(
+      """{"t": true, "f": false}""",
       """
         |booleans {{ .t }}, {{ .f }}, {{ true }}, {{ false }}
         """.trim.stripMargin,
@@ -66,8 +66,8 @@ class LiteralsTests extends AnyFreeSpec with Matchers with Testing {
   }
 
   "integer literals" in {
-    test(
-      "{a: -345, b: 0, c: 345}",
+    testJson(
+      """{"a": -345, "b": 0, "c": 345}""",
       """
         |ints {{ .a }} {{ .b }} {{ .c }} {{ -345 }} {{ 0 }} {{ 345 }}
         """.trim.stripMargin,
@@ -78,8 +78,8 @@ class LiteralsTests extends AnyFreeSpec with Matchers with Testing {
   }
 
   "decimal literals" in {
-    test(
-      "{N: 6.02214076e23}",
+    testJson(
+      """{"N": 6.02214076e23}""",
       """
         |Avogadro number {{ .N }} {{ 6.02214076e23 }}
         """.trim.stripMargin,

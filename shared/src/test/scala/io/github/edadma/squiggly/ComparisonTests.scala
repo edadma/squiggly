@@ -90,7 +90,7 @@ class ComparisonTests extends AnyFreeSpec with Matchers with Testing {
   }
 
   "comparison 3" in {
-    test("a: 5",
+    testJson("""{"a": 5}""",
          """
         |{{ 3 < .a < 7 }}
         """.trim.stripMargin) shouldBe
@@ -100,7 +100,7 @@ class ComparisonTests extends AnyFreeSpec with Matchers with Testing {
   }
 
   "comparison 3a" in {
-    test("a: 5",
+    testJson("""{"a": 5}""",
          """
         |{{ 5 < .a < 7 }}
         """.trim.stripMargin) shouldBe
@@ -110,7 +110,7 @@ class ComparisonTests extends AnyFreeSpec with Matchers with Testing {
   }
 
   "comparison 3b" in {
-    test("a: 5",
+    testJson("""{"a": 5}""",
          """
         |{{ 3 < .a < 5 }}
         """.trim.stripMargin) shouldBe
@@ -120,7 +120,7 @@ class ComparisonTests extends AnyFreeSpec with Matchers with Testing {
   }
 
   "comparison 3c" in {
-    test("a: 5",
+    testJson("""{"a": 5}""",
          """
         |{{ 3 < .a < 5 }}
         """.trim.stripMargin) shouldBe
@@ -130,7 +130,7 @@ class ComparisonTests extends AnyFreeSpec with Matchers with Testing {
   }
 
   "comparison 3e" in {
-    test("a: 5",
+    testJson("""{"a": 5}""",
          """
         |{{ 3 < .a <= 5 }}
         """.trim.stripMargin) shouldBe
@@ -140,7 +140,7 @@ class ComparisonTests extends AnyFreeSpec with Matchers with Testing {
   }
 
   "comparison 3f" in {
-    test("a: 5",
+    testJson("""{"a": 5}""",
          """
         |{{ 5 <= .a < 7 }}
         """.trim.stripMargin) shouldBe

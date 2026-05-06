@@ -6,7 +6,7 @@ import org.scalatest.matchers.should._
 class ForTests extends AnyFreeSpec with Matchers with Testing {
 
   "for 1" in {
-    test("l: [3, 4]",
+    testJson("""{"l": [3, 4]}""",
          """
         |{{ for .l }}{{ . }}{{ end }}
         """.trim.stripMargin) shouldBe
@@ -16,7 +16,7 @@ class ForTests extends AnyFreeSpec with Matchers with Testing {
   }
 
   "for 1a" in {
-    test("l: [3, 4]",
+    testJson("""{"l": [3, 4]}""",
          """
           |{{ for i <- .l }}[{{ i }}, {{ . }}]{{ end }}
           """.trim.stripMargin) shouldBe
@@ -26,7 +26,7 @@ class ForTests extends AnyFreeSpec with Matchers with Testing {
   }
 
   "for 1b" in {
-    test("l: [3, 4]",
+    testJson("""{"l": [3, 4]}""",
          """
           |{{ for e, i <- .l }}[{{ i }}, {{ e }}, {{ . }}]{{ end }}
           """.trim.stripMargin) shouldBe
@@ -37,14 +37,14 @@ class ForTests extends AnyFreeSpec with Matchers with Testing {
 
   "for 2" in {
     (the[RuntimeException] thrownBy
-      test("{a: {b: 3, c: {d: 4}}}",
+      testJson("""{"a": {"b": 3, "c": {"d": 4}}}""",
            """
             |{{ for .a.b }}{{ . }}{{ end }}
             """.trim.stripMargin)).getMessage should startWith("'for' can only be applied to an iterable object")
   }
 
   "for 3" in {
-    test("{a: 3, b: 4, c: 5}",
+    testJson("""{"a": 3, "b": 4, "c": 5}""",
          """
         |{{ for . }}{{ . }}{{ end }}
         """.trim.stripMargin) shouldBe
@@ -54,7 +54,7 @@ class ForTests extends AnyFreeSpec with Matchers with Testing {
   }
 
   "for 3a" in {
-    test("{a: 3, b: 4, c: 5}",
+    testJson("""{"a": 3, "b": 4, "c": 5}""",
          """
         |{{ for v <- . }}{{ . }}{{ end }}
         """.trim.stripMargin) shouldBe
@@ -64,7 +64,7 @@ class ForTests extends AnyFreeSpec with Matchers with Testing {
   }
 
   "for 3b" in {
-    test("{a: 3, b: 4, c: 5}",
+    testJson("""{"a": 3, "b": 4, "c": 5}""",
          """
         |{{ for k, v <- . }}<{{ k }}, {{ v }}>{{ end }}
         """.trim.stripMargin) shouldBe
@@ -104,7 +104,7 @@ class ForTests extends AnyFreeSpec with Matchers with Testing {
   }
 
   "for 7" in {
-    test("[]",
+    testJson("[]",
          """
         |{{ for . }}{{ . }}{{ else }}else{{ end }}
         """.trim.stripMargin) shouldBe
@@ -114,7 +114,7 @@ class ForTests extends AnyFreeSpec with Matchers with Testing {
   }
 
   "for 8" in {
-    test("{}",
+    testJson("{}",
          """
         |{{ for . }}{{ . }}{{ else }}else{{ end }}
         """.trim.stripMargin) shouldBe

@@ -16,7 +16,7 @@ class WithTests extends AnyFreeSpec with Matchers with Testing {
   }
 
   "with 2" in {
-    test("{a: {b: 3, c: {d: 4}}}",
+    testJson("""{"a": {"b": 3, "c": {"d": 4}}}""",
          """
         |{{ with .a.b }}{{ . }}{{ end }}
         """.trim.stripMargin) shouldBe
@@ -26,7 +26,7 @@ class WithTests extends AnyFreeSpec with Matchers with Testing {
   }
 
   "with 3" in {
-    test("123",
+    testJson("123",
          """
         |{{ with . }}{{ . }}{{ end }}
         """.trim.stripMargin) shouldBe
@@ -66,7 +66,7 @@ class WithTests extends AnyFreeSpec with Matchers with Testing {
   }
 
   "with 7" in {
-    test("[]",
+    testJson("[]",
          """
         |{{ with . }}{{ . }}{{ else }}else{{ end }}
         """.trim.stripMargin) shouldBe
@@ -76,7 +76,7 @@ class WithTests extends AnyFreeSpec with Matchers with Testing {
   }
 
   "with 8" in {
-    test("{}",
+    testJson("{}",
          """
         |{{ with . }}{{ . }}{{ else }}else{{ end }}
         """.trim.stripMargin) shouldBe

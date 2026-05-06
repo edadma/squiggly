@@ -6,65 +6,65 @@ import org.scalatest.matchers.should.Matchers
 class IndexTests extends AnyFreeSpec with Matchers with Testing {
 
   "index 1" in {
-    test(
+    testJson(
       "[3, 4, 5, 6]",
-      "{{ .[3] }}"
+      "{{ .[3] }}",
     ) shouldBe "6"
   }
 
   "index 2" in {
-    (the[RuntimeException] thrownBy test(
+    (the[RuntimeException] thrownBy testJson(
       "[3, 4, 5, 6]",
-      "{{ .[-1] }}"
+      "{{ .[-1] }}",
     )).getMessage should startWith("negative array index")
   }
 
   "index 3" in {
-    (the[RuntimeException] thrownBy test(
+    (the[RuntimeException] thrownBy testJson(
       "[3, 4, 5, 6]",
-      "{{ .[4] }}"
+      "{{ .[4] }}",
     )).getMessage should startWith("array index out of bounds")
   }
 
   "index 4" in {
-    (the[RuntimeException] thrownBy test(
+    (the[RuntimeException] thrownBy testJson(
       "5",
-      "{{ .[0] }}"
+      "{{ .[0] }}",
     )).getMessage should startWith("not indexable")
   }
 
   "index 5" in {
-    test(
-      "{a: 3, b: 4}",
-      "{{ .['a'] }}"
+    testJson(
+      """{"a": 3, "b": 4}""",
+      "{{ .['a'] }}",
     ) shouldBe "3"
   }
 
   "index 6" in {
-    test(
-      "{a: 3, b: 4}",
-      "{{ .['x'] }}"
+    testJson(
+      """{"a": 3, "b": 4}""",
+      "{{ .['x'] }}",
     ) shouldBe ""
   }
 
   "index 7" in {
-    test(
-      "'asdf'",
-      "{{ .[3] }}"
+    testJson(
+      "\"asdf\"",
+      "{{ .[3] }}",
     ) shouldBe "f"
   }
 
   "index 8" in {
-    (the[RuntimeException] thrownBy test(
-      "'asdf'",
-      "{{ .[-1] }}"
+    (the[RuntimeException] thrownBy testJson(
+      "\"asdf\"",
+      "{{ .[-1] }}",
     )).getMessage should startWith("negative array index")
   }
 
   "index 9" in {
-    (the[RuntimeException] thrownBy test(
-      "'asdf'",
-      "{{ .[4] }}"
+    (the[RuntimeException] thrownBy testJson(
+      "\"asdf\"",
+      "{{ .[4] }}",
     )).getMessage should startWith("array index out of bounds")
   }
 
