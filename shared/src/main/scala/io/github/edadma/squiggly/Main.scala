@@ -1,6 +1,5 @@
 package io.github.edadma.squiggly
 
-import java.io.File
 import scopt.OParser
 import io.github.edadma.cross_platform._
 
@@ -34,12 +33,7 @@ import io.github.edadma.cross_platform._
         .valueName("<file>")
         .optional()
         .action((f, c) => c.copy(templateFile = Some(f)))
-        .validate { t =>
-          val f = new File(t)
-
-          if (f.exists && f.isFile && f.canRead) success
-          else failure("file must exist and be a readable file")
-        }
+        .validate(t => if readableFile(t) then success else failure("file must exist and be a readable file"))
         .text("template file"),
       help('h', "help").text("prints this usage text"),
       version('v', "version").text("prints the version"),
@@ -47,12 +41,7 @@ import io.github.edadma.cross_platform._
         .valueName("<file>")
         .optional()
         .action((j, c) => c.copy(dataFile = Some(j)))
-        .validate { t =>
-          val f = new File(t)
-
-          if (f.exists && f.isFile && f.canRead) success
-          else failure("file must exist and be a readable file")
-        }
+        .validate(t => if readableFile(t) then success else failure("file must exist and be a readable file"))
         .text("JSON data file"),
       arg[String]("[<template>]")
         .optional()
@@ -60,7 +49,13 @@ import io.github.edadma.cross_platform._
         .text("template string"),
     )
 
-  OParser.parse(parser, args, Config()) match
+  // cross_platform.processArgs: on JVM and Native this is just `args`
+  // verbatim; on Scala.js it reads the real argv from `process.argv`
+  // (skipping `node` and the script path) because Scala.js's
+  // `scalaJSUseMainModuleInitializer := true` invokes @main at module-load
+  // with no sbt-supplied arguments. This is what makes the linked .js work
+  // when launched as `node main.js arg1 arg2 ...`.
+  OParser.parse(parser, processArgs(args), Config()) match
     case Some(Config(_, _, None, None, _)) => println(OParser.usage(parser))
     case Some(conf)                        => app(conf)
     case _                                 =>
@@ -72,9 +67,7 @@ import io.github.edadma.cross_platform._
       else Map.empty[String, Any]
     val template: String =
       if c.templateString.isDefined then c.templateString.get
-      else if c.templateFile.isDefined then
-        if c.templateFile.get == "--" then scala.io.Source.fromInputStream(System.in).mkString
-        else readFile(c.templateFile.get)
+      else if c.templateFile.isDefined then readFile(c.templateFile.get)
       else ""
 
     val ast = new TemplateParser().parse(template)
