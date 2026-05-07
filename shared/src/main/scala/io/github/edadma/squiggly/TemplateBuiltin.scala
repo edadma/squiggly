@@ -89,7 +89,7 @@ object TemplateBuiltin {
       //        case (con, Seq(s: String)) =>
       //      }),
       // TODO: absURL — needs a cross-platform path joiner (java.nio.file.Paths is JVM only).
-      TemplateFunction("append", 2, { case (con, Seq(e: Any, s: Seq[_])) => s :+ e }),
+      TemplateFunction("append", 2, { case (con, Seq(e: Any, s: Seq[?])) => s :+ e }),
       // todo: https://gohugo.io/functions/base64/
       TemplateFunction(
         "capitalize",
@@ -106,14 +106,14 @@ object TemplateBuiltin {
           n.round(new MathContext(n.mc.getPrecision, RoundingMode.CEILING))
         },
       ),
-      TemplateFunction("compact", 1, { case (con, Seq(s: Seq[_])) => s.filterNot(e => e == () || e == null) }),
+      TemplateFunction("compact", 1, { case (con, Seq(s: Seq[?])) => s.filterNot(e => e == () || e == null) }),
       TemplateFunction(
         "complement",
         1,
-        { case (con, cs: Seq[_]) =>
+        { case (con, cs: Seq[?]) =>
           require(cs forall (_.isInstanceOf[Seq[Any]]))
 
-          val union = mutable.LinkedHashSet.concat[Any](cs.asInstanceOf[Seq[Seq[Any]]].init: _*)
+          val union = mutable.LinkedHashSet.concat[Any](cs.asInstanceOf[Seq[Seq[Any]]].init*)
 
           cs.last.asInstanceOf[Seq[Any]] to mutable.LinkedHashSet diff union toList
         },
@@ -123,9 +123,9 @@ object TemplateBuiltin {
         "contains",
         2,
         {
-          case (con, Seq(elem: Any, s: Seq[_]))       => s contains elem
-          case (con, Seq(elem: String, m: Map[_, _])) => m.asInstanceOf[Map[String, _]] contains elem
-          case (con, Seq(substr: String, s: String))  => s contains substr
+          case (con, Seq(elem: Any, s: Seq[?]))       => s.contains(elem)
+          case (con, Seq(elem: String, m: Map[?, ?])) => m.asInstanceOf[Map[String, ?]].contains(elem)
+          case (con, Seq(substr: String, s: String))  => s.contains(substr)
         },
       ),
       TemplateFunction("context", 0, { case (con, _) => println(con) }),
@@ -134,16 +134,16 @@ object TemplateBuiltin {
         2,
         {
           case (con, Seq(default: Any, () | "" | `ZERO`))   => default
-          case (con, Seq(default: Any, input: Iterable[_])) => if (input.nonEmpty) input else default
+          case (con, Seq(default: Any, input: Iterable[?])) => if (input.nonEmpty) input else default
           case (con, Seq(_, input))                         => input
         },
       ),
-      TemplateFunction("distinct", 1, { case (con, Seq(s: Seq[_])) => s.distinct }),
+      TemplateFunction("distinct", 1, { case (con, Seq(s: Seq[?])) => s.distinct }),
       TemplateFunction(
         "drop",
         2,
         {
-          case (con, Seq(n: Num, s: Iterable[_])) => s drop n.toIntExact
+          case (con, Seq(n: Num, s: Iterable[?])) => s drop n.toIntExact
           case (con, Seq(n: Num, s: String))      => s drop n.toIntExact
         },
       ),
@@ -151,7 +151,7 @@ object TemplateBuiltin {
         "dropRight",
         2,
         {
-          case (con, Seq(n: Num, s: Iterable[_])) => s dropRight n.toIntExact
+          case (con, Seq(n: Num, s: Iterable[?])) => s dropRight n.toIntExact
           case (con, Seq(n: Num, s: String))      => s dropRight n.toIntExact
         },
       ),
@@ -160,14 +160,14 @@ object TemplateBuiltin {
       TemplateFunction(
         "filter",
         2,
-        { case (con, Seq(NonStrictExpr(expr), s: Iterable[_])) =>
+        { case (con, Seq(NonStrictExpr(expr), s: Iterable[?])) =>
           s filter (e => con.copy(data = e).beval(expr))
         },
       ),
       TemplateFunction(
         "filterNot",
         2,
-        { case (con, Seq(NonStrictExpr(expr), s: Iterable[_])) =>
+        { case (con, Seq(NonStrictExpr(expr), s: Iterable[?])) =>
           s filterNot (e => con.copy(data = e).beval(expr))
         },
       ),
@@ -200,14 +200,18 @@ object TemplateBuiltin {
       ),
       // todo: https://gohugo.io/functions/getenv/
       // todo: https://gohugo.io/functions/group/
-      TemplateFunction("head", 1, { case (con, Seq(s: Seq[_])) => s.head }),
+      TemplateFunction("head", 1, { case (con, Seq(s: Seq[?])) => s.head }),
       // todo: https://gohugo.io/functions/highlight/
       // todo: https://gohugo.io/functions/hmac/
       TemplateFunction(
         "htmlEscape",
         1,
         { case (con, Seq(s: String)) =>
-          s replace ("&", "&amp;") replace ("<", "&lt;") replace (">", "&gt;") replace ("'", "&apos;") replace ("\"", "&quot;")
+          s.replace("&", "&amp;")
+            .replace("<", "&lt;")
+            .replace(">", "&gt;")
+            .replace("'", "&apos;")
+            .replace("\"", "&quot;")
         },
       ),
       // todo: https://shopify.github.io/liquid/filters/escape_once/
@@ -226,34 +230,34 @@ object TemplateBuiltin {
         1,
         {
           case (con, Seq(s: String))      => s.isEmpty
-          case (con, Seq(s: Iterable[_])) => s.isEmpty
+          case (con, Seq(s: Iterable[?])) => s.isEmpty
         },
       ),
       TemplateFunction(
         "join",
         1,
         {
-          case (con, Seq(delim: String, s: Seq[_])) => s mkString delim
-          case (con, Seq(delim: String, last: String, s: Seq[_])) =>
+          case (con, Seq(delim: String, s: Seq[?])) => s mkString delim
+          case (con, Seq(delim: String, last: String, s: Seq[?])) =>
             if (s.length >= 2) s.init.mkString(delim) ++ last ++ s.last.toString
             else s.mkString
         },
       ),
       // todo: https://gohugo.io/functions/jsonify/
-      TemplateFunction("last", 1, { case (con, Seq(s: Seq[_])) => s.last }),
+      TemplateFunction("last", 1, { case (con, Seq(s: Seq[?])) => s.last }),
       TemplateFunction(
         "length",
         1,
         {
           case (con, Seq(s: String))      => s.length
-          case (con, Seq(s: Iterable[_])) => s.size
+          case (con, Seq(s: Iterable[?])) => s.size
         },
       ),
       TemplateFunction("lower", 1, { case (con, Seq(s: String)) => s.toLowerCase }),
       TemplateFunction(
         "map",
         2,
-        { case (con, Seq(NonStrictExpr(expr), s: Iterable[_])) =>
+        { case (con, Seq(NonStrictExpr(expr), s: Iterable[?])) =>
           s map (e => con.copy(data = e).eval(expr))
         // case (con, Seq(s: String))                           => s // todo: map named function
         },
@@ -275,7 +279,7 @@ object TemplateBuiltin {
         1,
         {
           case (con, Seq(s: String))      => s.nonEmpty
-          case (con, Seq(s: Iterable[_])) => s.nonEmpty
+          case (con, Seq(s: Iterable[?])) => s.nonEmpty
         },
       ),
       TemplateFunction("now", 0, _ => OffsetDateTime.now()),
@@ -291,19 +295,19 @@ object TemplateBuiltin {
           case (con, Seq(path: String, data: Any)) => partial(con, path, data)
         },
       ),
-      TemplateFunction("prepend", 2, { case (con, Seq(e: Any, s: Seq[_])) => e +: s }),
+      TemplateFunction("prepend", 2, { case (con, Seq(e: Any, s: Seq[?])) => e +: s }),
       TemplateFunction("print", 0, { case (con, args) => print(args mkString ", ") }),
       TemplateFunction("println", 0, { case (con, args) => println(args mkString ", ") }),
       TemplateFunction(
         "querify",
         1,
-        { case (con, Seq(m: collection.Map[_, _])) =>
+        { case (con, Seq(m: collection.Map[?, ?])) =>
           m map { case (k, v) => s"$k=$v" } mkString "&"
         },
       ),
       // todo: https://gohugo.io/functions/querify/
       // todo: https://gohugo.io/functions/readdir/
-      TemplateFunction("random", 1, { case (con, Seq(s: Seq[_])) => s(Random.nextInt(s.length)) }),
+      TemplateFunction("random", 1, { case (con, Seq(s: Seq[?])) => s(Random.nextInt(s.length)) }),
       // TODO: relURL — needs a cross-platform path joiner.
       // todo: https://gohugo.io/functions/replace/
       // todo: https://gohugo.io/functions/replaceRE/
@@ -311,7 +315,7 @@ object TemplateBuiltin {
         "reverse",
         1,
         {
-          case (con, Seq(s: Seq[_])) => s.reverse
+          case (con, Seq(s: Seq[?])) => s.reverse
           case (con, Seq(s: String)) => s.reverse
         },
       ),
@@ -331,24 +335,24 @@ object TemplateBuiltin {
         },
       ),
       // todo: https://gohugo.io/functions/sha/
-      TemplateFunction("shuffle", 1, { case (con, Seq(s: Seq[_])) => Random.shuffle(s) }),
+      TemplateFunction("shuffle", 1, { case (con, Seq(s: Seq[?])) => Random.shuffle(s) }),
       // todo: https://gohugo.io/functions/singularize/
       TemplateFunction(
         "slice",
         2,
         {
-          case (con, Seq(from: Num, s: Iterable[_]))             => s slice (from.toIntExact, s.size)
-          case (con, Seq(from: Num, until: Num, s: Iterable[_])) => s slice (from.toIntExact, until.toIntExact)
+          case (con, Seq(from: Num, s: Iterable[?]))             => s slice (from.toIntExact, s.size)
+          case (con, Seq(from: Num, until: Num, s: Iterable[?])) => s slice (from.toIntExact, until.toIntExact)
           case (con, Seq(from: Num, s: String))                  => s slice (from.toIntExact, s.length)
           case (con, Seq(from: Num, until: Num, s: String))      => s slice (from.toIntExact, until.toIntExact)
         },
       ),
       //      TemplateFunction("sort", 1, {// todo: sortNatural (case-insensitive)
-      //        case (con, Seq(s: Seq[_]))                      =>
-      //        case (con, Seq(NonStrictExpr(expr), s: Seq[_])) =>
+      //        case (con, Seq(s: Seq[?]))                      =>
+      //        case (con, Seq(NonStrictExpr(expr), s: Seq[?])) =>
       //      }),
-      TemplateFunction("split", 2, { case (con, Seq(delim: String, s: String)) => s split Regex.quote(delim) toSeq }),
-      TemplateFunction("startsWith", 2, { case (con, Seq(prefix: String, s: String)) => s startsWith prefix }),
+      TemplateFunction("split", 2, { case (con, Seq(delim: String, s: String)) => s.split(Regex.quote(delim)).toSeq }),
+      TemplateFunction("startsWith", 2, { case (con, Seq(prefix: String, s: String)) => s.startsWith(prefix) }),
       TemplateFunction(
         "substring",
         3,
@@ -356,14 +360,14 @@ object TemplateBuiltin {
           s.substring(start.toIntExact, end.toIntExact)
         },
       ),
-      TemplateFunction("sum", 1, { case (con, Seq(s: Seq[_])) => s.asInstanceOf[Seq[BigDecimal]].sum }),
+      TemplateFunction("sum", 1, { case (con, Seq(s: Seq[?])) => s.asInstanceOf[Seq[BigDecimal]].sum }),
       // todo: https://gohugo.io/functions/strings.count/
-      TemplateFunction("tail", 1, { case (con, Seq(s: Seq[_])) => s.tail }),
+      TemplateFunction("tail", 1, { case (con, Seq(s: Seq[?])) => s.tail }),
       TemplateFunction(
         "take",
         2,
         {
-          case (con, Seq(n: Num, s: Iterable[_])) => s take n.toIntExact
+          case (con, Seq(n: Num, s: Iterable[?])) => s take n.toIntExact
           case (con, Seq(n: Num, s: String))      => s take n.toIntExact
         },
       ),
@@ -381,13 +385,13 @@ object TemplateBuiltin {
         "takeRight",
         2,
         {
-          case (con, Seq(n: Num, s: Iterable[_])) => s takeRight n.toIntExact
+          case (con, Seq(n: Num, s: Iterable[?])) => s takeRight n.toIntExact
           case (con, Seq(n: Num, s: String))      => s takeRight n.toIntExact
         },
       ),
       TemplateFunction("time", 1, { case (con, Seq(s: String)) => parseDateTime(s) }),
       // todo: https://gohugo.io/functions/title/ https://en.wikipedia.org/wiki/Title_case
-      TemplateFunction("toSeq", 1, { case (con, Seq(s: Iterable[_])) => s.toSeq }),
+      TemplateFunction("toSeq", 1, { case (con, Seq(s: Iterable[?])) => s.toSeq }),
       TemplateFunction("toString", 1, { case (con, Seq(a: Any)) => a.toString }),
       TemplateFunction("trim", 1, { case (con, Seq(s: String)) => s.trim }), // todo: https://gohugo.io/functions/trim/
       TemplateFunction(

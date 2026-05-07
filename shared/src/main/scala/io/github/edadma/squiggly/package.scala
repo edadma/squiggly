@@ -44,7 +44,7 @@ package object squiggly {
   def falsy(a: Any): Boolean =
     a match {
       case () | false | null | "" | ZERO          => true
-      case s: collection.Iterable[_] if s.isEmpty => true
+      case s: collection.Iterable[?] if s.isEmpty => true
       case _                                      => false
     }
 

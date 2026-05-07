@@ -39,7 +39,7 @@ object TagParser extends StandardTokenParsers with PackratParsers with ImplicitC
       |true
       |false
       |null
-      |""".trim.stripMargin split "\\s+")
+      |""".trim.stripMargin.split("\\s+"))
   lexical.delimiters ++= ("+ ++ - * / \\ ^ % ( ) [ ] { } ` | . , < <= > >= != = $ : <- :=" split ' ') :+ " ."
 
   type P[+T] = PackratParser[T]

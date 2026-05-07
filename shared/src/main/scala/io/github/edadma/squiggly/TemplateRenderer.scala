@@ -48,7 +48,7 @@ class TemplateRenderer(
         case TemplateBlockAST(_, ForAST(index, expr), body, els) =>
           context.eval(expr) match {
             case v if falsy(v) => els foreach (render(context, _))
-            case s: collection.Seq[_] =>
+            case s: collection.Seq[?] =>
               s.zipWithIndex foreach { case (e, i) =>
                 index match {
                   case Some((Ident(elem), Some(Ident(idx)))) =>
@@ -60,7 +60,7 @@ class TemplateRenderer(
 
                 render(context.copy(data = e), body)
               }
-            case s: collection.Map[_, _] =>
+            case s: collection.Map[?, ?] =>
               s foreach { case (k, v) =>
                 index match {
                   case Some((Ident(key), Some(Ident(value)))) =>
@@ -76,23 +76,24 @@ class TemplateRenderer(
           }
         case ContentAST(toks) =>
           toks foreach {
-            case TextToken(_, text) => pout print text
-            case SpaceToken(_, s)   => pout print s
+            case TextToken(_, text) => pout.print(text)
+            case SpaceToken(_, s)   => pout.print(s)
             case TagToken(_, tag: ExprAST, _, _) =>
               def render(v: Any): String =
                 v match {
-                  case s: collection.Seq[_]    => s.mkString("[", ", ", "]")
-                  case m: collection.Map[_, _] => m map { case (k, v) => s"$k: ${render(v)}" } mkString ("{", ", ", "}")
+                  case s: collection.Seq[?]    => s.mkString("[", ", ", "]")
+                  case m: collection.Map[?, ?] => m.map { case (k, v) => s"$k: ${render(v)}" }.mkString("{", ", ", "}")
                   case s: String               => s""""$s""""
                   case null | ()               => ""
                   case v                       => v.toString
                 }
 
-              pout print
-                (context.eval(tag) match {
+              pout.print(
+                context.eval(tag) match {
                   case s: String => s
                   case v         => render(v)
-                })
+                },
+              )
             case TagToken(_, AssignmentAST(name, expr), _, _) => context.vars(name) = context.eval(expr)
             case TagToken(_, ReturnAST(expr), _, _) =>
               returnValue = expr map context.eval getOrElse ()

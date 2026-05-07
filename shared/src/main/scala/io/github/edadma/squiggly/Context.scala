@@ -5,12 +5,13 @@ import io.github.edadma.char_reader.CharReader
 import java.io.PrintStream
 import scala.annotation.tailrec
 import scala.collection.mutable
+import scala.compiletime.uninitialized
 import scala.language.postfixOps
 import scala.util.parsing.input.Positional
 
 case class Context(renderer: TemplateRenderer, data: Any, vars: mutable.HashMap[String, Any], out: PrintStream) {
 
-  private var _global: Any = _
+  private var _global: Any = uninitialized
 
   def global_=(d: Any): Unit = {
     require(_global == null)
@@ -134,7 +135,7 @@ case class Context(renderer: TemplateRenderer, data: Any, vars: mutable.HashMap[
 
         r match
           case s: String   => l.toString ++ s
-          case seq: Seq[_] => l.asInstanceOf[Seq[Any]] ++ seq
+          case seq: Seq[?] => l.asInstanceOf[Seq[Any]] ++ seq
           case _           => problem(left, "operands of '++' operator must all be either strings or sequences")
       case LeftInfixExpr(left, o, right) =>
         val l = neval(left)
@@ -153,8 +154,8 @@ case class Context(renderer: TemplateRenderer, data: Any, vars: mutable.HashMap[
       case MethodExpr(expr, id: Ident)      => lookup(eval(expr), id) getOrElse ()
       case IndexExpr(expr, index) =>
         eval(expr) match {
-          case m: collection.Map[_, _] => m.asInstanceOf[collection.Map[Any, _]] getOrElse (eval(index), ())
-          case s: collection.Seq[_] =>
+          case m: collection.Map[?, ?] => m.asInstanceOf[collection.Map[Any, ?]] getOrElse (eval(index), ())
+          case s: collection.Seq[?] =>
             ieval(index) match {
               case n if n < 0         => problem(index, s"negative array index: $n")
               case n if n >= s.length => problem(index, s"array index out of bounds: $n")
@@ -186,7 +187,7 @@ case class Context(renderer: TemplateRenderer, data: Any, vars: mutable.HashMap[
     v match {
       case ()                      => problem(id, s"attempt to lookup property '${id.name}' of undefined")
       case null                    => None
-      case m: collection.Map[_, _] => m.asInstanceOf[collection.Map[String, Any]] get id.name orElse tryMethod
+      case m: collection.Map[?, ?] => m.asInstanceOf[collection.Map[String, Any]] get id.name orElse tryMethod
       case p: Product =>
         p.productElementNames zip p.productIterator find { case (k, _) =>
           k == id.name

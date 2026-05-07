@@ -57,7 +57,7 @@ lazy val squiggly = crossProject(JSPlatform, JVMPlatform, NativePlatform)
       "com.lihaoyi"            %%% "pprint"                   % "0.9.0"  % "test",
       "org.scala-lang.modules" %%% "scala-parser-combinators" % "2.4.0",
       "io.github.edadma"       %%% "char_reader"              % "0.1.25",
-      "io.github.edadma"       %%% "cross_platform"           % "0.1.5",
+      "io.github.edadma"       %%% "cross_platform"           % "0.1.3",
       "dev.zio"                %%% "zio-json"                 % "0.7.42",
     ),
     publishMavenStyle      := true,
