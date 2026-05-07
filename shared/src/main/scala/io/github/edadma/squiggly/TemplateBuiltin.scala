@@ -1,13 +1,11 @@
 package io.github.edadma.squiggly
 
-import java.math.{MathContext, RoundingMode}
 import java.time.{Instant, LocalDate, OffsetDateTime, ZoneOffset}
 import java.time.format.{DateTimeFormatter, DateTimeParseException}
 import java.util.Locale
 import io.github.edadma.cross_platform._
 
 import scala.collection.mutable
-import scala.collection.mutable.ListBuffer
 import scala.language.postfixOps
 import scala.util.Random
 import scala.util.matching.Regex
@@ -102,9 +100,7 @@ object TemplateBuiltin {
       TemplateFunction(
         "ceil",
         1,
-        { case (con, Seq(n: BigDecimal)) =>
-          n.round(new MathContext(n.mc.getPrecision, RoundingMode.CEILING))
-        },
+        { case (con, Seq(n: BigDecimal)) => n.setScale(0, BigDecimal.RoundingMode.CEILING) },
       ),
       TemplateFunction("compact", 1, { case (con, Seq(s: Seq[?])) => s.filterNot(e => e == () || e == null) }),
       TemplateFunction(
@@ -175,17 +171,15 @@ object TemplateBuiltin {
         "findRE",
         2,
         {
-          case (con, Seq(pattern: String, input: String)) => findRE(pattern, input) toList
+          case (con, Seq(pattern: String, input: String)) => findRE(pattern, input).toList
           case (con, Seq(pattern: String, input: String, limit: Num)) =>
-            findRE(pattern, input) take limit.toIntExact toList
+            findRE(pattern, input).take(limit.toIntExact).toList
         },
       ),
       TemplateFunction(
         "floor",
         1,
-        { case (con, Seq(n: BigDecimal)) =>
-          n.round(new MathContext(n.mc.getPrecision, RoundingMode.FLOOR))
-        },
+        { case (con, Seq(n: BigDecimal)) => n.setScale(0, BigDecimal.RoundingMode.FLOOR) },
       ),
       TemplateFunction(
         "format",
@@ -330,9 +324,7 @@ object TemplateBuiltin {
       TemplateFunction(
         "round",
         1,
-        { case (con, Seq(n: BigDecimal)) =>
-          n.round(new MathContext(n.mc.getPrecision, RoundingMode.HALF_EVEN))
-        },
+        { case (con, Seq(n: BigDecimal)) => n.setScale(0, BigDecimal.RoundingMode.HALF_EVEN) },
       ),
       // todo: https://gohugo.io/functions/sha/
       TemplateFunction("shuffle", 1, { case (con, Seq(s: Seq[?])) => Random.shuffle(s) }),
@@ -523,17 +515,12 @@ object TemplateBuiltin {
     else s
   }
 
-  private def findRE(re: String, s: String) =
-    re.r.findAllMatchIn(s) map { m =>
-      val res = new ListBuffer[String]
-
-      res += m.matched
-
-      for (i <- 1 to m.groupCount)
-        res += m.group(i)
-
-      res.toList
-    }
+  /** Hugo-style `findRE`: returns a flat sequence of full-match strings.
+    * Capture-group submatches are not exposed (matches Hugo's behaviour);
+    * callers that need group access can use `scala.util.matching.Regex` directly.
+    */
+  private def findRE(re: String, s: String): Iterator[String] =
+    re.r.findAllMatchIn(s).map(_.matched)
 
   private def partial(context: Context, path: String, data: Any): Any = {
     val partial = context.renderer.partials(path) getOrElse sys.error(s"partial '$path' count not be loaded")

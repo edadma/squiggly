@@ -116,11 +116,18 @@ object TagParser extends StandardTokenParsers with PackratParsers with ImplicitC
       | index,
   )
 
+  // Index / method-access chains: `primary` followed by any number of `[expr]`
+  // or `.id` suffixes. Folded left-to-right so `'hi'.reverse.upper` becomes
+  // `MethodExpr(MethodExpr(StringExpr("hi"), reverse), upper)`.
   lazy val index: P[ExprAST] = positioned(
-    primary ~ ("[" ~> expression <~ "]") ^^ IndexExpr.apply
-      | primary ~ ("." ~> identifier) ^^ MethodExpr.apply
-      | primary,
+    primary ~ rep(indexSuffix) ^^ { case base ~ ops =>
+      ops.foldLeft(base)((lhs, op) => op(lhs))
+    },
   )
+
+  private lazy val indexSuffix: P[ExprAST => ExprAST] =
+    ("[" ~> expression <~ "]") ^^ (idx => (lhs: ExprAST) => IndexExpr(lhs, idx))
+      | ("." ~> identifier) ^^ (id => (lhs: ExprAST) => MethodExpr(lhs, id))
 
   lazy val decimal: P[BigDecimal] = numericLit ^^ BigDecimal.apply
 
