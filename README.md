@@ -3,180 +3,135 @@
 squiggly
 ========
 
-![GitHub release (latest by date including pre-releases)](https://img.shields.io/github/v/release/edadma/squiggly?include_prereleases) ![GitHub (Pre-)Release Date](https://img.shields.io/github/release-date-pre/edadma/squiggly) ![GitHub last commit](https://img.shields.io/github/last-commit/edadma/squiggly) ![GitHub](https://img.shields.io/github/license/edadma/squiggly)
+![Maven Central](https://img.shields.io/maven-central/v/io.github.edadma/squiggly_3)
+![GitHub last commit](https://img.shields.io/github/last-commit/edadma/squiggly)
+![GitHub](https://img.shields.io/github/license/edadma/squiggly)
+![Scala Version](https://img.shields.io/badge/Scala-3.8.3-blue.svg)
+![Scala.js Version](https://img.shields.io/badge/Scala.js-1.21.0-blue.svg)
+![Scala Native Version](https://img.shields.io/badge/Scala_Native-0.5.11-blue.svg)
 
-*squiggly* is a Scala based string templating engine.
+*squiggly* is a Scala 3 string templating engine, cross-built for the JVM,
+Scala.js, and Scala Native.
 
 ## Overview
 
-*squiggly* is a language, a Scala library, and a Linux command line application for doing string templating.  *squiggly*
-can be compared to [Mustache](https://mustache.github.io/) or [Go templates](https://pkg.go.dev/text/template) or
-[Liquid](https://shopify.github.io/liquid/), which are all great template languages. Basically, a string template that
-is composed of text and *tags* which are instructions in *squiggly*, is applied to context data producing a textual
-output.
+*squiggly* is a language, a Scala library, and a small command-line application
+for doing string templating. It can be compared to
+[Mustache](https://mustache.github.io/), [Go templates](https://pkg.go.dev/text/template),
+or [Liquid](https://shopify.github.io/liquid/) — a string template composed of
+text and *tags* (instructions in *squiggly*) is applied to context data,
+producing textual output.
 
-Unlike Mustache, *squiggly* is not logic-less, but allows some basic logic to be used in templates.
+Unlike Mustache, *squiggly* is not logic-less; it allows basic logic in
+templates. The expression language is inspired by Hugo and Liquid, with infix
+operators, comparison chains, pipes, and method calls.
 
-Curly braces or brackets are sometimes referred to as squiggly brackets, which is where the name "squiggly" comes from.
+The name "squiggly" is a colloquialism for curly braces — the tag delimiters.
 
 ## Installation
 
-### Library
+Add the dependency to your `build.sbt`:
 
-To use the library in your application, include the following in your `project/plugins.sbt`:
-
-```sbt
-addSbtPlugin("com.codecommit" % "sbt-github-packages" % "0.5.3")
-
+```scala
+libraryDependencies += "io.github.edadma" %%% "squiggly" % "0.2.2"
 ```
 
-Include the following in your `build.sbt`:
+`%%%` cross-builds against whatever target your project uses (JVM, Scala.js, or
+Scala Native).
 
-```sbt
-resolvers += Resolver.githubPackages("edadma")
-
-libraryDependencies += "io.github.edadma" %%% "squiggly" % "0.1.16"
-
-```
-
-Use the following `import` statement in your code:
+Use the following `import` in your code:
 
 ```scala
 import io.github.edadma.squiggly._
-
-```
-
-### Command line
-
-To use the command line executable, download the file `squiggly` from the root folder of the repository. Make it
-executable by typing
-
-```shell
-chmod a+x path/to/squiggly
-```
-
-then copy it to your `/usr/bin` folder
-
-```shell
-sudo cp path/to/squiggly /usr/bin
 ```
 
 ## Basic use
 
 ### Library
 
-Here's a simple example of using *squiggly* to render a template in your application.
-
 ```scala
-import io.github.edadma.squiggly.{Parser, Renderer}
+import io.github.edadma.squiggly._
 
-object Main extends App {
-
-  case class Task(task: String, done: Boolean)
-
-  case class User(user: String, tasks: List[Task])
-
+@main def runDemo(): Unit =
   val data =
-    User("ed",
-      List(Task("Improve Parser and Renderer API", done = true),
-        Task("Code template example", done = false),
-        Task("Update README", done = false)))
+    Map(
+      "user"  -> "ed",
+      "tasks" -> List(
+        Map("task" -> "Improve Parser and Renderer API", "done" -> true),
+        Map("task" -> "Code template example",           "done" -> false),
+        Map("task" -> "Update README",                   "done" -> false),
+      ),
+    )
+
   val template =
-    """
-      |<!DOCTYPE html>
+    """<!DOCTYPE html>
       |<html>
-      |  <head>
-      |    <title>To-Do list</title>
-      |  </head>
       |  <body>
-      |    <p>
-      |      To-Do list for user '{{ .user }}'
-      |    </p>
-      |    <table>
-      |      <tr>
-      |        <td>Task</td>
-      |        <td>Done</td>
-      |      </tr>
+      |    <p>To-do list for user '{{ .user }}'</p>
+      |    <ul>
       |      {{ for .tasks -}}
-      |      <tr>
-      |        <td>{{ .task }}</td>
-      |        <td>{{ if .done }}Yes{{ else }}No{{ end }}</td>
-      |      </tr>
+      |      <li>{{ .task }} — {{ if .done }}done{{ else }}pending{{ end }}</li>
       |      {{- end }}
-      |    </table>
+      |    </ul>
       |  </body>
       |</html>
-      |""".trim.stripMargin
-  val ast = Parser.default.parse(template)
+      |""".stripMargin
 
-  Renderer.default.render(data, ast)
+  val ast = TemplateParser.default.parse(template)
 
-}
-
+  TemplateRenderer.default.render(data, ast)
 ```
 
-output:
-
-```
-<!DOCTYPE html>
-<html>
-  <head>
-    <title>To-Do list</title>
-  </head>
-  <body>
-    <p>
-      To-Do list for user 'ed'
-    </p>
-    <table>
-      <tr>
-        <td>Task</td>
-        <td>Done</td>
-      </tr>
-      <tr>
-        <td>Improve Parser and Renderer API</td>
-        <td>Yes</td>
-      </tr><tr>
-        <td>Code template example</td>
-        <td>No</td>
-      </tr><tr>
-        <td>Update README</td>
-        <td>No</td>
-      </tr>
-    </table>
-  </body>
-</html>
-```
+`TemplateRenderer.render` takes any Scala value (`Map`, `Seq`, `String`, `BigDecimal`,
+`Boolean`, `case class`, …) — there is no special data-loading layer.
 
 ### Command line
 
-Type
+The CLI is invoked through sbt while developing. From the project root:
+
+```shell
+sbt 'squigglyJVM/run "Hello, {{ 1 + 2 }}!"'
+```
 
 ```
-squiggly -h
+Hello, 3!
 ```
 
-to get the following usage text:
+Equivalently on Scala Native:
+
+```shell
+sbt 'squigglyNative/run "Hello, {{ 1 + 2 }}!"'
+```
+
+For Scala.js, link the program first and run with `node`:
+
+```shell
+sbt squigglyJS/fastLinkJS
+node js/target/scala-3.8.3/squiggly-fastopt/main.js "Hello, {{ 1 + 2 }}!"
+```
+
+#### CLI flags
 
 ```
-Squiggly v0.1.16
+Squiggly Template Engine v0.2.2
 Usage: squiggly [options] [[<template>]]
 
   -a, --ast              pretty print AST
-  -d, --data <YAML>      YAML document
+  -d, --data <JSON>      JSON document (string)
   -f, --template <file>  template file
   -h, --help             prints this usage text
   -v, --version          prints the version
-  -y, --yaml <file>      YAML data file
+  -j, --json <file>      JSON data file
   [<template>]           template string
 ```
 
-Here's a trivial example:
+Example with inline JSON data (note shell quoting; for anything more complex
+than the simplest case prefer `-j <file>`):
 
 ```shell
-squiggly -d "{a: 3, b: 4}" "{{ .a }} + {{ .b }} = {{ .a + .b }}"
+echo '{"a": 3, "b": 4}' > /tmp/data.json
+sbt 'squigglyJVM/run -j /tmp/data.json "{{ .a }} + {{ .b }} = {{ .a + .b }}"'
 ```
-
-output:
 
 ```
 3 + 4 = 7
@@ -184,104 +139,111 @@ output:
 
 ## Templates
 
-Squiggly templates are written using a language that is inspired by
-both [Hugo](https://gohugo.io/templates/introduction/) and [Liquid](https://shopify.github.io/liquid/). The goal is low
-boilerplate and readability. Hugo is compact and boilerplate free, but it is also a *prefix* language where operations
-must always precede their operands. Prefix languages tend not to be conducive to readability. Liquid has better infix
-syntax but more boilerplate. Both languages have good features that the other is missing.
+Squiggly templates are inspired by [Hugo](https://gohugo.io/templates/introduction/)
+and [Liquid](https://shopify.github.io/liquid/). The goal is low boilerplate and
+readability. Hugo is compact but strictly prefix; Liquid has nicer infix syntax
+but more boilerplate. Squiggly takes the readable parts of each.
 
 ### Values
 
-*squiggly* values are pieces of data that are either computed in the template or retrieved from the *context* that is
-provided when a template is rendered. A value that is written manually inside a template is called a literal value.
-
 #### Literals
 
-- `null`. The null value simply represents no value, and is rendered in a template as an empty string. It corresponds to
-  a Scala `null`.
-- `true`, `false`. These correspond to the values of the Scala Boolean class.
-- _numbers_. Numbers in *squiggly* are all instances of one type internally: the Scala `BigDecimal` number type. This
-  was chosen mainly because it provides exact decimal arithmetic which is desirable when working with currency
-  values.  `BigDecimals` can also represent arbitrarily large integers.
-- _strings_. String literals are written between `'` and `'`, or `"` and `"`, whichever is more convenient. Strings may
-  contain any of the standard escapes: `\n`, `\uxxxx`, etc.
-- _lists_. List literals are written between `[` and `]` with each item in the list separated by a `,`.
-- _maps_. Map literals are written between `{` and `}` with each property in the map separated by a `,`, and where a
-  property is a *key* (property name) and a value separated by a `:`. For example: `{one: 1, two: 2, three: 3}`
+- `null` — represents no value; renders as an empty string. Maps to Scala `null`.
+- `true`, `false` — booleans.
+- _numbers_ — internally `BigDecimal` (exact decimal arithmetic, arbitrary-precision
+  integers, no floating-point surprises).
+- _strings_ — between `'…'` or `"…"`, whichever is convenient. Standard escapes:
+  `\n`, `\t`, `α`, `\\`, etc.
+- _lists_ — `[a, b, c]`.
+- _maps_ — `{key: value, key: value}`.
 
-There is a special *undefined* value which purposely cannot be expressed literally because it represents a property that
-is missing, and is always rendered in a template as an empty string. It is not the same as `null` because a property
-that is not missing can contain a `null` value, and one may wish to distinguish between them. The undefined value
-corresponds to the Scala `()` value, the only instance of the `Unit` class.
+There is also an *undefined* value (Scala `()`) that cannot be written literally
+— it represents a missing property and renders as an empty string. It is
+distinct from `null` because a present property may be explicitly `null`.
 
 #### Expressions
 
-TO DO
+Everything you'd expect: arithmetic (`+ - * / mod ^ \` for integer division,
+`++` for string/list concat), comparison chains (`a < b <= c`), boolean
+(`and`, `or`, `not`), conditional (`if x then a else b`), index (`.a[0]`),
+method (`'hello'.upper`), function application (`upper 'hello'`), and pipes
+(`'hello' | upper`).
 
 ### Tags
 
-Squiggly templates are plain text with the addition of *tags* that are normally between `{{` and `}}` delimiters. The
-tag delimiter strings are configurable. Following are the currently available tags.
+#### `{{ _value_ }}`
 
-#### {{ _value_ }}
+Renders a value into the output. `{{ .title }}` substitutes the `title` field
+of the current context.
 
-where *value* is any valid *squiggly* expression which results in a data value of some kind. The resulting value is
-converted to a string of characters if it is not already, and sent to the output stream.
+#### `{{ with _value_ }} … {{ else }} … {{ end }}`
 
-For example `{{ .title }}` will be replaced by the value of a context property called `title`.
+Binds the inner context to *value*; runs the falsy branch if the value is
+falsy.
 
-#### {{ with _value_ }} ...(truthy) {{ else }} ...(falsy) {{ end }}
+#### `{{ for [ _e_ [ , _i_ ] <- ] _value_ }} … [ {{ else }} … ] {{ end }}`
 
-The *with* tag binds the current context to *value*, and is often used to simply using code that will be referring to
-properties of a single data structure. For example `{{ with .user }}{{ .firstName }} {{ .lastName }}{{ end }}` will be
-replaced by the first and last name of `.user`.
+Iterates over a `Seq` or `Map`. Optional element/index bindings.
 
-#### {{ for [ _e_ [ , _i_ ] <- ] _value_ }} ... [ {{ else }} ... ] }}
+#### `{{ if _cond_ }} … [ {{ elsif _cond_ }} … ] [ {{ else }} … ] {{ end }}`
 
-The *for* tag binds context to successive elements of *value* which must be a Scala Iterable (i.e. a Seq or Map).
-Optionally, *e* is also set to each value, and *i* is set to the 0-based index.
+Standard branching. `else if` is spelled `elsif`.
 
-TO DO
+#### `{{ match _expr_ }} {{ case _value_ }} … [ {{ else }} … ] {{ end }}`
 
-### Functions
+Switch on a value.
 
-TO DO
+#### `{{ define _name_ }} … {{ end }}` and `{{ block _name_ _expr_ }} … {{ end }}`
 
-## Examples
+Reusable named blocks with override-by-`define`.
 
-TO DO
+#### `{{ _name_ := _expr_ }}`
+
+Bind a variable in the current context.
+
+#### `{{ return [_expr_] }}`
+
+Halt rendering and yield a value back from `TemplateRenderer.render`.
+
+#### `{{ // _comment_ }}` or `{{ /* _comment_ */ }}`
+
+Template comments.
+
+### Built-in functions
+
+~67 builtins: numeric (`abs`, `ceil`, `floor`, `round`, `min`, `max`, `sum`,
+`number`); string (`upper`, `lower`, `capitalize`, `length`, `trim`, `ltrim`,
+`rtrim`, `htmlEscape`, `newline_to_br`, `urlize`, `urlEncode`, `urlDecode`,
+`split`, `startsWith`, `substring`, `truncate`, `remove`, `removeFirst`);
+collection (`head`, `last`, `tail`, `append`, `prepend`, `reverse`,
+`distinct`, `compact`, `drop`, `dropRight`, `take`, `takeRight`, `slice`,
+`join`, `contains`, `length`, `isEmpty`, `nonEmpty`, `toSeq`, `toString`);
+set ops (`intersect`, `union`, `symdiff`, `complement`); higher-order
+(`filter`, `filterNot`, `map`, `default`); regex (`findRE`); date/time
+(`now`, `time`, `unix`, `format` with named formats `:date_full` /
+`:date_long` / `:date_medium` / `:date_short` and any `java.time`
+`DateTimeFormatter` pattern); misc (`querify`, `partial`, `fileExists`,
+`random`, `shuffle`, `print`, `println`, `context`).
 
 ## Tests
 
-Unit tests can be run quickly for the JVM platform by typing
-
-```sbt
-squigglyJVM / test
-
+```shell
+sbt squigglyJVM/test
+sbt squigglyJS/test
+sbt squigglyNative/test
 ```
 
-Tests for all platforms can be run by typing simply
+Or run the whole cross-build at once:
 
-```sbt
-test
-
+```shell
+sbt test
 ```
 
 ## Contributing
 
-This project welcomes contributions from the community. Contributions are accepted using GitHub pull requests; for more
-information, see
-[GitHub documentation - Creating a pull request](https://help.github.com/articles/creating-a-pull-request/).
-
-For a good pull request, we ask you provide the following:
-
-1. Include a clear description of your pull request in the description with the basic "what" and "why"s for the request.
-2. The tests should pass as best as you can.
-3. The pull request should include tests for the change. A new feature should have tests for the new feature and bug
-   fixes should include a test that fails without the corresponding code change and passes after they are applied.
-4. If the pull request is a new feature, please include appropriate documentation in the `README.md` file as well.
-5. To help ensure that your code is similar in style to the existing code, `scalafmt` should be used.
+PRs welcome. New features and bug fixes should ship with tests; `scalafmt` is
+configured.
 
 ## License
 
-[ISC]()
+[ISC](https://opensource.org/licenses/ISC)
