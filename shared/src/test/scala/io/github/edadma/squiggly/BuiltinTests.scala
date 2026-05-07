@@ -301,11 +301,8 @@ class BuiltinTests extends AnyFreeSpec with Matchers with Testing {
   }
 
   // ------------------------------------------------------- filesystem
-  //
-  // TODO: re-enable once cross_platform 0.1.6 (which fixes JS readableFile to
-  // return false on a missing file instead of throwing ENOENT) is published
-  // and we bump deps. Currently passes on JVM/Native, throws on JS.
-  "fileExists negative" ignore {
+
+  "fileExists negative" in {
     test(null, "{{ fileExists '/__definitely_not_a_real_path__' }}") shouldBe "false"
   }
 
