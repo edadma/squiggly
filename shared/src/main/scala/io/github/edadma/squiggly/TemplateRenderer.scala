@@ -79,21 +79,21 @@ class TemplateRenderer(
             case TextToken(_, text) => pout.print(text)
             case SpaceToken(_, s)   => pout.print(s)
             case TagToken(_, tag: ExprAST, _, _) =>
+              // Render any-data values as compact, JSON-ish text. Both Seq
+              // and Map recurse so nested structures (e.g. findRE's
+              // List-of-(match :: groups) result) format cleanly as
+              // `[[m1, g1], [m2, g2]]` rather than falling back to
+              // `List(m1).toString`.
               def render(v: Any): String =
                 v match {
-                  case s: collection.Seq[?]    => s.mkString("[", ", ", "]")
+                  case s: collection.Seq[?]    => s.map(render).mkString("[", ", ", "]")
                   case m: collection.Map[?, ?] => m.map { case (k, v) => s"$k: ${render(v)}" }.mkString("{", ", ", "}")
-                  case s: String               => s""""$s""""
                   case null | ()               => ""
+                  case s: String               => s
                   case v                       => v.toString
                 }
 
-              pout.print(
-                context.eval(tag) match {
-                  case s: String => s
-                  case v         => render(v)
-                },
-              )
+              pout.print(render(context.eval(tag)))
             case TagToken(_, AssignmentAST(name, expr), _, _) => context.vars(name) = context.eval(expr)
             case TagToken(_, ReturnAST(expr), _, _) =>
               returnValue = expr map context.eval getOrElse ()

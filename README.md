@@ -33,7 +33,7 @@ The name "squiggly" is a colloquialism for curly braces — the tag delimiters.
 Add the dependency to your `build.sbt`:
 
 ```scala
-libraryDependencies += "io.github.edadma" %%% "squiggly" % "0.2.2"
+libraryDependencies += "io.github.edadma" %%% "squiggly" % "0.2.3"
 ```
 
 `%%%` cross-builds against whatever target your project uses (JVM, Scala.js, or
@@ -113,7 +113,7 @@ node js/target/scala-3.8.3/squiggly-fastopt/main.js "Hello, {{ 1 + 2 }}!"
 #### CLI flags
 
 ```
-Squiggly Template Engine v0.2.2
+Squiggly Template Engine v0.2.3
 Usage: squiggly [options] [[<template>]]
 
   -a, --ast              pretty print AST

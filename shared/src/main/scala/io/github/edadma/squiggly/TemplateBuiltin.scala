@@ -6,6 +6,7 @@ import java.util.Locale
 import io.github.edadma.cross_platform._
 
 import scala.collection.mutable
+import scala.collection.mutable.ListBuffer
 import scala.language.postfixOps
 import scala.util.Random
 import scala.util.matching.Regex
@@ -515,12 +516,31 @@ object TemplateBuiltin {
     else s
   }
 
-  /** Hugo-style `findRE`: returns a flat sequence of full-match strings.
-    * Capture-group submatches are not exposed (matches Hugo's behaviour);
-    * callers that need group access can use `scala.util.matching.Regex` directly.
+  /** Find every match of `re` in `s`. Each entry is a `List[String]` — the
+    * full matched text first, then any capture groups (groups that didn't
+    * match are returned as empty strings).
+    *
+    * Templates can index into this in the obvious way:
+    *
+    * {{{
+    *   {{ findRE 'pattern' input }}        // → [[m1, g1, …], [m2, g1, …], …]
+    *   {{ (findRE '<p>(.+)</p>' .)[0][1] }}  // → first match's group 1
+    * }}}
+    *
+    * The flat "just the matches" projection a Hugo user might expect can be
+    * derived from this with the squiggly pipeline (e.g. `findRE … | map …`).
     */
-  private def findRE(re: String, s: String): Iterator[String] =
-    re.r.findAllMatchIn(s).map(_.matched)
+  private def findRE(re: String, s: String): Iterator[List[String]] =
+    re.r.findAllMatchIn(s).map { m =>
+      val buf = new ListBuffer[String]
+      buf += m.matched
+      var i = 1
+      while (i <= m.groupCount) {
+        buf += Option(m.group(i)).getOrElse("")
+        i += 1
+      }
+      buf.toList
+    }
 
   private def partial(context: Context, path: String, data: Any): Any = {
     val partial = context.renderer.partials(path) getOrElse sys.error(s"partial '$path' count not be loaded")

@@ -19,7 +19,7 @@ import io.github.edadma.cross_platform._
 
     OParser.sequence(
       programName("squiggly"),
-      head("Squiggly Template Engine", "v0.2.2"),
+      head("Squiggly Template Engine", "v0.2.3"),
       opt[Unit]('a', "ast")
         .optional()
         .action((_, c) => c.copy(ast = true))

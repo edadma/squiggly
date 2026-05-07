@@ -278,12 +278,23 @@ class BuiltinTests extends AnyFreeSpec with Matchers with Testing {
 
   // -------------------------------------------------------------- regex
 
-  "findRE" in {
-    test(null, """{{ findRE '[a-z]+' 'hello 123 world' }}""") shouldBe "[hello, world]"
+  "findRE (no groups)" in {
+    // Each match is a list of [fullMatch, group1, group2, ...] — no groups
+    // means each entry is a one-element list with just the match.
+    test(null, """{{ findRE '[a-z]+' 'hello 123 world' }}""") shouldBe "[[hello], [world]]"
+  }
+
+  "findRE (with groups)" in {
+    test(null, """{{ findRE '<p>(.+?)</p>' '<p>one</p><p>two</p>' }}""") shouldBe
+      "[[<p>one</p>, one], [<p>two</p>, two]]"
+  }
+
+  "findRE indexed access" in {
+    test(null, """{{ (findRE '<p>(.+?)</p>' '<p>hello</p>')[0][1] }}""") shouldBe "hello"
   }
 
   "findRE (limited)" in {
-    test(null, """{{ findRE '[a-z]+' 'a b c d' 2 }}""") shouldBe "[a, b]"
+    test(null, """{{ findRE '[a-z]+' 'a b c d' 2 }}""") shouldBe "[[a], [b]]"
   }
 
   // ------------------------------------------------------------ misc
