@@ -7,7 +7,7 @@ ThisBuild / scalaVersion           := "3.8.3"
 ThisBuild / organization           := "io.github.edadma"
 ThisBuild / organizationName       := "edadma"
 ThisBuild / organizationHomepage   := Some(url("https://github.com/edadma"))
-ThisBuild / version                := "0.2.0"
+ThisBuild / version                := "0.2.1"
 ThisBuild / description            := "A Scala 3 string templating engine inspired by Hugo and Liquid"
 ThisBuild / sonatypeCredentialHost := sonatypeCentralHost
 
@@ -56,8 +56,8 @@ lazy val squiggly = crossProject(JSPlatform, JVMPlatform, NativePlatform)
       "com.github.scopt"       %%% "scopt"                    % "4.1.0",
       "com.lihaoyi"            %%% "pprint"                   % "0.9.0"  % "test",
       "org.scala-lang.modules" %%% "scala-parser-combinators" % "2.4.0",
-      "io.github.edadma"       %%% "char_reader"              % "0.1.25",
-      "io.github.edadma"       %%% "cross_platform"           % "0.1.3",
+      "io.github.edadma"       %%% "char_reader"              % "0.1.26",
+      "io.github.edadma"       %%% "cross_platform"           % "0.1.5",
       "dev.zio"                %%% "zio-json"                 % "0.7.42",
     ),
     publishMavenStyle      := true,
