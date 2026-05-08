@@ -1,5 +1,7 @@
 ---
 title: Squiggly
+heroTitle: Pour your data through a
+heroHighlight: template
 summary: A small, fast, Scala 3 template engine — Mustache-flavored syntax over an any-data shape.
 ---
 

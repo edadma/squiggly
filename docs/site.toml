@@ -24,6 +24,7 @@ htmlDir         = ""
 
 [juicerdocs]
 logo            = "/squiggly-logo.png"
+version         = "v0.2.3"
 
 # Brand palette — cyan + electric-blue, matched to the neon-S logo. Distinct
 # from juicer's magenta-plum so the two sites read as siblings, not clones.
