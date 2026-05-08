@@ -1,0 +1,4 @@
+<figure class="not-prose my-6">
+  <img src="{{ head .args }}" alt="{{ if .alt }}{{ .alt }}{{ end }}" class="w-full rounded-lg border border-zinc-200 dark:border-zinc-800" />
+  {{ if .caption }}<figcaption class="mt-2 text-sm text-zinc-600 dark:text-zinc-400 text-center">{{ .caption }}</figcaption>{{ end }}
+</figure>

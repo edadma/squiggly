@@ -1,0 +1,8 @@
+{{ if .tocList }}
+  <nav id="juicerdocs-page-toc" aria-label="On this page" class="text-sm">
+    <p class="font-semibold jd-fg mb-3 text-xs uppercase tracking-wider">On this page</p>
+    <ul class="space-y-0.5 border-l jd-border">
+      {{ partial 'page-toc-list' .tocList }}
+    </ul>
+  </nav>
+{{ end }}

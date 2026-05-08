@@ -1,0 +1,67 @@
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>{{ if .page.title }}{{ .page.title }} – {{ end }}{{ .site.title }}</title>
+{{ if .page.summary }}<meta name="description" content="{{ .page.summary }}" />{{ end }}
+<link rel="canonical" href="{{ .page.permalink }}" />
+<link rel="icon" type="image/png" href="{{ if .site.juicerdocs.logo }}{{ relURL .site.juicerdocs.logo }}{{ else }}{{ relURL '/juicer-logo.png' }}{{ end }}" />
+<link rel="alternate" type="application/atom+xml" href="{{ relURL '/feed.xml' }}" title="{{ .site.title }}" />
+
+<!-- Inter font (variable) for clean typography -->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" />
+
+<!--
+  Apply the theme BEFORE first paint to avoid the white flash.
+  Reads localStorage ('juicerdocs-theme'), falls back to system preference.
+  Sets data-theme="dark" or data-theme="light" on <html>.
+-->
+<script>
+  (function() {
+    try {
+      var stored = localStorage.getItem('juicerdocs-theme');
+      var dark = stored
+        ? stored === 'dark'
+        : window.matchMedia('(prefers-color-scheme: dark)').matches;
+      document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+    } catch (e) {}
+  })();
+</script>
+
+<!--
+  Tailwind CSS v4 — browser CDN. JIT-compiles classes on every page load.
+  We mostly use Tailwind for layout + spacing; theme colors flow through
+  CSS variables in juicerdocs.css so they don't depend on Tailwind's
+  variant compiler (which is unreliable through @tailwindcss/browser).
+-->
+<script src="https://unpkg.com/@tailwindcss/browser@4"></script>
+<script type="text/tailwindcss">
+  @plugin "@tailwindcss/typography";
+</script>
+
+<link rel="stylesheet" href="{{ relURL '/juicerdocs.css' }}" />
+
+{{ if .site.juicerdocs }}
+<!--
+  Site-supplied palette overrides — set under [juicerdocs] in site.toml:
+    brand, brandStrong, brandSoft, accent, leaf  (light defaults)
+    brandDark, brandStrongDark, brandSoftDark, accentDark, leafDark  (dark overrides)
+  Anything left unset falls through to the theme defaults in juicerdocs.css.
+-->
+<style>
+  :root {
+    {{ if .site.juicerdocs.brand        }}--jd-brand: {{ .site.juicerdocs.brand }};{{ end }}
+    {{ if .site.juicerdocs.brandStrong  }}--jd-brand-strong: {{ .site.juicerdocs.brandStrong }};{{ end }}
+    {{ if .site.juicerdocs.brandSoft    }}--jd-brand-soft: {{ .site.juicerdocs.brandSoft }};{{ end }}
+    {{ if .site.juicerdocs.accent       }}--jd-accent: {{ .site.juicerdocs.accent }};{{ end }}
+    {{ if .site.juicerdocs.leaf         }}--jd-leaf: {{ .site.juicerdocs.leaf }};{{ end }}
+  }
+  [data-theme="dark"] {
+    {{ if .site.juicerdocs.brandDark        }}--jd-brand: {{ .site.juicerdocs.brandDark }};{{ end }}
+    {{ if .site.juicerdocs.brandStrongDark  }}--jd-brand-strong: {{ .site.juicerdocs.brandStrongDark }};{{ end }}
+    {{ if .site.juicerdocs.brandSoftDark    }}--jd-brand-soft: {{ .site.juicerdocs.brandSoftDark }};{{ end }}
+    {{ if .site.juicerdocs.accentDark       }}--jd-accent: {{ .site.juicerdocs.accentDark }};{{ end }}
+    {{ if .site.juicerdocs.leafDark         }}--jd-leaf: {{ .site.juicerdocs.leafDark }};{{ end }}
+  }
+</style>
+{{ end }}

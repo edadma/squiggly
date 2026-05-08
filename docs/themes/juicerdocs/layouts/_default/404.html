@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  {{ partial 'head' . }}
+</head>
+<body class="min-h-screen flex items-center justify-center">
+  <div class="text-center px-4">
+    <img src="{{ if .site.juicerdocs.logo }}{{ relURL .site.juicerdocs.logo }}{{ else }}{{ relURL '/juicer-logo.png' }}{{ end }}" alt="" class="w-20 h-20 mx-auto mb-6 opacity-90" />
+    <h1 class="text-5xl font-bold mb-2 jd-fg">404</h1>
+    <p class="text-lg jd-muted mb-8">No such page on this site.</p>
+    <a href="{{ relURL '/' }}" class="jd-btn jd-btn-primary">Back to home</a>
+  </div>
+</body>
+</html>

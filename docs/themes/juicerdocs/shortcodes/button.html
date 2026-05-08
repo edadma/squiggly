@@ -1,0 +1,3 @@
+<a href="{{ if .href }}{{ .href }}{{ end }}" class="jd-btn {{ if .primary }}jd-btn-primary{{ else }}jd-btn-secondary{{ end }}">
+  {{ if .icon }}<span>{{ .icon }}</span>{{ end }}{{ head .args }}
+</a>

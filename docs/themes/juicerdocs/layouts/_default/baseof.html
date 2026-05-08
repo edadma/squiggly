@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  {{ partial 'head' . }}
+</head>
+<body class="antialiased">
+  {{ partial 'topbar' . }}
+
+  <div class="mx-auto max-w-screen-2xl flex">
+    <aside class="jd-sidebar-aside hidden lg:block w-64 shrink-0 border-r jd-border px-4 py-8 sticky top-14 self-start max-h-[calc(100vh-3.5rem)] overflow-y-auto">
+      {{ partial 'sidebar' . }}
+    </aside>
+    <div class="jd-sidebar-backdrop" aria-hidden="true"></div>
+
+    <main class="flex-1 min-w-0 px-4 sm:px-6 lg:px-10 py-8">
+      <div class="max-w-3xl mx-auto">
+        {{ partial 'breadcrumbs' . }}
+        {{ block main . }}
+          <article class="prose prose-headings:scroll-mt-20 max-w-none">
+            <h1>{{ .page.title }}</h1>
+            {{ .content }}
+          </article>
+        {{ end }}
+        {{ partial 'prev-next' . }}
+      </div>
+    </main>
+
+    <aside class="hidden xl:block w-72 shrink-0 px-4 py-8 sticky top-14 self-start max-h-[calc(100vh-3.5rem)] overflow-y-auto">
+      {{ partial 'page-toc' . }}
+    </aside>
+  </div>
+
+  {{ partial 'footer' . }}
+
+  <script src="{{ relURL '/juicerdocs.js' }}"></script>
+</body>
+</html>

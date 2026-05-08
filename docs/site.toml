@@ -1,0 +1,40 @@
+# squiggly docs site, deployed to https://edadma.github.io/squiggly/.
+#
+# Built with juicer (the static site generator that uses squiggly as its
+# template engine), and themed with juicerdocs (vendored under
+# themes/juicerdocs/ so this repo stays self-contained).
+#
+# Local preview:
+#   sbt 'juicerJVM/run serve -s ../squiggly/docs -L'      # from juicer's repo
+#
+# Production: pushed to `stable`, built + deployed by .github/workflows/docs.yml.
+
+title           = "Squiggly"
+author          = "Ed Maxedon"
+baseURL         = "https://edadma.github.io/squiggly/"
+
+theme           = "juicerdocs"
+
+# The page <h1> comes from frontmatter title — markdown headings start at h2.
+headingShift    = 0
+
+# Static-host deploy: URL space must match disk layout. The default 'html'
+# segment is a dev-time convenience that doesn't survive GitHub Pages.
+htmlDir         = ""
+
+[juicerdocs]
+logo            = "/squiggly-logo.png"
+
+# Brand palette — cyan + electric-blue, matched to the neon-S logo. Distinct
+# from juicer's magenta-plum so the two sites read as siblings, not clones.
+brand           = "#0891b2"        # cyan-600 — primary
+brandStrong     = "#0e7490"        # cyan-700 — hover
+brandSoft       = "#cffafe"        # cyan-100 — backgrounds
+accent          = "#3b82f6"        # blue-500 — secondary
+leaf            = "#10b981"        # emerald-500 — success / leaf
+
+brandDark       = "#22d3ee"        # cyan-400
+brandStrongDark = "#67e8f9"        # cyan-300
+brandSoftDark   = "rgb(34 211 238 / .12)"
+accentDark      = "#60a5fa"        # blue-400
+leafDark        = "#34d399"        # emerald-400

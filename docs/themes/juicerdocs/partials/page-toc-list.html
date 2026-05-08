@@ -1,0 +1,14 @@
+{{ for h <- . }}
+  <li>
+    <a href="#{{ h.id }}" data-juicerdocs-toc-link data-jd-toc-id="{{ h.id }}"
+       class="jd-toc-link block py-1 pl-3 -ml-px border-l-2 border-transparent jd-muted hover:jd-fg transition"
+       data-jd-toc-level="{{ h.level }}">
+      {{ h.heading }}
+    </a>
+    {{ if h.sub }}
+      <ul class="space-y-0.5">
+        {{ partial 'page-toc-list' h.sub }}
+      </ul>
+    {{ end }}
+  </li>
+{{ end }}

@@ -1,0 +1,20 @@
+{{ if .page.prev or .page.next }}
+  <nav class="not-prose mt-12 grid grid-cols-2 gap-4" aria-label="Page navigation">
+    {{ if .page.prev }}
+      <a href="{{ .page.prev.url }}" class="group flex flex-col p-4 rounded-lg border jd-border jd-surface-2 hover:border-(--jd-brand) transition" style="text-decoration:none">
+        <span class="text-xs jd-muted">← Previous</span>
+        <span class="font-semibold jd-fg mt-1">{{ .page.prev.title }}</span>
+      </a>
+    {{ else }}
+      <div></div>
+    {{ end }}
+    {{ if .page.next }}
+      <a href="{{ .page.next.url }}" class="group flex flex-col p-4 rounded-lg border jd-border jd-surface-2 hover:border-(--jd-brand) transition text-right" style="text-decoration:none">
+        <span class="text-xs jd-muted">Next →</span>
+        <span class="font-semibold jd-fg mt-1">{{ .page.next.title }}</span>
+      </a>
+    {{ else }}
+      <div></div>
+    {{ end }}
+  </nav>
+{{ end }}
