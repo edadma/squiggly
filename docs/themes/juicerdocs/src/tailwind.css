@@ -1,0 +1,666 @@
+/*
+ * juicerdocs — Tailwind v4 input file.
+ *
+ * Build with:
+ *   npm install      (one-time, in this directory)
+ *   npm run build    (regenerate ../static/juicerdocs.css)
+ *   npm run watch    (ditto, on every save)
+ *
+ * The compiled output is committed; theme USERS don't need Node.
+ */
+
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+
+/* Where to scan for utility-class usage. Tailwind v4 uses @source
+ * directives instead of a tailwind.config.js. */
+@source "../layouts/**/*.html";
+@source "../partials/**/*.html";
+@source "../shortcodes/**/*.html";
+
+/* Class-strategy dark mode. The pre-paint script in head.html sets
+ * `data-theme="dark"` on <html>; this variant rewires Tailwind's
+ * `dark:` modifier to match it (default would be the
+ * prefers-color-scheme media query). */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+/* ================================================================
+ * Theme tokens
+ * ----------------------------------------------------------------
+ * Exposed to Tailwind via @theme so utilities like `bg-brand`,
+ * `text-fg-soft`, etc. resolve to var() references. The values
+ * themselves come from the CSS variables defined in @layer base
+ * below — overriding those switches the whole theme in one step
+ * (light vs dark). */
+
+@theme {
+  --color-bg:           var(--jd-bg);
+  --color-bg-soft:      var(--jd-bg-soft);
+  --color-surface:      var(--jd-surface);
+  --color-surface-2:    var(--jd-surface-2);
+  --color-border:       var(--jd-border);
+  --color-border-soft:  var(--jd-border-soft);
+  --color-fg:           var(--jd-fg);
+  --color-fg-soft:      var(--jd-fg-soft);
+  --color-muted:        var(--jd-muted);
+  --color-brand:        var(--jd-brand);
+  --color-brand-strong: var(--jd-brand-strong);
+  --color-brand-soft:   var(--jd-brand-soft);
+  --color-accent:       var(--jd-accent);
+  --color-leaf:         var(--jd-leaf);
+
+  --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+
+  --radius-md: 0.625rem;
+  --radius-lg: 1rem;
+}
+
+/* ================================================================
+ * Base layer
+ * ---------------------------------------------------------------- */
+
+@layer base {
+
+  :root {
+    --jd-bg:           #ffffff;
+    --jd-bg-soft:      #fafafa;
+    --jd-surface:      #f4f4f5;
+    --jd-surface-2:    #ffffff;
+    --jd-border:       #e4e4e7;
+    --jd-border-soft:  #f1f1f3;
+    --jd-fg:           #18181b;
+    --jd-fg-soft:      #3f3f46;
+    --jd-muted:        #71717a;
+
+    --jd-brand:        #d61472;
+    --jd-brand-strong: #a30d57;
+    --jd-brand-soft:   #fce7f3;
+    --jd-accent:       #6f1f9e;
+    --jd-leaf:         #65a30d;
+
+    --jd-code-bg:      #f6f6f7;
+    --jd-code-fg:      #1f1f23;
+    --jd-code-border:  #e4e4e7;
+
+    --jd-shadow:       0 1px 2px rgb(0 0 0 / .05);
+    --jd-shadow-lg:    0 12px 32px -8px rgb(214 20 114 / .15),
+                       0 4px 16px -4px rgb(111 31 158 / .1);
+  }
+
+  [data-theme="dark"] {
+    --jd-bg:           #0b0a10;
+    --jd-bg-soft:      #0f0e15;
+    --jd-surface:      #16141d;
+    --jd-surface-2:    #1c1925;
+    --jd-border:       #2a2533;
+    --jd-border-soft:  #1e1a26;
+    --jd-fg:           #f4f4f5;
+    --jd-fg-soft:      #d4d4d8;
+    --jd-muted:        #9b97a3;
+
+    --jd-brand:        #ec4899;
+    --jd-brand-strong: #f472b6;
+    --jd-brand-soft:   rgb(236 72 153 / .12);
+    --jd-accent:       #c084fc;
+    --jd-leaf:         #84cc16;
+
+    --jd-code-bg:      #0f0e15;
+    --jd-code-fg:      #e4e4e7;
+    --jd-code-border:  #1f1d28;
+
+    --jd-shadow:       0 1px 2px rgb(0 0 0 / .4);
+    --jd-shadow-lg:    0 12px 32px -8px rgb(236 72 153 / .25),
+                       0 4px 16px -4px rgb(192 132 252 / .15);
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--jd-bg);
+    color: var(--jd-fg);
+    font-family: var(--font-sans);
+    font-feature-settings: "ss01", "cv11";
+  }
+
+  ::selection {
+    background: var(--jd-brand);
+    color: #ffffff;
+  }
+
+  /* Show light/dark icon based on theme. */
+  [data-theme="dark"]  .jd-icon-light { display: none; }
+  [data-theme="light"] .jd-icon-dark  { display: none; }
+}
+
+/* ================================================================
+ * Component layer
+ * ---------------------------------------------------------------- */
+
+@layer components {
+
+  /* ---- Top-bar ---- */
+
+  .jd-topbar {
+    position: sticky;
+    top: 0;
+    z-index: 30;
+    background: color-mix(in oklab, var(--jd-bg) 92%, transparent);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--jd-border);
+  }
+
+  .jd-search-input {
+    width: 100%;
+    padding: 0.4375rem 0.75rem 0.4375rem 2.25rem;
+    border-radius: 0.4375rem;
+    border: 1px solid var(--jd-border);
+    background: var(--jd-surface);
+    color: var(--jd-fg);
+    font-size: 0.875rem;
+    font-family: inherit;
+  }
+  .jd-search-input:focus {
+    outline: none;
+    border-color: var(--jd-brand);
+    box-shadow: 0 0 0 3px var(--jd-brand-soft);
+  }
+
+  .jd-icon-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 0.4375rem;
+    color: var(--jd-fg-soft);
+    background: transparent;
+    border: 1px solid transparent;
+    cursor: pointer;
+  }
+  .jd-icon-btn:hover {
+    color: var(--jd-brand);
+    background: var(--jd-brand-soft);
+  }
+
+  /* ---- Mobile sidebar overlay ---- */
+
+  #juicerdocs-sidebar-toggle { display: inline-flex; }
+  @media (min-width: 1024px) {
+    #juicerdocs-sidebar-toggle { display: none; }
+  }
+  @media (max-width: 1023.98px) {
+    body[data-jd-sidebar="open"] .jd-sidebar-aside {
+      display: block !important;
+      position: fixed;
+      inset: 3.5rem 0 0 0;
+      z-index: 40;
+      width: min(20rem, 80vw);
+      max-width: none;
+      max-height: calc(100vh - 3.5rem);
+      overflow-y: auto;
+      background: var(--jd-bg);
+      border-right: 1px solid var(--jd-border);
+      box-shadow: var(--jd-shadow-lg);
+      animation: jdSlideInLeft .18s ease-out;
+    }
+    body[data-jd-sidebar="open"] .jd-sidebar-backdrop {
+      display: block;
+      position: fixed;
+      inset: 3.5rem 0 0 0;
+      z-index: 39;
+      background: rgb(0 0 0 / .35);
+      animation: jdFadeIn .18s ease-out;
+    }
+  }
+  .jd-sidebar-backdrop { display: none; }
+
+  @keyframes jdSlideInLeft {
+    from { transform: translateX(-12px); opacity: 0; }
+    to   { transform: none;              opacity: 1; }
+  }
+  @keyframes jdFadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+
+  /* ---- Sidebar nav ---- */
+
+  .jd-nav-link {
+    display: block;
+    padding: 0.375rem 0.75rem;
+    border-radius: 0.375rem;
+    color: var(--jd-fg-soft);
+    border-left: 2px solid transparent;
+    margin-left: -2px;
+    transition: color .12s, border-color .12s, background .12s;
+  }
+  .jd-nav-link:hover {
+    color: var(--jd-brand);
+    background: var(--jd-brand-soft);
+  }
+  .jd-nav-link.active,
+  .juicerdocs-nav-active {
+    color: var(--jd-brand);
+    background: var(--jd-brand-soft);
+    border-left-color: var(--jd-brand);
+    font-weight: 500;
+  }
+  .jd-nav-section {
+    display: block;
+    padding: 0.375rem 0.75rem;
+    font-weight: 600;
+    color: var(--jd-fg);
+    font-size: 0.8125rem;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+  }
+
+  /* ---- "On this page" right rail ---- */
+
+  .jd-toc-link {
+    word-break: break-word;
+    overflow-wrap: anywhere;
+    line-height: 1.4;
+  }
+  .jd-toc-link[data-jd-toc-level="2"] { padding-left: 0.75rem; }
+  .jd-toc-link[data-jd-toc-level="3"] { padding-left: 1.5rem; }
+  .jd-toc-link[data-jd-toc-level="4"] { padding-left: 2.25rem; font-size: 0.8125rem; }
+  .jd-toc-link[data-jd-toc-level="5"] { padding-left: 3rem;    font-size: 0.8125rem; }
+
+  .jd-toc-link.active {
+    color: var(--jd-brand);
+    border-color: var(--jd-brand);
+    font-weight: 500;
+  }
+
+  /* ---- Hero ---- */
+
+  .jd-hero {
+    position: relative;
+    padding: 3.5rem 0 2rem;
+    overflow: hidden;
+  }
+  .jd-hero-bg {
+    position: absolute;
+    inset: -10% -10% 0 -10%;
+    z-index: -1;
+    opacity: .8;
+    background:
+      radial-gradient(45% 45% at 80% 0%,   color-mix(in oklab, var(--jd-brand)  25%, transparent) 0%, transparent 70%),
+      radial-gradient(40% 40% at 0% 30%,   color-mix(in oklab, var(--jd-accent) 22%, transparent) 0%, transparent 70%),
+      radial-gradient(60% 50% at 50% 100%, color-mix(in oklab, var(--jd-leaf)   12%, transparent) 0%, transparent 80%);
+  }
+  .jd-hero-title {
+    font-size: clamp(2.25rem, 5.5vw, 3.5rem);
+    line-height: 1.05;
+    font-weight: 800;
+    letter-spacing: -0.025em;
+  }
+  .jd-hero-title .jd-grad {
+    background: linear-gradient(135deg, var(--jd-brand) 0%, var(--jd-accent) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .jd-hero-tagline {
+    font-size: 1.125rem;
+    color: var(--jd-fg-soft);
+    max-width: 42rem;
+    margin-top: 1rem;
+  }
+
+  /* ---- Feature grid + cards ---- */
+
+  .jd-feature-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    margin-top: 2.5rem;
+  }
+  @media (min-width: 768px)  { .jd-feature-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (min-width: 1024px) { .jd-feature-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+
+  .jd-card {
+    display: block;
+    position: relative;
+    padding: 1.25rem;
+    background: var(--jd-surface-2);
+    border: 1px solid var(--jd-border);
+    border-radius: var(--radius-md);
+    text-decoration: none;
+    color: inherit;
+    transition: transform .15s, border-color .15s, box-shadow .15s;
+  }
+  .jd-card:hover {
+    transform: translateY(-2px);
+    border-color: var(--jd-brand);
+    box-shadow: var(--jd-shadow-lg);
+  }
+  .jd-card-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 0.5rem;
+    background: var(--jd-brand-soft);
+    color: var(--jd-brand);
+    margin-bottom: 0.75rem;
+  }
+  .jd-card-title {
+    font-weight: 600;
+    font-size: 1.0625rem;
+    color: var(--jd-fg);
+    margin-bottom: 0.25rem;
+  }
+  .jd-card-summary {
+    font-size: 0.875rem;
+    color: var(--jd-muted);
+    line-height: 1.55;
+  }
+
+  /* ---- Buttons ---- */
+
+  .jd-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.625rem 1.125rem;
+    font-weight: 500;
+    font-size: 0.9375rem;
+    border-radius: 0.5rem;
+    border: 1px solid transparent;
+    text-decoration: none !important;
+    transition: background .12s, border-color .12s, color .12s, transform .08s;
+  }
+  .jd-btn:active { transform: translateY(1px); }
+  .jd-btn-primary {
+    background: var(--jd-brand);
+    color: #ffffff;
+  }
+  .jd-btn-primary:hover { background: var(--jd-brand-strong); }
+  .jd-btn-secondary {
+    background: var(--jd-surface);
+    color: var(--jd-fg);
+    border-color: var(--jd-border);
+  }
+  .jd-btn-secondary:hover {
+    border-color: var(--jd-brand);
+    color: var(--jd-brand);
+  }
+
+  /* ---- Prose: brand-color overrides on top of @tailwindcss/typography ---- */
+
+  .prose {
+    color: var(--jd-fg);
+    --tw-prose-body:           var(--jd-fg-soft);
+    --tw-prose-headings:       var(--jd-fg);
+    --tw-prose-links:          var(--jd-brand);
+    --tw-prose-bold:           var(--jd-fg);
+    --tw-prose-quotes:         var(--jd-fg-soft);
+    --tw-prose-quote-borders:  var(--jd-brand);
+    --tw-prose-code:           var(--jd-fg);
+    --tw-prose-counters:       var(--jd-muted);
+    --tw-prose-bullets:        var(--jd-muted);
+    --tw-prose-hr:             var(--jd-border);
+    --tw-prose-th-borders:     var(--jd-border);
+    --tw-prose-td-borders:     var(--jd-border);
+    --tw-prose-pre-bg:         var(--jd-code-bg);
+    --tw-prose-pre-code:       var(--jd-code-fg);
+  }
+  .prose a { font-weight: 500; }
+  .prose a:hover { color: var(--jd-brand-strong); }
+  .prose h2 {
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--jd-border-soft);
+  }
+  .prose code:not(pre code) {
+    background: var(--jd-surface);
+    padding: 0.125rem 0.375rem;
+    border-radius: 0.25rem;
+    font-size: 0.875em;
+    font-weight: 500;
+  }
+  .prose code::before,
+  .prose code::after { content: none; }
+
+  .prose pre {
+    position: relative;
+    padding-top: 2.25rem;
+    background: var(--jd-code-bg);
+    color: var(--jd-code-fg);
+    border: 1px solid var(--jd-code-border);
+    border-radius: var(--radius-md);
+    font-family: var(--font-mono);
+  }
+  .prose pre::before {
+    content: attr(data-language);
+    position: absolute;
+    top: 0.5rem;
+    left: 1rem;
+    font-size: 0.6875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.075em;
+    color: var(--jd-muted);
+    font-family: var(--font-mono);
+    font-weight: 500;
+  }
+
+  /* Tables — typography defaults aren't visible enough at a glance. */
+  .prose table {
+    border-collapse: separate;
+    border-spacing: 0;
+    border: 1px solid var(--jd-border);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+  }
+  .prose thead { background: var(--jd-surface); }
+  .prose th {
+    text-align: left;
+    padding: 0.625rem 0.875rem;
+    border-bottom: 1px solid var(--jd-border);
+  }
+  .prose td {
+    padding: 0.5rem 0.875rem;
+    border-bottom: 1px solid var(--jd-border-soft);
+  }
+  .prose tbody tr:last-child td { border-bottom: none; }
+  .prose tbody tr:nth-child(even) td { background: var(--jd-bg-soft); }
+  .prose tbody tr:hover td { background: var(--jd-brand-soft); }
+
+  /* ---- Copy button on code blocks ---- */
+
+  .juicerdocs-copy {
+    position: absolute;
+    top: 0.4375rem;
+    right: 0.5rem;
+    padding: 0.1875rem 0.5rem;
+    font-size: 0.75rem;
+    background: color-mix(in oklab, var(--jd-fg) 6%, transparent);
+    border: 1px solid color-mix(in oklab, var(--jd-fg) 12%, transparent);
+    border-radius: 0.25rem;
+    color: var(--jd-muted);
+    cursor: pointer;
+    opacity: 0;
+    font-family: inherit;
+    transition: opacity 0.15s, color 0.15s, background .15s;
+  }
+  .prose pre:hover .juicerdocs-copy { opacity: 1; }
+  .juicerdocs-copy:hover {
+    background: color-mix(in oklab, var(--jd-fg) 12%, transparent);
+    color: var(--jd-fg);
+  }
+  .juicerdocs-copy.copied { color: var(--jd-leaf); opacity: 1; }
+
+  /* ---- Callout shortcodes (note / tip / warning / danger) ---- */
+
+  .jd-callout {
+    position: relative;
+    margin: 1.5rem 0;
+    padding: 1rem 1rem 1rem 2.5rem;
+    border-radius: var(--radius-md);
+    border-left: 3px solid var(--jd-callout-accent, var(--jd-brand));
+    background: var(--jd-callout-bg, var(--jd-brand-soft));
+    color: var(--jd-fg);
+  }
+  .jd-callout::before {
+    content: var(--jd-callout-icon, "");
+    position: absolute;
+    left: 0.875rem;
+    top: 0.95rem;
+    font-size: 1rem;
+    line-height: 1;
+  }
+  .jd-callout > strong {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+    color: var(--jd-callout-accent, var(--jd-brand));
+  }
+  .jd-callout > .jd-callout-body > :first-child { margin-top: 0; }
+  .jd-callout > .jd-callout-body > :last-child  { margin-bottom: 0; }
+
+  .jd-callout-note    { --jd-callout-accent: #2563eb; --jd-callout-bg: rgb(37 99 235  / .08); --jd-callout-icon: "ℹ︎"; }
+  .jd-callout-tip     { --jd-callout-accent: #059669; --jd-callout-bg: rgb(5  150 105 / .08); --jd-callout-icon: "✶"; }
+  .jd-callout-warning { --jd-callout-accent: #d97706; --jd-callout-bg: rgb(217 119 6  / .10); --jd-callout-icon: "△"; }
+  .jd-callout-danger  { --jd-callout-accent: #dc2626; --jd-callout-bg: rgb(220 38  38 / .10); --jd-callout-icon: "⚠"; }
+
+  [data-theme="dark"] .jd-callout-note    { --jd-callout-accent: #60a5fa; --jd-callout-bg: rgb(37  99 235 / .15); }
+  [data-theme="dark"] .jd-callout-tip     { --jd-callout-accent: #34d399; --jd-callout-bg: rgb(16 185 129 / .15); }
+  [data-theme="dark"] .jd-callout-warning { --jd-callout-accent: #fbbf24; --jd-callout-bg: rgb(217 119  6 / .15); }
+  [data-theme="dark"] .jd-callout-danger  { --jd-callout-accent: #f87171; --jd-callout-bg: rgb(220  38 38 / .18); }
+
+  /* ---- Step list (CSS-counter) ---- */
+
+  .juicerdocs-steps { counter-reset: juicerdocs-step; }
+  .juicerdocs-steps > :is(h2, h3, h4):first-child { margin-top: 0; }
+  .juicerdocs-steps h2 {
+    counter-increment: juicerdocs-step;
+    position: relative;
+    padding-left: 2.75rem;
+    scroll-margin-top: 5rem;
+  }
+  .juicerdocs-steps h2::before {
+    content: counter(juicerdocs-step);
+    position: absolute;
+    left: 0;
+    top: 0.125rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.875rem;
+    height: 1.875rem;
+    border-radius: 9999px;
+    background: var(--jd-brand);
+    color: #ffffff;
+    font-size: 0.875rem;
+    font-weight: 700;
+  }
+
+  /* ---- Tabs widget ---- */
+
+  .juicerdocs-tabs {
+    margin: 1.5rem 0;
+    border: 1px solid var(--jd-border);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    background: var(--jd-surface-2);
+  }
+  .juicerdocs-tabs-buttons {
+    display: flex;
+    gap: 0.25rem;
+    padding: 0.5rem 0.5rem 0;
+    background: var(--jd-surface);
+    border-bottom: 1px solid var(--jd-border);
+  }
+  .juicerdocs-tabs-button {
+    padding: 0.5rem 0.875rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--jd-muted);
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .juicerdocs-tabs-button:hover { color: var(--jd-fg); }
+  .juicerdocs-tabs-button.active {
+    color: var(--jd-brand);
+    border-bottom-color: var(--jd-brand);
+  }
+  .juicerdocs-tab-panel { padding: 1rem 1.25rem; }
+  .juicerdocs-tab-panel:not(.active) { display: none; }
+
+  /* ---- Filetree shortcode ---- */
+
+  .juicerdocs-filetree {
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    line-height: 1.65;
+    background: var(--jd-surface);
+    border: 1px solid var(--jd-border);
+    border-radius: var(--radius-md);
+    padding: 1rem 1.25rem;
+    white-space: pre;
+    overflow-x: auto;
+    color: var(--jd-fg-soft);
+  }
+
+  /* ---- GitHub repo card ---- */
+
+  .juicerdocs-github {
+    display: flex;
+    align-items: center;
+    gap: 0.875rem;
+    padding: 0.875rem 1.125rem;
+    border: 1px solid var(--jd-border);
+    border-radius: var(--radius-md);
+    background: var(--jd-surface-2);
+    text-decoration: none !important;
+    color: var(--jd-fg);
+    margin: 1rem 0;
+    transition: border-color .12s, transform .12s;
+  }
+  .juicerdocs-github:hover {
+    border-color: var(--jd-brand);
+    transform: translateY(-1px);
+  }
+
+  /* ---- Search popup ---- */
+
+  #juicerdocs-search-results {
+    background: var(--jd-bg);
+    border: 1px solid var(--jd-border);
+    border-radius: var(--radius-md);
+    box-shadow: var(--jd-shadow-lg);
+  }
+  #juicerdocs-search-results .juicerdocs-result {
+    display: block;
+    padding: 0.625rem 0.875rem;
+    border-bottom: 1px solid var(--jd-border-soft);
+    text-decoration: none;
+    color: var(--jd-fg);
+  }
+  #juicerdocs-search-results .juicerdocs-result:last-child { border-bottom: none; }
+  #juicerdocs-search-results .juicerdocs-result:hover,
+  #juicerdocs-search-results .juicerdocs-result.active {
+    background: var(--jd-brand-soft);
+    color: var(--jd-brand);
+  }
+  .juicerdocs-result-title {
+    display: block;
+    font-weight: 500;
+  }
+  .juicerdocs-result-snippet {
+    display: block;
+    font-size: 0.75rem;
+    opacity: 0.7;
+    margin-top: 0.125rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}

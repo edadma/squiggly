@@ -29,16 +29,10 @@
 </script>
 
 <!--
-  Tailwind CSS v4 — browser CDN. JIT-compiles classes on every page load.
-  We mostly use Tailwind for layout + spacing; theme colors flow through
-  CSS variables in juicerdocs.css so they don't depend on Tailwind's
-  variant compiler (which is unreliable through @tailwindcss/browser).
+  Bundled CSS — Tailwind v4 + @tailwindcss/typography + theme components.
+  Pre-compiled by `npm run build` in themes/juicerdocs/. Site authors
+  don't need Node; the file is committed.
 -->
-<script src="https://unpkg.com/@tailwindcss/browser@4"></script>
-<script type="text/tailwindcss">
-  @plugin "@tailwindcss/typography";
-</script>
-
 <link rel="stylesheet" href="{{ relURL '/juicerdocs.css' }}" />
 
 {{ if .site.juicerdocs }}

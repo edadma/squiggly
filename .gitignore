@@ -20,3 +20,6 @@ project/plugins/project/
 .directory
 .idea/
 .bsp/
+
+# juicerdocs theme (Tailwind v4 build output)
+docs/themes/juicerdocs/node_modules/
