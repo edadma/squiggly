@@ -12,7 +12,7 @@ name: Docs
 
 on:
   push:
-    branches: ["stable", "dev"]
+    branches: ["stable"]
   pull_request:
     branches: ["stable"]
   workflow_dispatch:
