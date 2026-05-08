@@ -1,21 +1,17 @@
 {{ if .pages }}
-  <ul class="mt-1 space-y-0.5 border-l jd-border-soft">
+  <ul class="juicerdocs-nav-children">
     {{ for p <- .pages }}
       <li>
-        <a href="{{ p.url }}" data-juicerdocs-nav-link class="jd-nav-link">
-          {{ p.title }}
-        </a>
+        <a href="{{ p.url }}" data-juicerdocs-nav-link class="juicerdocs-nav-link">{{ p.title }}</a>
       </li>
     {{ end }}
   </ul>
 {{ end }}
 {{ if .subsections }}
-  <ul class="mt-1 space-y-0.5 border-l jd-border-soft">
+  <ul class="juicerdocs-nav-children">
     {{ for sub <- .subsections }}
       <li>
-        <a href="{{ sub.url }}" data-juicerdocs-nav-link class="jd-nav-link" style="font-weight:500">
-          {{ sub.title }}
-        </a>
+        <a href="{{ sub.url }}" data-juicerdocs-nav-link class="juicerdocs-nav-link">{{ sub.title }}</a>
         {{ partial 'nav-children' sub }}
       </li>
     {{ end }}

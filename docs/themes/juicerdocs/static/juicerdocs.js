@@ -4,13 +4,17 @@
  *   - Theme toggle (data-theme attribute on <html>; persisted in
  *     localStorage; the <head> snippet applies it before paint so there's
  *     no white flash on dark-mode reload).
- *   - Mobile sidebar toggle.
+ *   - Mobile sidebar toggle (body[data-sidebar-open="true"]).
  *   - "Copy" buttons + language badges on every <pre> code block.
  *   - Mark active sidebar link based on current URL.
  *   - Tabs widget (synthesizes button bar from panels).
  *   - Client-side search via /search.json.
  *   - "On this page" right-rail active-heading highlight via
  *     IntersectionObserver.
+ *
+ * State is conveyed exclusively via the `is-*` modifier classes
+ * (.is-active, .is-copied) and named component classes — no Tailwind
+ * utility strings live in this file.
  *
  * Self-contained — no external dependencies.
  */
@@ -30,27 +34,27 @@
   }
 
   // ===== Mobile sidebar overlay =====
-  // Toggles `body[data-jd-sidebar="open"]`, which the CSS uses to slide
+  // Toggles `body[data-sidebar-open="true"]`, which the CSS uses to slide
   // the sidebar in from the left as a fixed overlay. Uses event delegation
   // so a missing element on this page doesn't matter; clicks elsewhere
   // (backdrop, nav links, Esc key) all close the sidebar.
   function setSidebar(open) {
-    if (open) document.body.setAttribute("data-jd-sidebar", "open");
-    else      document.body.removeAttribute("data-jd-sidebar");
+    if (open) document.body.setAttribute("data-sidebar-open", "true");
+    else      document.body.removeAttribute("data-sidebar-open");
   }
   document.addEventListener("click", (e) => {
     if (e.target.closest("#juicerdocs-sidebar-toggle")) {
       e.preventDefault();
       e.stopPropagation();
-      setSidebar(document.body.getAttribute("data-jd-sidebar") !== "open");
+      setSidebar(document.body.getAttribute("data-sidebar-open") !== "true");
       return;
     }
-    if (e.target.closest(".jd-sidebar-backdrop")) {
+    if (e.target.closest(".juicerdocs-sidebar-backdrop")) {
       setSidebar(false);
       return;
     }
     // Close when a sidebar nav link is tapped (mobile UX).
-    const link = e.target.closest(".jd-sidebar-aside a");
+    const link = e.target.closest(".juicerdocs-sidebar-aside a");
     if (link) setSidebar(false);
   });
   document.addEventListener("keydown", (e) => { if (e.key === "Escape") setSidebar(false); });
@@ -75,10 +79,10 @@
       try {
         await navigator.clipboard.writeText(code.innerText);
         btn.textContent = "Copied!";
-        btn.classList.add("copied");
+        btn.classList.add("is-copied");
         setTimeout(() => {
           btn.textContent = "Copy";
-          btn.classList.remove("copied");
+          btn.classList.remove("is-copied");
         }, 1500);
       } catch (e) {
         btn.textContent = "Error";
@@ -88,25 +92,31 @@
   });
 
   // ===== Tabs widget — see {= tabs / tab =} shortcodes =====
+  // Builds a button bar from the .juicerdocs-tab-panel children of a
+  // .juicerdocs-tabs container; uses .is-active on both the button and
+  // the panel to express which one is current.
   document.querySelectorAll(".juicerdocs-tabs[data-juicerdocs-tabs]").forEach((root) => {
     const panels = Array.from(root.querySelectorAll(":scope > .juicerdocs-tab-panel"));
     if (panels.length === 0) return;
     const bar = document.createElement("div");
-    bar.className = "juicerdocs-tabs-buttons";
+    bar.className = "juicerdocs-tabs-bar";
     panels.forEach((panel, i) => {
       const label = panel.dataset.tabLabel || `Tab ${i + 1}`;
       const btn = document.createElement("button");
       btn.type = "button";
-      btn.className = "juicerdocs-tabs-button" + (i === 0 ? " active" : "");
+      btn.className = "juicerdocs-tabs-button";
+      if (i === 0) {
+        btn.classList.add("is-active");
+        panel.classList.add("is-active");
+      }
       btn.textContent = label;
       btn.addEventListener("click", () => {
-        bar.querySelectorAll(".juicerdocs-tabs-button").forEach((b) => b.classList.remove("active"));
-        panels.forEach((p) => p.classList.remove("active"));
-        btn.classList.add("active");
-        panel.classList.add("active");
+        bar.querySelectorAll(".juicerdocs-tabs-button").forEach((b) => b.classList.remove("is-active"));
+        panels.forEach((p) => p.classList.remove("is-active"));
+        btn.classList.add("is-active");
+        panel.classList.add("is-active");
       });
       bar.appendChild(btn);
-      if (i === 0) panel.classList.add("active");
     });
     root.insertBefore(bar, root.firstChild);
     root.removeAttribute("data-juicerdocs-tabs");
@@ -118,7 +128,7 @@
     const href = a.getAttribute("href");
     if (!href) return;
     const norm = href.replace(/\/+$/, "/") || "/";
-    if (norm === here) a.classList.add("juicerdocs-nav-active");
+    if (norm === here) a.classList.add("is-active");
   });
 
   // ===== "On this page" — active-heading highlight =====
@@ -143,12 +153,12 @@
       if (active === id) return;
       if (active) {
         const prev = linkById.get(active);
-        if (prev) prev.classList.remove("active");
+        if (prev) prev.classList.remove("is-active");
       }
       active = id;
       if (id) {
         const next = linkById.get(id);
-        if (next) next.classList.add("active");
+        if (next) next.classList.add("is-active");
       }
     }
 
@@ -204,10 +214,18 @@
       return (start > 0 ? "…" : "") + content.slice(start, end) + (end < content.length ? "…" : "");
     }
 
+    function setHidden(hidden) {
+      if (hidden) searchResults.setAttribute("hidden", "");
+      else        searchResults.removeAttribute("hidden");
+    }
+
     function renderResults(matches, q) {
       searchResults.innerHTML = "";
       if (matches.length === 0) {
-        searchResults.innerHTML = '<div class="juicerdocs-result jd-muted">No matches.</div>';
+        const empty = document.createElement("div");
+        empty.className = "juicerdocs-result-empty";
+        empty.textContent = "No matches.";
+        searchResults.appendChild(empty);
       } else {
         for (let i = 0; i < matches.length; i++) {
           const r = matches[i];
@@ -215,21 +233,24 @@
           a.className = "juicerdocs-result";
           a.href = r.url;
           a.dataset.idx = i;
-          a.innerHTML =
-            '<span class="juicerdocs-result-title"></span>' +
-            '<span class="juicerdocs-result-snippet"></span>';
-          a.querySelector(".juicerdocs-result-title").textContent = r.title || r.url;
-          a.querySelector(".juicerdocs-result-snippet").textContent = snippet(r.content || r.summary || "", q);
+          const title = document.createElement("span");
+          title.className = "juicerdocs-result-title";
+          title.textContent = r.title || r.url;
+          const snip = document.createElement("span");
+          snip.className = "juicerdocs-result-snippet";
+          snip.textContent = snippet(r.content || r.summary || "", q);
+          a.appendChild(title);
+          a.appendChild(snip);
           searchResults.appendChild(a);
         }
       }
-      searchResults.classList.remove("hidden");
+      setHidden(false);
       activeIndex = -1;
     }
 
     async function doSearch(q) {
       if (!q) {
-        searchResults.classList.add("hidden");
+        setHidden(true);
         return;
       }
       const data = await ensureIndex();
@@ -260,14 +281,17 @@
         e.preventDefault();
         items[activeIndex].click();
       } else if (e.key === "Escape") {
-        searchResults.classList.add("hidden");
+        setHidden(true);
         searchInput.blur();
       }
-      items.forEach((it, i) => it.classList.toggle("active", i === activeIndex));
+      items.forEach((it, i) => {
+        if (i === activeIndex) it.classList.add("is-active");
+        else                   it.classList.remove("is-active");
+      });
     });
     document.addEventListener("click", (e) => {
       if (!searchInput.contains(e.target) && !searchResults.contains(e.target)) {
-        searchResults.classList.add("hidden");
+        setHidden(true);
       }
     });
   }

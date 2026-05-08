@@ -28,11 +28,6 @@
   })();
 </script>
 
-<!--
-  Bundled CSS — Tailwind v4 + @tailwindcss/typography + theme components.
-  Pre-compiled by `npm run build` in themes/juicerdocs/. Site authors
-  don't need Node; the file is committed.
--->
 <link rel="stylesheet" href="{{ relURL '/juicerdocs.css' }}" />
 
 {{ if .site.juicerdocs }}
@@ -44,18 +39,18 @@
 -->
 <style>
   :root {
-    {{ if .site.juicerdocs.brand        }}--jd-brand: {{ .site.juicerdocs.brand }};{{ end }}
-    {{ if .site.juicerdocs.brandStrong  }}--jd-brand-strong: {{ .site.juicerdocs.brandStrong }};{{ end }}
-    {{ if .site.juicerdocs.brandSoft    }}--jd-brand-soft: {{ .site.juicerdocs.brandSoft }};{{ end }}
-    {{ if .site.juicerdocs.accent       }}--jd-accent: {{ .site.juicerdocs.accent }};{{ end }}
-    {{ if .site.juicerdocs.leaf         }}--jd-leaf: {{ .site.juicerdocs.leaf }};{{ end }}
+    {{ if .site.juicerdocs.brand        }}--brand: {{ .site.juicerdocs.brand }};{{ end }}
+    {{ if .site.juicerdocs.brandStrong  }}--brand-strong: {{ .site.juicerdocs.brandStrong }};{{ end }}
+    {{ if .site.juicerdocs.brandSoft    }}--brand-soft: {{ .site.juicerdocs.brandSoft }};{{ end }}
+    {{ if .site.juicerdocs.accent       }}--accent: {{ .site.juicerdocs.accent }};{{ end }}
+    {{ if .site.juicerdocs.leaf         }}--leaf: {{ .site.juicerdocs.leaf }};{{ end }}
   }
   [data-theme="dark"] {
-    {{ if .site.juicerdocs.brandDark        }}--jd-brand: {{ .site.juicerdocs.brandDark }};{{ end }}
-    {{ if .site.juicerdocs.brandStrongDark  }}--jd-brand-strong: {{ .site.juicerdocs.brandStrongDark }};{{ end }}
-    {{ if .site.juicerdocs.brandSoftDark    }}--jd-brand-soft: {{ .site.juicerdocs.brandSoftDark }};{{ end }}
-    {{ if .site.juicerdocs.accentDark       }}--jd-accent: {{ .site.juicerdocs.accentDark }};{{ end }}
-    {{ if .site.juicerdocs.leafDark         }}--jd-leaf: {{ .site.juicerdocs.leafDark }};{{ end }}
+    {{ if .site.juicerdocs.brandDark        }}--brand: {{ .site.juicerdocs.brandDark }};{{ end }}
+    {{ if .site.juicerdocs.brandStrongDark  }}--brand-strong: {{ .site.juicerdocs.brandStrongDark }};{{ end }}
+    {{ if .site.juicerdocs.brandSoftDark    }}--brand-soft: {{ .site.juicerdocs.brandSoftDark }};{{ end }}
+    {{ if .site.juicerdocs.accentDark       }}--accent: {{ .site.juicerdocs.accentDark }};{{ end }}
+    {{ if .site.juicerdocs.leafDark         }}--leaf: {{ .site.juicerdocs.leafDark }};{{ end }}
   }
 </style>
 {{ end }}

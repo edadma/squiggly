@@ -1,13 +1,13 @@
 {{ if .page.ancestors }}
-  <nav aria-label="Breadcrumb" class="text-sm jd-muted mb-6">
-    <ol class="flex flex-wrap items-center gap-1.5">
+  <nav aria-label="Breadcrumb" class="juicerdocs-breadcrumbs">
+    <ol>
       {{ for a <- .page.ancestors }}
-        <li class="flex items-center gap-1.5">
-          <a href="{{ a.url }}" class="hover:jd-brand">{{ a.title }}</a>
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 jd-muted opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="m9 5 7 7-7 7"/></svg>
+        <li>
+          <a href="{{ a.url }}">{{ a.title }}</a>
+          <svg xmlns="http://www.w3.org/2000/svg" class="juicerdocs-breadcrumbs-sep" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="m9 5 7 7-7 7"/></svg>
         </li>
       {{ end }}
-      <li class="jd-fg-soft font-medium">{{ .page.title }}</li>
+      <li class="juicerdocs-breadcrumbs-current">{{ .page.title }}</li>
     </ol>
   </nav>
 {{ end }}

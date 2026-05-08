@@ -1,8 +1,6 @@
-<details class="not-prose my-4 rounded-lg border jd-border jd-surface-2 [&[open]>summary]:border-b [&[open]>summary]:jd-border">
-  <summary class="cursor-pointer px-4 py-2 font-medium jd-fg select-none hover:jd-surface">
-    {{ head .args }}
-  </summary>
-  <div class="px-4 py-3 prose prose-sm max-w-none">
+<details class="juicerdocs-collapse">
+  <summary>{{ head .args }}</summary>
+  <div class="juicerdocs-collapse-body">
     {{ markdownify .content }}
   </div>
 </details>
