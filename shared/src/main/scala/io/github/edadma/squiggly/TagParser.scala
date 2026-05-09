@@ -94,6 +94,24 @@ object TagParser extends StandardTokenParsers with PackratParsers with ImplicitC
 
   lazy val applicative: P[ExprAST] = apply | additive
 
+  // KNOWN LIMITATION — `id[expr]` (subscript on a bare variable) and
+  // `id [list]` (paren-less call passing a list literal) are
+  // token-identical after the lexer strips whitespace. The grammar
+  // resolves ambiguity by always trying `apply` first, so a bare-var
+  // subscript like `xs[0]` parses as a function call `apply(xs, [0])`
+  // and the evaluator reports "function not found: xs". To subscript a
+  // bare-var assignment, either:
+  //
+  //   - put the binding inside the indexable chain — `.foo.bar[0]`
+  //     starts with `.`, so the parser routes through `index` directly;
+  //   - wrap the variable in parens — `(xs)[0]` parses primary as the
+  //     parenthesised expression, then `index` chains the subscript;
+  //   - iterate with an indexed `for` — `for x, i <- xs; if i = 0 ...`
+  //     — and let the loop body capture the head element.
+  //
+  // Distinguishing the two cases properly requires a reader-position
+  // check (no-whitespace adjacency) since StandardTokenParsers discards
+  // whitespace before reaching this rule. Tracked for a future fix.
   lazy val apply: P[ApplyExpr] = identifier ~ (guard(not(".")) ~> rep1(additive)) ^^ ApplyExpr.apply
 
   lazy val additive: P[ExprAST] = positioned(

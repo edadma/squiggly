@@ -33,7 +33,7 @@ case class Context(
         else function((this, args))
       case None =>
         if (args.isEmpty) getVar(id, id.name)
-        else problem(id, s"function found: ${id.name}")
+        else problem(id, s"function not found: ${id.name}")
     }
 
   def getVar(pos: Positional, name: String): Any =
