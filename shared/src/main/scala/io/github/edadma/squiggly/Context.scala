@@ -5,23 +5,22 @@ import io.github.edadma.char_reader.CharReader
 import java.io.PrintStream
 import scala.annotation.tailrec
 import scala.collection.mutable
-import scala.compiletime.uninitialized
 import scala.language.postfixOps
 import scala.util.parsing.input.Positional
 
-case class Context(renderer: TemplateRenderer, data: Any, vars: mutable.HashMap[String, Any], out: PrintStream) {
-
-  private var _global: Any = uninitialized
-
-  def global_=(d: Any): Unit = {
-    require(_global == null)
-    _global = d
-  }
-
-  def global: Any = {
-    require(_global != null)
-    _global
-  }
+/** Per-render evaluation context. The `global` field is the root data
+  * supplied to `TemplateRenderer.render(globalData, …)`. Inner contexts
+  * created via `copy(data = …)` (for-loop bodies, with-blocks, partial
+  * dispatch) carry it through automatically because it's a constructor
+  * parameter — so `$.foo` resolves against the root regardless of how
+  * deep the current data hand-off is. */
+case class Context(
+    renderer: TemplateRenderer,
+    data:     Any,
+    vars:     mutable.HashMap[String, Any],
+    out:      PrintStream,
+    global:   Any = null,
+) {
 
   // todo: arguments should have Position for error reporting
   def callFunction(id: Ident, args: Seq[Any]): Any =
@@ -47,12 +46,28 @@ case class Context(renderer: TemplateRenderer, data: Any, vars: mutable.HashMap[
   def num(pos: Positional, v: Any): Num =
     v match {
       case n: Num => n
+      // Java boxed numerics arrive here from `for x, i <- coll` loop indices
+      // (which `zipWithIndex` produces as Int) and from any host-side data
+      // hand-off that hands us a JLong / Integer / Double instead of a
+      // BigDecimal. Convert through the well-defined paths so the comparison
+      // and arithmetic sites that downstream call sites care about all see
+      // the canonical Num shape.
+      case n: Int    => BigDecimal(n)
+      case n: Long   => BigDecimal(n)
+      case n: Double => BigDecimal(n)
+      case n: Float  => BigDecimal(n.toDouble)
+      case n: java.lang.Integer => BigDecimal(n.intValue)
+      case n: java.lang.Long    => BigDecimal(n.longValue)
+      case n: java.lang.Double  => BigDecimal(n.doubleValue)
+      case n: java.lang.Float   => BigDecimal(n.floatValue.toDouble)
+      case n: java.lang.Number  => BigDecimal(n.toString)
       case s: String =>
         try {
           BigDecimal(s)
         } catch {
           case _: NumberFormatException => problem(pos, s"not a number: $s")
         }
+      case other => problem(pos, s"not a number: $other (${other.getClass.getName})")
     }
 
   def neval(expr: ExprAST): Num = num(expr, eval(expr))

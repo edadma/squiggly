@@ -123,4 +123,22 @@ class ForTests extends AnyFreeSpec with Matchers with Testing {
         """.trim.stripMargin
   }
 
+  // Regression: the loop index from `for x, i <- coll` is a Java boxed Int
+  // (the runtime stores it via `vars(idx) = i` where i comes from
+  // `s.zipWithIndex`). Before the Context.num boxed-Number fix, comparing
+  // `i > 0` or `i = $.l.length - 1` threw scala.MatchError because num()
+  // only knew how to handle `Num` (BigDecimal alias) and `String`. The
+  // `$.` global-root prefix is necessary because the for-loop shifts data
+  // to the current element — `.l` inside the body would resolve against
+  // the iterated string, not the original list.
+  "for-with-index comparison" in {
+    testJson("""{"l": ["a", "b", "c"]}""",
+         """
+          |{{ for x, i <- .l }}{{ if i > 0 }}{{ if i = $.l.length - 1 }} and {{ else }}, {{ end }}{{ end }}{{ x }}{{ end }}
+          """.trim.stripMargin) shouldBe
+      """
+        |a, b and c
+        """.trim.stripMargin
+  }
+
 }

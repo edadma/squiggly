@@ -28,10 +28,11 @@ class TemplateRenderer(
         case p: PrintStream => p
         case _              => new PrintStream(out)
       }
-    val globalContext = Context(this, globalData, new mutable.HashMap[String, Any], pout)
+    // `global = globalData` so `$.foo` inside any nested context (for-loop
+    // bodies, with-blocks, partials) resolves back against the original root
+    // data. Carried through case-class copy automatically.
+    val globalContext = Context(this, globalData, new mutable.HashMap[String, Any], pout, globalData)
     var returnValue: Any = ()
-
-    globalContext.global = globalData
 
     def render(context: Context, ast: TemplateAST): Unit = {
       ast match {
