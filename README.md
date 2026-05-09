@@ -28,6 +28,11 @@ operators, comparison chains, pipes, and method calls.
 
 The name "squiggly" is a colloquialism for curly braces — the tag delimiters.
 
+## Documentation
+
+Full reference, syntax guide, and built-in function index:
+**https://edadma.github.io/squiggly/**
+
 ## Installation
 
 Add the dependency to your `build.sbt`:
