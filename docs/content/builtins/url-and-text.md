@@ -16,7 +16,7 @@ These helpers cover the common things a static site generator wants — they're 
 
 ## Examples
 
-```
+```squiggly
 {{ '/getting-started/' | relURL }}        /docs/getting-started/
 {{ '/getting-started/' | absURL }}        https://example.com/docs/getting-started/
 

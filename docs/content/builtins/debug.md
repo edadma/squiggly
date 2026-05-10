@@ -13,13 +13,13 @@ Two functions you reach for when a template isn't rendering what you thought it 
 
 ## Examples
 
-```
+```squiggly
 {{ context }}
 ```
 
 …dumps everything the template can see at this point — the current `data`, plus locals introduced by enclosing `with` / `for` / `:=` blocks. Useful when a field reference unexpectedly renders empty: drop a `{{ context }}` above it and check whether the field is actually there.
 
-```
+```squiggly
 {{ type .page }}
 {{ type .page.tags }}
 {{ type .page.weight }}

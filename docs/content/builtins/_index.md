@@ -14,7 +14,7 @@ val renderer = new TemplateRenderer(
 
 Every builtin is callable in two equivalent forms:
 
-```
+```squiggly
 {{ trim .name }}              // function-call form
 {{ .name | trim }}            // pipe form
 {{ .name.trim }}              // method form (1-arg only)

@@ -28,7 +28,7 @@ The string builtins. All can be called as a function, a pipe target, or (where t
 
 ## Examples
 
-```
+```squiggly
 {{ .title | upper }}                              CSS HOOK
 {{ .author | trim | lower | replace ' ' '-' }}    "ed-maxedon"
 {{ .body | split '\n' | length }}                 number of lines

@@ -14,7 +14,7 @@ Date/time builtins use Java's `java.time` API. Available on JVM and Scala Native
 
 ## Examples
 
-```
+```squiggly
 {{ now | dateFormat 'yyyy-MM-dd' }}                today
 {{ .page.date | dateFormat 'MMMM d, yyyy' }}        December 7, 2025
 {{ .page.date | dateFormat 'EEEE' }}                day of week

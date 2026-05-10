@@ -22,7 +22,7 @@ weight: 20
 
 ## Examples
 
-```
+```squiggly
 {{ .args | head }}                          first positional arg
 {{ .args | tail | join ' ' }}               drop first, rejoin
 
@@ -41,7 +41,7 @@ weight: 20
 
 To pluck a value by key, use `[…]` indexing in expressions:
 
-```
+```squiggly
 {{ .config['baseURL'] }}
 {{ .frontmatter.tags }}        // dot syntax works for string keys
 ```

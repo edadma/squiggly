@@ -8,7 +8,7 @@ Squiggly's block-form actions wrap a chunk of template content with conditional,
 
 ## `if` / `elif` / `else`
 
-```
+```squiggly
 {{ if .draft }}
   <span class="badge">Draft</span>
 {{ elif .scheduled }}
@@ -24,7 +24,7 @@ Squiggly's block-form actions wrap a chunk of template content with conditional,
 
 Two forms — value-only and key-value:
 
-```
+```squiggly
 {{ for p <- .pages }}
   <li>{{ p.title }}</li>
 {{ end }}
@@ -40,7 +40,7 @@ The iteration variable `p` is bound inside the block; it's not visible after `{{
 
 `else` works on `for`: it runs when the iterable is empty.
 
-```
+```squiggly
 {{ for p <- .pages }}
   …
 {{ else }}
@@ -52,7 +52,7 @@ The iteration variable `p` is bound inside the block; it's not visible after `{{
 
 `with` evaluates an expression once and binds it as the current data context for the block. Inside the block, the leading `.` refers to whatever you passed in.
 
-```
+```squiggly
 {{ with .author }}
   <a href="{{ .url }}">{{ .name }}</a>
 {{ end }}
@@ -60,7 +60,7 @@ The iteration variable `p` is bound inside the block; it's not visible after `{{
 
 If the bound value is falsy, the block doesn't render at all (and the optional `else` runs):
 
-```
+```squiggly
 {{ with .editor }}
   Edited by {{ .name }}.
 {{ else }}
@@ -72,7 +72,7 @@ If the bound value is falsy, the block doesn't render at all (and the optional `
 
 Pattern-match an expression against several literal values:
 
-```
+```squiggly
 {{ match .status }}
   {{ case 'draft' }}    <span class="warn">Draft</span>
   {{ case 'live' }}     <span class="ok">Live</span>
@@ -87,7 +87,7 @@ The `else` branch is optional but recommended — it catches unexpected values.
 
 Inside any block, you can introduce a local with `:=`:
 
-```
+```squiggly
 {{ words := split .body ' ' }}
 {{ wordCount := len words }}
 
@@ -100,7 +100,7 @@ The variable is scoped to the enclosing block.
 
 All four block forms nest freely:
 
-```
+```squiggly
 {{ for p <- .pages }}
   {{ if p.draft }}
     {{ /* skip drafts */ }}

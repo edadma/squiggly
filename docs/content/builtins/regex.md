@@ -18,7 +18,7 @@ Regex builtins use Java's `java.util.regex.Pattern` syntax (the same flavor as S
 
 ### Validate
 
-```
+```squiggly
 {{ if matchRE .email '^[^@]+@[^@]+\.[^@]+$' }}
   valid
 {{ else }}
@@ -28,7 +28,7 @@ Regex builtins use Java's `java.util.regex.Pattern` syntax (the same flavor as S
 
 ### Extract groups
 
-```
+```squiggly
 {{ ymd := findRE .date '^(\d{4})-(\d{2})-(\d{2})$' }}
 {{ // ymd is a list: [whole-match, year, month, day] }}
 {{ if ymd | nonEmpty }}
@@ -40,7 +40,7 @@ The capture-group behavior was restored in 0.2.3 — earlier 0.2.x lost groups.
 
 ### Find every match
 
-```
+```squiggly
 {{ for m <- findAllRE .body '\\[\\[([^\\]]+)\\]\\]' }}
   {{ m[1] }}        // each capture group's text
 {{ end }}
@@ -48,13 +48,13 @@ The capture-group behavior was restored in 0.2.3 — earlier 0.2.x lost groups.
 
 ### Replace
 
-```
+```squiggly
 {{ replaceRE .body '\\b(\\w+) - (\\w+)\\b' '$1 — $2' }}
 ```
 
 ### Split
 
-```
+```squiggly
 {{ for chunk <- splitRE .text '\\s+' }}
   {{ chunk }}
 {{ end }}

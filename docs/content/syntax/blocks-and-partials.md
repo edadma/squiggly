@@ -10,7 +10,7 @@ Two ways to share template content across multiple files, with quite different s
 
 A **partial** is a template loaded by name from a `TemplateLoader`. The renderer looks up the name through the loader's `String => Option[TemplateAST]` callback, then renders the result with whatever data context you pass in.
 
-```
+```squiggly
 {{ partial 'topbar' . }}
 {{ partial 'page-toc' .page }}
 {{ partial 'footer' (with title='Hello') }}
@@ -37,7 +37,7 @@ The renderer's `blocks` field is a `mutable.HashMap[String, TemplateAST]` carryi
 
 `baseof.html` (the parent layout):
 
-```
+```squiggly
 <!DOCTYPE html>
 <html>
 <head><title>{{ .page.title }}</title></head>
@@ -53,7 +53,7 @@ The renderer's `blocks` field is a `mutable.HashMap[String, TemplateAST]` carryi
 
 `page.html` (the child):
 
-```
+```squiggly
 {{ define content }}
   <article>
     <h1>{{ .page.title }}</h1>
@@ -83,7 +83,7 @@ This is the pattern juicer uses for its `_default/baseof.html` + `_default/file.
 
 `{{ block name . }} … {{ end }}` renders its inner content if no `define` populated the block.
 
-```
+```squiggly
 {{ block sidebar . }}
   <p>No sidebar configured.</p>
 {{ end }}

@@ -10,7 +10,7 @@ Inside `{{ … }}` you can put any expression. The result is converted to a stri
 
 The simplest expression is a field access. The `.` prefix references the current data context:
 
-```
+```squiggly
 {{ .name }}
 {{ .page.title }}
 {{ .args[0] }}
@@ -22,7 +22,7 @@ parameters.
 
 ## Literals
 
-```
+```squiggly
 {{ 'a string' }}      single-quoted
 {{ "a string" }}      double-quoted (interchangeable)
 {{ 42 }}              integer
@@ -42,7 +42,7 @@ parameters.
 | String      | `+` (concatenation) |
 | Membership  | `in` (e.g., `'foo' in .tags`) |
 
-```
+```squiggly
 {{ if .count > 10 and .show }}
   Many.
 {{ end }}
@@ -52,7 +52,7 @@ parameters.
 
 Any function in the renderer's function map can be called directly. Most builtins are 1-arity and accept a pipe target.
 
-```
+```squiggly
 {{ upper .name }}
 {{ len .pages }}
 {{ replace .text 'foo' 'bar' }}
@@ -63,7 +63,7 @@ Any function in the renderer's function map can be called directly. Most builtin
 The pipe operator `|` threads the previous value as the *first* argument
 to the next function. These two are equivalent:
 
-```
+```squiggly
 {{ .name | upper | trim }}
 {{ trim (upper .name) }}
 ```
@@ -74,7 +74,7 @@ Pipes read left-to-right, which is friendlier than nested calls when you have se
 
 Any 1-arity function can be invoked as a method on its receiver:
 
-```
+```squiggly
 {{ .name.upper.trim }}
 {{ .name | upper | trim }}
 {{ trim (upper .name) }}
@@ -86,7 +86,7 @@ All three render the same output.
 
 Parentheses group expressions and force evaluation order:
 
-```
+```squiggly
 {{ (1 + 2) * 3 }}
 {{ if (.count > 0) and (.published) }}…{{ end }}
 ```
@@ -95,7 +95,7 @@ Parentheses group expressions and force evaluation order:
 
 The C-style ternary, written with `then` / `else` keywords for readability:
 
-```
+```squiggly
 {{ if .draft then 'DRAFT' else 'LIVE' }}
 ```
 
