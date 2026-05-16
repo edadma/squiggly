@@ -44,6 +44,6 @@ It's used as the template engine in [juicer](https://juicer.run/), the static si
 | Scala.js (Node 20+) | ✓ |
 | Scala Native | ✓ |
 
-316 / 316 tests pass on all three platforms.
+342 / 342 tests pass on all three platforms.
 
 ## Where to go next

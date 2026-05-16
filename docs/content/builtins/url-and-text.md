@@ -1,42 +1,57 @@
 ---
 title: URL & text helpers
-summary: relURL, absURL, markdownify, emojify — for sites that emit HTML.
+summary: urlize, slugify, urlEncode, querify, jsonStr, markdownify, emojify.
 weight: 50
 ---
 
-These helpers cover the common things a static site generator wants — they're the reason juicer ships with a `data` map containing `baseURL` and `link`. If you're using squiggly as a generic template engine outside that context, you may not need them.
+Pure value-transform helpers — URL slugging, percent-encoding,
+markdown / emoji rendering, JSON-string escape. None of these need a
+site config; they are usable from any squiggly host.
 
-| Function       | Arity | What |
-|----------------|-------|------|
-| `relURL`       | 1     | Site-relative URL (prepends the renderer's `baseURL.path`) |
-| `absURL`       | 1     | Absolute URL (prepends `baseURL.base + baseURL.path`) |
-| `urlEscape`    | 1     | Percent-encode for use in URL paths |
-| `markdownify`  | 1     | Render a markdown string to HTML (uses `io.github.edadma.markdown`) |
-| `emojify`      | 1     | Substitute `:smile:` → 😄 (uses `io.github.edadma.emoji`) |
+`absURL` / `relURL` are explicitly **not** here — those need a
+`baseURL` from a renderer-side site config, so they live in the SSG
+layer (e.g. juicer's `juicerUrlBuiltins`) rather than in squiggly's
+generic standard library.
+
+## Slugs & URLs
+
+| Function    | Arity | Signature           | What |
+|-------------|-------|---------------------|------|
+| `urlize`    | 1     | `urlize s`          | Hugo-style URL-friendly form — trim, drop non-alnum, hyphenate spaces. Preserves case. |
+| `slugify`   | 1     | `slugify s`         | Squiggly's richer slug — lowercase, ASCII-fold Latin diacritics, collapse non-alnum runs to `-`. |
+| `urlEncode` | 1     | `urlEncode s`       | Percent-encode for URL paths / query values. `' '` → `'+'`, `'/'` → `'%2F'`. |
+| `urlDecode` | 1     | `urlDecode s`       | Reverse of `urlEncode`. |
+| `querify`   | 1+    | `querify k v ...`   | Build a `k=v&k=v` query string from alternating key / value args. |
+
+## Rich content
+
+| Function       | Arity | Signature              | What |
+|----------------|-------|------------------------|------|
+| `markdownify`  | 1     | `markdownify s`        | Render a markdown string to HTML (default `MarkdownConfig`, no syntax highlighter). |
+| `emojify`      | 1     | `emojify s`            | Substitute `:shortcode:` tokens with Unicode emoji. |
+| `jsonStr`      | 1     | `jsonStr v`            | JSON-string escape — RFC 8259 §7 plus U+2028 / U+2029 (safe inside `<script type="application/ld+json">`). |
 
 ## Examples
 
 ```squiggly
-{{ '/getting-started/' | relURL }}        /docs/getting-started/
-{{ '/getting-started/' | absURL }}        https://example.com/docs/getting-started/
+{{ urlize 'Hello, World!' }}                 Hello-World
+{{ slugify 'Café au lait' }}                 cafe-au-lait
+{{ slugify 'C++' }}                          c
+{{ urlEncode 'a b/c' }}                      a+b%2Fc
 
-{{ 'Hello **world**' | markdownify }}     Hello <strong>world</strong>
+{{ 'Hello **world**' | markdownify }}        Hello <strong>world</strong>
+{{ ':rocket: shipped!' | emojify }}          🚀 shipped!
 
-{{ ':rocket: shipped!' | emojify }}       🚀 shipped!
+{{ jsonStr .page.title }}                    He said \"hi\"
+
+{{ querify 'q' 'cats' 'page' 2 }}            q=cats&page=2
 ```
 
-## How `relURL` / `absURL` find baseURL
+## Frameworks that ship their own `markdownify`
 
-These read `con.renderer.data("baseURL")` — a `BaseURL(base: String, path: String)` value the host application puts in the renderer's `data` map at construction time:
-
-```scala
-import io.github.edadma.squiggly.BaseURL
-
-val renderer = new TemplateRenderer(
-  data = Map(
-    "baseURL" -> BaseURL("https://example.com", "/docs"),
-  ),
-)
-```
-
-If your data doesn't supply this, `relURL` / `absURL` will throw at template evaluation. Skip them and write the URLs out directly if you don't need site-rooting.
+`markdownify` here uses the default markdown config — no syntax
+highlighter, no per-site extensions. SSG frameworks built on squiggly
+(e.g. juicer) typically *shadow* this builtin in their own function
+map with a version that uses the site's configured markdown engine.
+Both forms coexist: juicer's site-aware version wins on the key
+collision; standalone squiggly users get the simple default.

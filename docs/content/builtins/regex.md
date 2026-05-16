@@ -1,25 +1,37 @@
 ---
 title: Regex
-summary: matchRE, findRE, replaceRE for pattern-based string operations.
+summary: findRE for capturing groups across every match.
 weight: 30
 ---
 
-Regex builtins use Java's `java.util.regex.Pattern` syntax (the same flavor as Scala's `Regex`).
+Squiggly's regex surface is a single, versatile function — `findRE` —
+that returns every match (with capture groups) for a Java
+`java.util.regex.Pattern` (the same flavour as Scala's `Regex`).
+Other regex idioms (full-string match, replace, split-on-pattern)
+compose from `findRE` plus the standard string / list builtins.
 
-| Function     | Arity | What |
-|--------------|-------|------|
-| `matchRE`    | 2     | `matchRE s pattern` — true if the entire string matches |
-| `findRE`     | 2     | `findRE s pattern` — first match's groups (a list); empty list when no match |
-| `findAllRE`  | 2     | `findAllRE s pattern` — list of group-lists, one per match |
-| `replaceRE`  | 3     | `replaceRE s pattern replacement` — every match replaced; `$1`, `$2`, `$0` work in `replacement` |
-| `splitRE`    | 2     | `splitRE s pattern` — split on every match, returning the in-between pieces |
+| Function     | Arity | Signature                              | What |
+|--------------|-------|----------------------------------------|------|
+| `findRE`     | 2     | `findRE pattern s`                     | All matches — each is a `[whole, group1, group2, …]` list |
+| `findRE`     | 3     | `findRE pattern s limit`               | First `limit` matches only |
 
-## Examples
+## What the result looks like
+
+```squiggly
+{{ findRE '(\d{4})-(\d{2})-(\d{2})' '2024-03-12 and 2025-01-09' }}
+```
+
+…returns `[[2024-03-12, 2024, 03, 12], [2025-01-09, 2025, 01, 09]]` —
+one list per match, with the full match first followed by each
+capture group's text. Groups that didn't participate render as an
+empty string.
+
+## Idioms
 
 ### Validate
 
 ```squiggly
-{{ if matchRE .email '^[^@]+@[^@]+\.[^@]+$' }}
+{{ if findRE '^[^@]+@[^@]+\.[^@]+$' .email | nonEmpty }}
   valid
 {{ else }}
   invalid
@@ -29,33 +41,37 @@ Regex builtins use Java's `java.util.regex.Pattern` syntax (the same flavor as S
 ### Extract groups
 
 ```squiggly
-{{ ymd := findRE .date '^(\d{4})-(\d{2})-(\d{2})$' }}
-{{ // ymd is a list: [whole-match, year, month, day] }}
+{{ ymd := findRE '^(\d{4})-(\d{2})-(\d{2})$' .date }}
 {{ if ymd | nonEmpty }}
-  year = {{ ymd[1] }}, month = {{ ymd[2] }}, day = {{ ymd[3] }}
+  year = {{ ymd[0][1] }}, month = {{ ymd[0][2] }}, day = {{ ymd[0][3] }}
 {{ end }}
 ```
 
-The capture-group behavior was restored in 0.2.3 — earlier 0.2.x lost groups.
+`ymd[0]` is the first match's group list; `ymd[0][1]` is its first
+capture group.
 
-### Find every match
+### Walk every match
 
 ```squiggly
-{{ for m <- findAllRE .body '\\[\\[([^\\]]+)\\]\\]' }}
-  {{ m[1] }}        // each capture group's text
+{{ for m <- findRE '\[\[([^\]]+)\]\]' .body }}
+  {{ m[1] }}        // each match's first capture group
 {{ end }}
 ```
 
-### Replace
+### Cap the work
 
 ```squiggly
-{{ replaceRE .body '\\b(\\w+) - (\\w+)\\b' '$1 — $2' }}
+{{ findRE '\b\w+\b' .body 10 }}    first ten words only
 ```
 
-### Split
+## Beyond `findRE`
 
-```squiggly
-{{ for chunk <- splitRE .text '\\s+' }}
-  {{ chunk }}
-{{ end }}
-```
+Squiggly doesn't ship dedicated `matchRE` / `replaceRE` / `splitRE`
+builtins yet. Common workarounds:
+
+- **Full-string match:** wrap the pattern in `^…$` and check
+  `findRE pattern s | nonEmpty`.
+- **Split on pattern:** for literal separators, use `split sep s`.
+  Splitting on a regex is on the roadmap.
+- **Replace by pattern:** combine `findRE` with `map` and string
+  concatenation, or wait for the planned `replaceRE` builtin.

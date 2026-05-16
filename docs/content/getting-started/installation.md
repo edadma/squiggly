@@ -9,7 +9,7 @@ Squiggly is published on Maven Central as `io.github.edadma:squiggly`. Cross-bui
 ## sbt
 
 ```scala
-libraryDependencies += "io.github.edadma" %%% "squiggly" % "0.2.3"
+libraryDependencies += "io.github.edadma" %%% "squiggly" % "0.3.0"
 ```
 
 `%%%` selects the right artifact for your active platform. If you only need the JVM build, `%%` works too.
@@ -17,13 +17,13 @@ libraryDependencies += "io.github.edadma" %%% "squiggly" % "0.2.3"
 ## scala-cli
 
 ```scala
-//> using dep "io.github.edadma::squiggly:0.2.3"
+//> using dep "io.github.edadma::squiggly:0.3.0"
 ```
 
 ## Mill
 
 ```scala
-ivy"io.github.edadma::squiggly:0.2.3"
+ivy"io.github.edadma::squiggly:0.3.0"
 ```
 
 ## Requirements
