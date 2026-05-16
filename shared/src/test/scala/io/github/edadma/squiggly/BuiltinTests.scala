@@ -186,6 +186,50 @@ class BuiltinTests extends AnyFreeSpec with Matchers with Testing {
     test(null, "{{ printf '%s = %d' 'count' 7 }}") shouldBe "count = 7"
   }
 
+  // ------------------------------------------------------------------ date / time
+
+  "time parses a full ISO-8601 string and format round-trips it" in {
+    // OffsetDateTime input — has full time-of-day info so any custom
+    // format pattern works. `time` returns whatever parser matched;
+    // for a full ISO string that's OffsetDateTime.
+    test(null, "{{ format 'yyyy-MM-dd' (time '2024-03-12T00:00:00Z') }}") shouldBe "2024-03-12"
+  }
+
+  "format named date patterns" in {
+    test(null, "{{ format ':date_short' (time '2024-03-12T00:00:00Z') }}") shouldBe "3/12/24"
+    test(null, "{{ format ':date_long'  (time '2024-03-12T00:00:00Z') }}") shouldBe "March 12, 2024"
+    test(null, "{{ format ':date_full'  (time '2024-03-12T00:00:00Z') }}") shouldBe "Tuesday, March 12, 2024"
+  }
+
+  "format custom DateTimeFormatter pattern" in {
+    test(null, "{{ format 'yyyy-MM' (time '2024-03-12T00:00:00Z') }}") shouldBe "2024-03"
+  }
+
+  "unix returns epoch milliseconds for a parsed date" in {
+    // 2024-03-12T00:00:00Z is 1710201600000 ms since epoch.
+    test(null, "{{ unix (time '2024-03-12T00:00:00Z') }}") shouldBe "1710201600000"
+  }
+
+  "now returns the current OffsetDateTime" in {
+    // Non-deterministic — assert the rendered form is shaped like a
+    // long-date string.
+    val out = test(null, "{{ format ':date_long' now }}")
+    out should fullyMatch regex ".+ \\d+, \\d{4}"
+  }
+
+  // ------------------------------------------------------------------ collections
+
+  "filter keeps elements matching a non-strict predicate" in {
+    testJson("[1, 2, 3, 4, 5]", "{{ filter `. > 2` . }}") shouldBe "[3, 4, 5]"
+  }
+
+  "filter on map values" in {
+    testJson(
+      """[{"name": "alpha", "n": 1}, {"name": "beta", "n": 2}]""",
+      "{{ filter `.n > 1` . }}",
+    ) should include("beta")
+  }
+
   "urlEncode" in {
     test(null, "{{ urlEncode 'a b/c' }}") shouldBe "a+b%2Fc"
   }
