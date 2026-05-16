@@ -11,10 +11,8 @@ import scala.language.postfixOps
 import scala.util.Random
 import scala.util.matching.Regex
 
-// TODO: the following builtins remain stubbed out:
-//   - emojify     (io.github.edadma.emoji — not yet cross-built for Scala 3)
-//   - absURL/relURL (need a cross-platform path joiner; java.nio.file.Paths is JVM-only)
-//   - markdownify (will use the local `markdown` library once we wire it up)
+// `absURL` / `relURL` still live in the SSG layer (juicer) because they
+// need a baseURL from site config — squiggly has no notion of a site.
 // Date / time builtins (now / time / unix / format) live below on java.time;
 // `scala-java-time` 2.6.0 supplies that on JS and Native.
 
@@ -504,6 +502,75 @@ object TemplateBuiltin {
             buf.toString
           }
         },
+      ),
+      // Substitute `:shortcode:` tokens with the corresponding Unicode
+      // emoji via the `io.github.edadma.emoji` library. Unknown
+      // shortcodes pass through unchanged.
+      TemplateFunction(
+        "emojify",
+        1,
+        { case (con, Seq(s: String)) => io.github.edadma.emoji.Emoji(s) },
+      ),
+      // JSON-string escape — produces the body of a JSON string
+      // (without surrounding quotes). Escapes the characters
+      // RFC 8259 §7 requires plus U+2028 / U+2029 (valid JSON but break
+      // JavaScript parsers when JSON lands inside an HTML `<script>`).
+      // Use for emitting `<script type="application/ld+json">` bodies,
+      // attribute values that need JSON encoding, etc.
+      TemplateFunction(
+        "jsonStr",
+        1,
+        { case (con, Seq(v: Any)) =>
+          val s = v match {
+            case null | () => ""
+            case x         => x.toString
+          }
+          val sb = new StringBuilder(s.length + 8)
+          var i  = 0
+          while (i < s.length) {
+            val c = s.charAt(i)
+            c match {
+              case '"'                    => sb.append("\\\"")
+              case '\\'                   => sb.append("\\\\")
+              case '\n'                   => sb.append("\\n")
+              case '\r'                   => sb.append("\\r")
+              case '\t'                   => sb.append("\\t")
+              case '\b'                   => sb.append("\\b")
+              case '\f'                   => sb.append("\\f")
+              case c if c.toInt == 0x2028 => sb.append("\\u2028")
+              case c if c.toInt == 0x2029 => sb.append("\\u2029")
+              case c if c < 0x20          => sb.append("\\u%04x".format(c.toInt))
+              case c                      => sb.append(c)
+            }
+            i += 1
+          }
+          sb.toString
+        },
+      ),
+      // Render a markdown string to HTML directly. Uses the markdown
+      // library's default config — no syntax highlighter, no per-site
+      // extensions. Frameworks that ship a configured markdown engine
+      // (e.g. juicer with a `codeHighlighter` plugged in) typically
+      // shadow this builtin in their own function map, replacing it
+      // with a site-aware version.
+      TemplateFunction(
+        "markdownify",
+        1,
+        { case (con, Seq(s: String)) =>
+          val cfg = io.github.edadma.markdown.MarkdownConfig()
+          io.github.edadma.markdown
+            .renderToHTML(io.github.edadma.markdown.parseDocumentContent(s, cfg), cfg)
+            .trim
+        },
+      ),
+      // Convert a free-form string into a URL-safe slug — lowercase,
+      // ASCII-folded, non-alnum runs collapsed to a single `-`.
+      // See [[Slug.slugify]] for the full contract; this just exposes
+      // it to templates.
+      TemplateFunction(
+        "slugify",
+        1,
+        { case (con, Seq(s: String)) => Slug.slugify(s) },
       ),
     ) map (f => (f.name, f)) toMap
 
