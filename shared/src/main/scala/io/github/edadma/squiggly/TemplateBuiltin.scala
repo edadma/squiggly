@@ -150,7 +150,6 @@ object TemplateBuiltin {
           case (con, Seq(n: Num, s: String))      => s dropRight n.toIntExact
         },
       ),
-      // TODO: emojify — was `Emoji(s)` from io.github.edadma.emoji; reintroduce when that lib is cross-built.
       TemplateFunction("fileExists", 1, { case (con, Seq(file: String)) => readableFile(file) }),
       TemplateFunction(
         "filter",
@@ -302,7 +301,6 @@ object TemplateBuiltin {
       // todo: https://gohugo.io/functions/readdir/
       TemplateFunction("random", 1, { case (con, Seq(s: Seq[?])) => s(Random.nextInt(s.length)) }),
       // TODO: relURL — needs a cross-platform path joiner.
-      // todo: https://gohugo.io/functions/replace/
       // todo: https://gohugo.io/functions/replaceRE/
       TemplateFunction(
         "reverse",
