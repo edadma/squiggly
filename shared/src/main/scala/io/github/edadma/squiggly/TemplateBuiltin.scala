@@ -572,7 +572,173 @@ object TemplateBuiltin {
         1,
         { case (con, Seq(s: String)) => Slug.slugify(s) },
       ),
+      // ---- String filters that round out the existing trim/contains/
+      // ---- startsWith family.
+      //
+      // Replace every occurrence of `from` in `s` with `to`. Useful for
+      // converting between separator conventions, fixing up generated
+      // text, etc. `from` is matched literally (not as a regex) — for
+      // regex replacement use `findRE` + a map pipeline.
+      TemplateFunction(
+        "replace",
+        3,
+        { case (con, Seq(from: String, to: String, s: String)) => s.replace(from, to) },
+      ),
+      // Mirror of `startsWith` for the trailing edge — `endsWith
+      // 'suffix' s` is `true` when `s` ends with `suffix`.
+      TemplateFunction(
+        "endsWith",
+        2,
+        { case (con, Seq(suffix: String, s: String)) => s.endsWith(suffix) },
+      ),
+      // ---- List shaping
+      //
+      // Flatten one level of nesting from a `Seq[Seq[?]]` into a
+      // single `Seq[?]`. Useful after a `map` that produces lists
+      // (`group → list of pages → flatten → one big page list`).
+      // Non-sequence elements pass through wrapped — `[1, [2,3], 4]`
+      // flattens to `[1, 2, 3, 4]`.
+      TemplateFunction(
+        "flatten",
+        1,
+        { case (con, Seq(s: Seq[?])) =>
+          s.flatMap {
+            case inner: Seq[?] => inner
+            case other         => Seq(other)
+          }
+        },
+      ),
+      // ---- Explicit type coercions
+      //
+      // The existing `number` builtin returns a `BigDecimal` which is
+      // squiggly's universal numeric type. These three give templates
+      // a way to ask for a *specific* widening: `int` truncates
+      // fractions, `float` keeps them as a double-precision value,
+      // and `bool` collapses any value to squiggly's truthiness rule
+      // (non-empty string, non-zero number, non-empty list/map,
+      // non-null, non-false). Accepts strings, BigDecimals, or any
+      // value `toString`-able as a number.
+      TemplateFunction(
+        "int",
+        1,
+        { case (con, Seq(v: Any)) =>
+          val bd: BigDecimal = v match {
+            case n: BigDecimal => n
+            case s: String     => BigDecimal(s.trim)
+            case n: Int        => BigDecimal(n)
+            case n: Long       => BigDecimal(n)
+            case n: Double     => BigDecimal(n)
+            case other         => BigDecimal(other.toString.trim)
+          }
+          bd.setScale(0, BigDecimal.RoundingMode.DOWN)
+        },
+      ),
+      TemplateFunction(
+        "float",
+        1,
+        { case (con, Seq(v: Any)) =>
+          v match {
+            case n: BigDecimal => n
+            case s: String     => BigDecimal(s.trim)
+            case n: Int        => BigDecimal(n)
+            case n: Long       => BigDecimal(n)
+            case n: Double     => BigDecimal(n)
+            case other         => BigDecimal(other.toString.trim)
+          }
+        },
+      ),
+      TemplateFunction(
+        "bool",
+        1,
+        { case (con, Seq(v: Any)) =>
+          v match {
+            case null | ()      => false
+            case b: Boolean     => b
+            case n: BigDecimal  => n != BigDecimal(0)
+            case n: Int         => n != 0
+            case n: Long        => n != 0L
+            case n: Double      => n != 0.0
+            case s: String      => s.nonEmpty
+            case s: Seq[?]      => s.nonEmpty
+            case m: Map[?, ?]   => m.nonEmpty
+            case _              => true
+          }
+        },
+      ),
+      // ---- Formatted output (Hugo's `printf`)
+      //
+      // First arg is a `java.util.Formatter` pattern; remaining args
+      // are values. Supports the full Java format-string surface:
+      // `%d` / `%05d` / `%,d` (commas), `%f` / `%.2f`, `%s` / `%-10s`
+      // (left-pad), `%x` / `%X` / `%o`, `%b`, `%%`. BigDecimals are
+      // auto-unwrapped to `Long` or `Double` based on the conversion
+      // — `%d` always integer-truncates, `%f` always uses the
+      // double-precision value. String args pass through unchanged.
+      // Variadic — call with any number of value args after the
+      // pattern.
+      TemplateFunction(
+        "printf",
+        0,
+        { case (con, args) =>
+          args.toList match {
+            case (fmt: String) :: rest =>
+              val convs    = scanConversions(fmt)
+              val javaArgs = rest.zipWithIndex.map { case (v, i) =>
+                val conv = if (i < convs.length) convs(i) else ' '
+                toJavaArg(conv, v)
+              }.toArray
+              String.format(fmt, javaArgs*)
+            case _ => sys.error("printf: first arg must be a format string")
+          }
+        },
+      ),
     ) map (f => (f.name, f)) toMap
+
+  /** Walk a `printf`-style format string once and collect the
+    * conversion character of each active `%` directive in order
+    * (`'%%'` literals are skipped). Result length aligns with the
+    * argument count the formatter is going to consume — so the
+    * caller can zip each user-supplied arg with the conversion the
+    * formatter will apply to it, and widen the arg's Java type
+    * accordingly. */
+  private def scanConversions(fmt: String): IndexedSeq[Char] = {
+    val out = scala.collection.mutable.ArrayBuffer.empty[Char]
+    var i   = 0
+    while (i < fmt.length) {
+      if (fmt.charAt(i) == '%' && i + 1 < fmt.length) {
+        if (fmt.charAt(i + 1) == '%') { i += 2 }
+        else {
+          var j = i + 1
+          while (j < fmt.length && "0123456789#-+,(. ".contains(fmt.charAt(j))) j += 1
+          if (j < fmt.length) {
+            out += fmt.charAt(j)
+            i = j + 1
+          } else i = j
+        }
+      } else i += 1
+    }
+    out.toIndexedSeq
+  }
+
+  /** Widen one `printf` arg to a Java type the JDK formatter accepts,
+    * using `conv` (the format conversion char that will consume it)
+    * to choose between `Long` and `Double` for the BigDecimal case.
+    * Strings, booleans, and other types pass through as the closest
+    * `AnyRef`. */
+  private def toJavaArg(conv: Char, v: Any): Object = v match {
+    case null            => null
+    case ()              => null
+    case s: String       => s
+    case b: Boolean      => java.lang.Boolean.valueOf(b)
+    case n: BigDecimal   =>
+      if ("doxXb".contains(conv)) java.lang.Long.valueOf(n.longValue)
+      else java.lang.Double.valueOf(n.doubleValue)
+    case n: Int          => java.lang.Integer.valueOf(n)
+    case n: Long         => java.lang.Long.valueOf(n)
+    case n: Double       => java.lang.Double.valueOf(n)
+    case n: Float        => java.lang.Float.valueOf(n)
+    case other           => other.asInstanceOf[Object]
+  }
 
   private val WS_REGEX = "\\s+".r
 
