@@ -101,6 +101,33 @@ class BuiltinTests extends AnyFreeSpec with Matchers with Testing {
     test(null, "{{ urlize '' }}")               shouldBe "-"
   }
 
+  "slugify" in {
+    test(null, "{{ slugify 'Hello, World!' }}") shouldBe "hello-world"
+    test(null, "{{ slugify 'Café au lait' }}")  shouldBe "cafe-au-lait"
+    test(null, "{{ slugify 'C++' }}")           shouldBe "c"
+    test(null, "{{ slugify '___' }}")           shouldBe "-"
+  }
+
+  "jsonStr escapes JSON special chars" in {
+    test(null, "{{ jsonStr 'he said \"hi\"' }}") shouldBe """he said \"hi\""""
+    test(null, "{{ jsonStr 'a\\nb' }}")          shouldBe "a\\nb"
+  }
+
+  "emojify substitutes shortcodes" in {
+    // The exact unicode depends on the emoji table; the contract is
+    // that recognized shortcodes get replaced and unrecognized ones
+    // pass through. ":smile:" maps to U+1F604 in the standard table.
+    val out = test(null, "{{ emojify ':smile: hi' }}")
+    out should not include ":smile:"
+    out should include("hi")
+  }
+
+  "markdownify renders bold + paragraphs" in {
+    val out = test(null, "{{ markdownify 'A **bold** word.' }}")
+    out should include("<strong>bold</strong>")
+    out should include("<p>")
+  }
+
   "urlEncode" in {
     test(null, "{{ urlEncode 'a b/c' }}") shouldBe "a+b%2Fc"
   }
