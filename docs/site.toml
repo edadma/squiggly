@@ -25,6 +25,11 @@ headingShift    = 0
 # segment is a dev-time convenience that doesn't survive GitHub Pages.
 htmlDir         = ""
 
+# CI builds to ./_site for GitHub Pages; exclude it from the source walk so
+# a stale local build doesn't get re-ingested as HTML templates the next
+# time `juicer serve` runs from this tree.
+excludeDirs     = ["_site"]
+
 [juicerdocs]
 logo            = "/squiggly-logo.png"
 version         = "v0.2.3"
