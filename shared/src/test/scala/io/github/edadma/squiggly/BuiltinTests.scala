@@ -128,6 +128,64 @@ class BuiltinTests extends AnyFreeSpec with Matchers with Testing {
     out should include("<p>")
   }
 
+  "replace substitutes every match" in {
+    test(null, "{{ replace 'a' 'X' 'banana' }}") shouldBe "bXnXnX"
+    test(null, "{{ replace 'foo' 'bar' 'hello' }}") shouldBe "hello"
+  }
+
+  "endsWith" in {
+    test(null, "{{ endsWith '.png' 'hero.png' }}") shouldBe "true"
+    test(null, "{{ endsWith '.jpg' 'hero.png' }}") shouldBe "false"
+  }
+
+  "flatten one level" in {
+    test(null, "{{ flatten [[1, 2], [3], [4, 5]] }}") shouldBe "[1, 2, 3, 4, 5]"
+  }
+
+  "flatten passes scalars through" in {
+    test(null, "{{ flatten [1, [2, 3], 4] }}") shouldBe "[1, 2, 3, 4]"
+  }
+
+  "int truncates fractional value" in {
+    test(null, "{{ int 3.9 }}")    shouldBe "3"
+    test(null, "{{ int -3.9 }}")   shouldBe "-3"
+    test(null, "{{ int '42' }}")   shouldBe "42"
+  }
+
+  "float keeps fractional value" in {
+    test(null, "{{ float 3.5 }}")   shouldBe "3.5"
+    test(null, "{{ float '2.7' }}") shouldBe "2.7"
+  }
+
+  "bool follows truthiness rules" in {
+    test(null, "{{ bool 1 }}")      shouldBe "true"
+    test(null, "{{ bool 0 }}")      shouldBe "false"
+    test(null, "{{ bool 'hello' }}") shouldBe "true"
+    test(null, "{{ bool '' }}")      shouldBe "false"
+    test(null, "{{ bool [1] }}")     shouldBe "true"
+    test(null, "{{ bool [] }}")      shouldBe "false"
+  }
+
+  "printf decimal padding" in {
+    test(null, "{{ printf '%05d' 42 }}") shouldBe "00042"
+  }
+
+  "printf comma flag for thousands" in {
+    test(null, "{{ printf '%,d' 1234567 }}") shouldBe "1,234,567"
+  }
+
+  "printf float precision" in {
+    test(null, "{{ printf '%.2f' 3.14159 }}") shouldBe "3.14"
+  }
+
+  "printf string left-pad" in {
+    test(null, "{{ printf '%-10s|' 'hi' }}") shouldBe "hi        |"
+  }
+
+  "printf mixed conversions" in {
+    test(null, "{{ printf '%s = %d' 'count' 7 }}") shouldBe "count = 7"
+  }
+
   "urlEncode" in {
     test(null, "{{ urlEncode 'a b/c' }}") shouldBe "a+b%2Fc"
   }
