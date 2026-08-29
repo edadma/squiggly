@@ -3,11 +3,11 @@ import xerial.sbt.Sonatype.sonatypeCentralHost
 ThisBuild / licenses               := Seq("ISC" -> url("https://opensource.org/licenses/ISC"))
 ThisBuild / versionScheme          := Some("semver-spec")
 ThisBuild / evictionErrorLevel     := Level.Warn
-ThisBuild / scalaVersion           := "3.8.3"
+ThisBuild / scalaVersion           := "3.8.4"
 ThisBuild / organization           := "io.github.edadma"
 ThisBuild / organizationName       := "edadma"
 ThisBuild / organizationHomepage   := Some(url("https://github.com/edadma"))
-ThisBuild / version                := "0.3.1"
+ThisBuild / version                := "0.3.2"
 ThisBuild / description            := "A Scala 3 string templating engine inspired by Hugo and Liquid"
 ThisBuild / sonatypeCredentialHost := sonatypeCentralHost
 
@@ -58,8 +58,8 @@ lazy val squiggly = crossProject(JSPlatform, JVMPlatform, NativePlatform)
       "org.scala-lang.modules" %%% "scala-parser-combinators" % "2.4.0",
       "io.github.edadma"       %%% "char_reader" % "0.1.30",
       "io.github.edadma"       %%% "cross_platform" % "0.1.9",
-      "io.github.edadma"       %%% "markdown" % "0.4.8",
-      "io.github.edadma"       %%% "emoji" % "0.1.3",
+      "io.github.edadma"       %%% "markdown" % "0.4.9",
+      "io.github.edadma"       %%% "emoji" % "0.1.4",
       "dev.zio"                %%% "zio-json"                 % "0.7.42",
     ),
     publishMavenStyle      := true,
